@@ -1,0 +1,479 @@
+date,time,location
+9/8/2022,6:30PM,St. Matthew
+9/8/2022,7:15PM,St. Matthew
+9/8/2022,8:00PM,St. Matthew
+9/9/2022,6:00PM,St. Philip
+9/9/2022,6:45PM,St. Philip
+9/9/2022,7:30PM,St. Philip
+9/9/2022,8:15PM,St. Philip
+9/9/2022,6:00PM,Park Place
+9/9/2022,6:45PM,Park Place
+9/9/2022,5:45PM,St. Isidore
+9/9/2022,6:30PM,St. Isidore
+9/9/2022,7:15PM,St. Isidore
+9/9/2022,8:00PM,St. Isidore
+9/9/2022,6:00PM,St. Walter
+9/9/2022,6:45PM,St. Walter
+9/9/2022,7:30PM,St. Walter
+9/9/2022,8:15PM,St. Walter
+9/9/2022,6:30PM,St. Matthew
+9/9/2022,7:15PM,St. Matthew
+9/9/2022,8:00PM,St. Matthew
+9/10/2022,9:30AM,St. Philip
+9/10/2022,10:15AM,St. Philip
+9/10/2022,11:00AM,St. Philip
+9/10/2022,11:45AM,St. Philip
+9/10/2022,8:00AM,St. Isidore
+9/10/2022,8:45AM,St. Isidore
+9/10/2022,9:30AM,St. Isidore
+9/10/2022,10:15AM,St. Isidore
+9/10/2022,9:45AM,St. Walter
+9/10/2022,10:30AM,St. Walter
+9/10/2022,11:15AM,St. Walter
+9/10/2022,12:00PM,St. Walter
+9/10/2022,12:45PM,St. Walter
+9/10/2022,9:00AM,St. Matthew
+9/10/2022,9:45AM,St. Matthew
+9/10/2022,10:30AM,St. Matthew
+9/10/2022,11:15AM,St. Matthew
+9/12/2022,12:00PM,St. John Vianney
+9/12/2022,12:45PM,St. John Vianney
+9/12/2022,1:30PM,St. John Vianney
+9/12/2022,2:15PM,St. John Vianney
+9/13/2022,5:30PM,St. John Vianney
+9/13/2022,6:15PM,St. John Vianney
+9/13/2022,7:00PM,St. John Vianney
+9/13/2022,7:45PM,St. John Vianney
+9/14/2022,5:30PM,St. John Vianney
+9/14/2022,6:15PM,St. John Vianney
+9/14/2022,7:00PM,St. John Vianney
+9/14/2022,7:45PM,St. John Vianney
+9/15/2022,6:30PM,St. Matthew
+9/15/2022,7:15PM,St. Matthew
+9/15/2022,8:00PM,St. Matthew
+9/16/2022,6:00PM,Christ the King
+9/16/2022,6:45PM,Christ the King
+9/16/2022,7:30PM,Christ the King
+9/16/2022,8:15PM,Christ the King
+9/16/2022,6:00PM,Park Place
+9/16/2022,6:45PM,Park Place
+9/16/2022,5:45PM,St. Isidore
+9/16/2022,6:30PM,St. Isidore
+9/16/2022,7:15PM,St. Isidore
+9/16/2022,8:00PM,St. Isidore
+9/16/2022,6:00PM,St. Walter
+9/16/2022,6:45PM,St. Walter
+9/16/2022,7:30PM,St. Walter
+9/16/2022,8:15PM,St. Walter
+9/16/2022,5:30PM,St. John Vianney
+9/16/2022,6:15PM,St. John Vianney
+9/16/2022,7:00PM,St. John Vianney
+9/16/2022,7:45PM,St. John Vianney
+9/16/2022,8:30PM,St. John Vianney
+9/16/2022,6:30PM,St. Matthew
+9/16/2022,7:15PM,St. Matthew
+9/16/2022,8:00PM,St. Matthew
+9/17/2022,8:00AM,St. Isidore
+9/17/2022,8:45AM,St. Isidore
+9/17/2022,9:30AM,St. Isidore
+9/17/2022,10:15AM,St. Isidore
+9/17/2022,9:00AM,St. Walter
+9/17/2022,9:45AM,St. Walter
+9/17/2022,10:30AM,St. Walter
+9/17/2022,11:15AM,St. Walter
+9/17/2022,12:00PM,St. Walter
+9/17/2022,9:00AM,St. Matthew
+9/17/2022,9:45AM,St. Matthew
+9/17/2022,10:30AM,St. Matthew
+9/17/2022,11:15AM,St. Matthew
+9/20/2022,5:30PM,St. John Vianney
+9/20/2022,6:15PM,St. John Vianney
+9/20/2022,7:00PM,St. John Vianney
+9/20/2022,7:45PM,St. John Vianney
+9/21/2022,5:30PM,St. John Vianney
+9/21/2022,6:15PM,St. John Vianney
+9/21/2022,7:00PM,St. John Vianney
+9/21/2022,7:45PM,St. John Vianney
+9/22/2022,6:00PM,St. Walter
+9/22/2022,6:45PM,St. Walter
+9/22/2022,7:30PM,St. Walter
+9/22/2022,8:15PM,St. Walter
+9/22/2022,5:30PM,St. John Vianney
+9/22/2022,6:15PM,St. John Vianney
+9/22/2022,7:00PM,St. John Vianney
+9/22/2022,7:45PM,St. John Vianney
+9/22/2022,6:30PM,St. Matthew
+9/22/2022,7:15PM,St. Matthew
+9/22/2022,8:00PM,St. Matthew
+9/23/2022,6:00PM,St. Philip
+9/23/2022,6:45PM,St. Philip
+9/23/2022,7:30PM,St. Philip
+9/23/2022,8:15PM,St. Philip
+9/23/2022,6:00PM,Park Place
+9/23/2022,6:45PM,Park Place
+9/23/2022,5:45PM,St. Isidore
+9/23/2022,6:30PM,St. Isidore
+9/23/2022,7:15PM,St. Isidore
+9/23/2022,8:00PM,St. Isidore
+9/23/2022,5:30PM,St. John Vianney
+9/23/2022,6:15PM,St. John Vianney
+9/23/2022,7:00PM,St. John Vianney
+9/23/2022,7:45PM,St. John Vianney
+9/23/2022,8:30PM,St. John Vianney
+9/23/2022,6:30PM,St. Matthew
+9/23/2022,7:15PM,St. Matthew
+9/23/2022,8:00PM,St. Matthew
+9/24/2022,1:30PM,Christ the King
+9/24/2022,2:15PM,Christ the King
+9/24/2022,3:00PM,Christ the King
+9/24/2022,8:00AM,St. Isidore
+9/24/2022,8:45AM,St. Isidore
+9/24/2022,9:30AM,St. Isidore
+9/24/2022,10:15AM,St. Isidore
+9/24/2022,9:00AM,St. John Vianney
+9/24/2022,9:45AM,St. John Vianney
+9/24/2022,10:30AM,St. John Vianney
+9/24/2022,11:15AM,St. John Vianney
+9/24/2022,12:00PM,St. John Vianney
+9/24/2022,12:45PM,St. John Vianney
+9/24/2022,1:30PM,St. John Vianney
+9/24/2022,2:15PM,St. John Vianney
+9/24/2022,9:00AM,St. Matthew
+9/24/2022,9:45AM,St. Matthew
+9/24/2022,10:30AM,St. Matthew
+9/24/2022,11:15AM,St. Matthew
+9/26/2022,5:30PM,St. John Vianney
+9/26/2022,6:15PM,St. John Vianney
+9/26/2022,7:00PM,St. John Vianney
+9/26/2022,7:45PM,St. John Vianney
+9/27/2022,5:30PM,St. John Vianney
+9/27/2022,6:15PM,St. John Vianney
+9/27/2022,7:00PM,St. John Vianney
+9/27/2022,7:45PM,St. John Vianney
+9/28/2022,5:30PM,St. John Vianney
+9/28/2022,6:15PM,St. John Vianney
+9/28/2022,7:00PM,St. John Vianney
+9/28/2022,7:45PM,St. John Vianney
+9/29/2022,6:30PM,St. Matthew
+9/29/2022,7:15PM,St. Matthew
+9/29/2022,8:00PM,St. Matthew
+9/30/2022,6:00PM,St. Philip
+9/30/2022,6:45PM,St. Philip
+9/30/2022,7:30PM,St. Philip
+9/30/2022,8:15PM,St. Philip
+9/30/2022,6:00PM,Park Place
+9/30/2022,6:45PM,Park Place
+9/30/2022,5:45PM,St. Isidore
+9/30/2022,6:30PM,St. Isidore
+9/30/2022,7:15PM,St. Isidore
+9/30/2022,8:00PM,St. Isidore
+9/30/2022,6:00PM,St. Walter
+9/30/2022,6:45PM,St. Walter
+9/30/2022,7:30PM,St. Walter
+9/30/2022,8:15PM,St. Walter
+9/30/2022,5:30PM,St. John Vianney
+9/30/2022,6:15PM,St. John Vianney
+9/30/2022,7:00PM,St. John Vianney
+9/30/2022,7:45PM,St. John Vianney
+9/30/2022,8:30PM,St. John Vianney
+9/30/2022,6:30PM,St. Matthew
+9/30/2022,7:15PM,St. Matthew
+9/30/2022,8:00PM,St. Matthew
+10/1/2022,1:30PM,Christ the King
+10/1/2022,2:15PM,Christ the King
+10/1/2022,3:00PM,Christ the King
+10/1/2022,9:30AM,St. Philip
+10/1/2022,10:15AM,St. Philip
+10/1/2022,11:00AM,St. Philip
+10/1/2022,11:45AM,St. Philip
+10/1/2022,8:00AM,St. Isidore
+10/1/2022,8:45AM,St. Isidore
+10/1/2022,9:30AM,St. Isidore
+10/1/2022,10:15AM,St. Isidore
+10/1/2022,9:00AM,St. Walter
+10/1/2022,9:45AM,St. Walter
+10/1/2022,10:30AM,St. Walter
+10/1/2022,11:15AM,St. Walter
+10/1/2022,12:00PM,St. Walter
+10/1/2022,9:00AM,St. Matthew
+10/1/2022,9:45AM,St. Matthew
+10/1/2022,10:30AM,St. Matthew
+10/1/2022,11:15AM,St. Matthew
+10/3/2022,5:30PM,St. John Vianney
+10/3/2022,6:15PM,St. John Vianney
+10/3/2022,7:00PM,St. John Vianney
+10/3/2022,7:45PM,St. John Vianney
+10/4/2022,5:30PM,St. John Vianney
+10/4/2022,6:15PM,St. John Vianney
+10/4/2022,7:00PM,St. John Vianney
+10/4/2022,7:45PM,St. John Vianney
+10/5/2022,5:30PM,St. John Vianney
+10/5/2022,6:15PM,St. John Vianney
+10/5/2022,7:00PM,St. John Vianney
+10/5/2022,7:45PM,St. John Vianney
+10/6/2022,5:30PM,St. John Vianney
+10/6/2022,6:15PM,St. John Vianney
+10/6/2022,7:00PM,St. John Vianney
+10/6/2022,7:45PM,St. John Vianney
+10/6/2022,6:30PM,St. Matthew
+10/6/2022,7:15PM,St. Matthew
+10/6/2022,8:00PM,St. Matthew
+10/7/2022,6:00PM,St. Philip
+10/7/2022,6:45PM,St. Philip
+10/7/2022,7:30PM,St. Philip
+10/7/2022,8:15PM,St. Philip
+10/7/2022,6:00PM,Park Place
+10/7/2022,6:45PM,Park Place
+10/7/2022,5:45PM,St. Isidore
+10/7/2022,6:30PM,St. Isidore
+10/7/2022,7:15PM,St. Isidore
+10/7/2022,8:00PM,St. Isidore
+10/7/2022,6:00PM,St. Walter
+10/7/2022,6:45PM,St. Walter
+10/7/2022,7:30PM,St. Walter
+10/7/2022,8:15PM,St. Walter
+10/7/2022,5:30PM,St. John Vianney
+10/7/2022,6:15PM,St. John Vianney
+10/7/2022,7:00PM,St. John Vianney
+10/7/2022,7:45PM,St. John Vianney
+10/7/2022,8:30PM,St. John Vianney
+10/7/2022,6:30PM,St. Matthew
+10/7/2022,7:15PM,St. Matthew
+10/7/2022,8:00PM,St. Matthew
+10/8/2022,8:30AM,Christ the King
+10/8/2022,9:15AM,Christ the King
+10/8/2022,9:30AM,St. Philip
+10/8/2022,10:15AM,St. Philip
+10/8/2022,11:00AM,St. Philip
+10/8/2022,11:45AM,St. Philip
+10/8/2022,8:00AM,St. Isidore
+10/8/2022,8:45AM,St. Isidore
+10/8/2022,9:30AM,St. Isidore
+10/8/2022,10:15AM,St. Isidore
+10/8/2022,9:00AM,St. John Vianney
+10/8/2022,9:45AM,St. John Vianney
+10/8/2022,10:30AM,St. John Vianney
+10/8/2022,11:15AM,St. John Vianney
+10/8/2022,12:00PM,St. John Vianney
+10/8/2022,12:45PM,St. John Vianney
+10/8/2022,1:30PM,St. John Vianney
+10/8/2022,2:15PM,St. John Vianney
+10/8/2022,9:00AM,St. Matthew
+10/8/2022,9:45AM,St. Matthew
+10/8/2022,10:30AM,St. Matthew
+10/8/2022,11:15AM,St. Matthew
+10/10/2022,5:30PM,St. John Vianney
+10/10/2022,6:15PM,St. John Vianney
+10/10/2022,7:00PM,St. John Vianney
+10/10/2022,7:45PM,St. John Vianney
+10/11/2022,5:30PM,St. John Vianney
+10/11/2022,6:15PM,St. John Vianney
+10/11/2022,7:00PM,St. John Vianney
+10/11/2022,7:45PM,St. John Vianney
+10/12/2022,5:30PM,St. John Vianney
+10/12/2022,6:15PM,St. John Vianney
+10/12/2022,7:00PM,St. John Vianney
+10/12/2022,7:45PM,St. John Vianney
+10/13/2022,5:30PM,St. John Vianney
+10/13/2022,6:15PM,St. John Vianney
+10/13/2022,7:00PM,St. John Vianney
+10/13/2022,7:45PM,St. John Vianney
+10/13/2022,6:30PM,St. Matthew
+10/13/2022,7:15PM,St. Matthew
+10/13/2022,8:00PM,St. Matthew
+10/14/2022,6:00PM,St. Philip
+10/14/2022,6:45PM,St. Philip
+10/14/2022,7:30PM,St. Philip
+10/14/2022,8:15PM,St. Philip
+10/14/2022,6:00PM,Park Place
+10/14/2022,6:45PM,Park Place
+10/14/2022,5:45PM,St. Isidore
+10/14/2022,6:30PM,St. Isidore
+10/14/2022,7:15PM,St. Isidore
+10/14/2022,8:00PM,St. Isidore
+10/14/2022,6:00PM,St. Walter
+10/14/2022,6:45PM,St. Walter
+10/14/2022,7:30PM,St. Walter
+10/14/2022,8:15PM,St. Walter
+10/14/2022,5:30PM,St. John Vianney
+10/14/2022,6:15PM,St. John Vianney
+10/14/2022,7:00PM,St. John Vianney
+10/14/2022,7:45PM,St. John Vianney
+10/14/2022,8:30PM,St. John Vianney
+10/14/2022,6:30PM,St. Matthew
+10/14/2022,7:15PM,St. Matthew
+10/14/2022,8:00PM,St. Matthew
+10/15/2022,8:30AM,Christ the King
+10/15/2022,9:15AM,Christ the King
+10/15/2022,10:00AM,Holy Trinity
+10/15/2022,10:45AM,Holy Trinity
+10/15/2022,9:30AM,St. Philip
+10/15/2022,10:15AM,St. Philip
+10/15/2022,11:00AM,St. Philip
+10/15/2022,11:45AM,St. Philip
+10/15/2022,8:00AM,St. Isidore
+10/15/2022,8:45AM,St. Isidore
+10/15/2022,9:30AM,St. Isidore
+10/15/2022,10:15AM,St. Isidore
+10/15/2022,9:00AM,St. Walter
+10/15/2022,9:45AM,St. Walter
+10/15/2022,10:30AM,St. Walter
+10/15/2022,11:15AM,St. Walter
+10/15/2022,12:00PM,St. Walter
+10/15/2022,9:00AM,St. John Vianney
+10/15/2022,9:45AM,St. John Vianney
+10/15/2022,10:30AM,St. John Vianney
+10/15/2022,11:15AM,St. John Vianney
+10/15/2022,12:00PM,St. John Vianney
+10/15/2022,12:45PM,St. John Vianney
+10/15/2022,1:30PM,St. John Vianney
+10/15/2022,2:15PM,St. John Vianney
+10/15/2022,9:00AM,St. Matthew
+10/15/2022,9:45AM,St. Matthew
+10/15/2022,10:30AM,St. Matthew
+10/15/2022,11:15AM,St. Matthew
+10/18/2022,5:30PM,St. John Vianney
+10/18/2022,6:15PM,St. John Vianney
+10/18/2022,7:00PM,St. John Vianney
+10/18/2022,7:45PM,St. John Vianney
+10/19/2022,5:30PM,St. John Vianney
+10/19/2022,6:15PM,St. John Vianney
+10/19/2022,7:00PM,St. John Vianney
+10/19/2022,7:45PM,St. John Vianney
+10/20/2022,6:30PM,St. Matthew
+10/20/2022,7:15PM,St. Matthew
+10/20/2022,8:00PM,St. Matthew
+10/21/2022,6:00PM,St. Philip
+10/21/2022,6:45PM,St. Philip
+10/21/2022,7:30PM,St. Philip
+10/21/2022,8:15PM,St. Philip
+10/21/2022,6:00PM,Park Place
+10/21/2022,6:45PM,Park Place
+10/21/2022,5:45PM,St. Isidore
+10/21/2022,6:30PM,St. Isidore
+10/21/2022,7:15PM,St. Isidore
+10/21/2022,8:00PM,St. Isidore
+10/21/2022,5:30PM,St. John Vianney
+10/21/2022,6:15PM,St. John Vianney
+10/21/2022,7:00PM,St. John Vianney
+10/21/2022,7:45PM,St. John Vianney
+10/21/2022,8:30PM,St. John Vianney
+10/21/2022,6:30PM,St. Matthew
+10/21/2022,7:15PM,St. Matthew
+10/21/2022,8:00PM,St. Matthew
+10/22/2022,8:30AM,Holy Trinity
+10/22/2022,9:15AM,Holy Trinity
+10/22/2022,10:00AM,Holy Trinity
+10/22/2022,10:45AM,Holy Trinity
+10/22/2022,9:30AM,St. Philip
+10/22/2022,10:15AM,St. Philip
+10/22/2022,11:00AM,St. Philip
+10/22/2022,11:45AM,St. Philip
+10/22/2022,8:00AM,St. Isidore
+10/22/2022,8:45AM,St. Isidore
+10/22/2022,9:30AM,St. Isidore
+10/22/2022,10:15AM,St. Isidore
+10/22/2022,9:00AM,St. John Vianney
+10/22/2022,9:45AM,St. John Vianney
+10/22/2022,10:30AM,St. John Vianney
+10/22/2022,11:15AM,St. John Vianney
+10/22/2022,12:00PM,St. John Vianney
+10/22/2022,12:45PM,St. John Vianney
+10/22/2022,1:30PM,St. John Vianney
+10/22/2022,2:15PM,St. John Vianney
+10/22/2022,9:00AM,St. Matthew
+10/22/2022,9:45AM,St. Matthew
+10/22/2022,10:30AM,St. Matthew
+10/22/2022,11:15AM,St. Matthew
+10/24/2022,5:30PM,St. John Vianney
+10/24/2022,6:15PM,St. John Vianney
+10/24/2022,7:00PM,St. John Vianney
+10/24/2022,7:45PM,St. John Vianney
+10/26/2022,5:30PM,St. John Vianney
+10/26/2022,6:15PM,St. John Vianney
+10/26/2022,7:00PM,St. John Vianney
+10/26/2022,7:45PM,St. John Vianney
+10/27/2022,6:00PM,St. Walter
+10/27/2022,6:45PM,St. Walter
+10/27/2022,7:30PM,St. Walter
+10/27/2022,8:15PM,St. Walter
+10/27/2022,5:30PM,St. John Vianney
+10/27/2022,6:15PM,St. John Vianney
+10/27/2022,7:00PM,St. John Vianney
+10/27/2022,7:45PM,St. John Vianney
+10/28/2022,6:00PM,St. Philip
+10/28/2022,6:45PM,St. Philip
+10/28/2022,7:30PM,St. Philip
+10/28/2022,8:15PM,St. Philip
+10/28/2022,6:00PM,Park Place
+10/28/2022,6:45PM,Park Place
+10/28/2022,5:45PM,St. Isidore
+10/28/2022,6:30PM,St. Isidore
+10/28/2022,7:15PM,St. Isidore
+10/28/2022,8:00PM,St. Isidore
+10/28/2022,6:00PM,St. Walter
+10/28/2022,6:45PM,St. Walter
+10/28/2022,7:30PM,St. Walter
+10/28/2022,8:15PM,St. Walter
+10/28/2022,5:30PM,St. John Vianney
+10/28/2022,6:15PM,St. John Vianney
+10/28/2022,7:00PM,St. John Vianney
+10/28/2022,7:45PM,St. John Vianney
+10/28/2022,8:30PM,St. John Vianney
+10/29/2022,9:30AM,St. Philip
+10/29/2022,10:15AM,St. Philip
+10/29/2022,11:00AM,St. Philip
+10/29/2022,11:45AM,St. Philip
+10/29/2022,8:00AM,St. Isidore
+10/29/2022,8:45AM,St. Isidore
+10/29/2022,9:30AM,St. Isidore
+10/29/2022,10:15AM,St. Isidore
+10/29/2022,9:00AM,St. Walter
+10/29/2022,9:45AM,St. Walter
+10/29/2022,10:30AM,St. Walter
+10/29/2022,11:15AM,St. Walter
+10/29/2022,12:00PM,St. Walter
+10/29/2022,9:00AM,St. John Vianney
+10/29/2022,9:45AM,St. John Vianney
+10/29/2022,10:30AM,St. John Vianney
+10/29/2022,11:15AM,St. John Vianney
+10/29/2022,12:00PM,St. John Vianney
+10/29/2022,12:45PM,St. John Vianney
+10/29/2022,1:30PM,St. John Vianney
+10/29/2022,2:15PM,St. John Vianney
+11/2/2022,5:30PM,St. John Vianney
+11/2/2022,6:15PM,St. John Vianney
+11/2/2022,7:00PM,St. John Vianney
+11/2/2022,7:45PM,St. John Vianney
+11/3/2022,5:30PM,St. John Vianney
+11/3/2022,6:15PM,St. John Vianney
+11/3/2022,7:00PM,St. John Vianney
+11/3/2022,7:45PM,St. John Vianney
+11/3/2022,6:30PM,St. Matthew
+11/3/2022,7:15PM,St. Matthew
+11/3/2022,8:00PM,St. Matthew
+11/4/2022,5:45PM,St. Isidore
+11/4/2022,6:30PM,St. Isidore
+11/4/2022,7:15PM,St. Isidore
+11/4/2022,8:00PM,St. Isidore
+11/4/2022,6:00PM,St. Walter
+11/4/2022,6:45PM,St. Walter
+11/4/2022,7:30PM,St. Walter
+11/4/2022,8:15PM,St. Walter
+11/4/2022,5:30PM,St. John Vianney
+11/4/2022,6:30PM,St. John Vianney
+11/4/2022,7:15PM,St. John Vianney
+11/4/2022,7:45PM,St. John Vianney
+11/4/2022,8:30PM,St. John Vianney
+11/4/2022,6:30PM,St. Matthew
+11/4/2022,7:15PM,St. Matthew
+11/4/2022,8:00PM,St. Matthew
+11/5/2022,9:00AM,St. Walter
+11/5/2022,9:45AM,St. Walter
+11/5/2022,10:30AM,St. Walter
+11/5/2022,11:15AM,St. Walter
+11/5/2022,12:00PM,St. Walter
+11/5/2022,9:00AM,St. Matthew
+11/5/2022,9:45AM,St. Matthew
+11/5/2022,10:30AM,St. Matthew
+11/5/2022,11:15AM,St. Matthew
