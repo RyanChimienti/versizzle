@@ -26,13 +26,10 @@ def assign_candidate_locations_to_matchups():
     for d in divisions_to_counts:
         division_matchups = [m for m in matchups if m.division == d]
 
-        team_pairs_to_matchups = dict()
+        team_pairs_to_matchups = defaultdict(list)
         for m in division_matchups:
             team_pair = tuple(sorted([m.team_a.name, m.team_b.name]))
-            if team_pair not in team_pairs_to_matchups:
-                team_pairs_to_matchups[team_pair] = [m]
-            else:
-                team_pairs_to_matchups[team_pair].append(m)
+            team_pairs_to_matchups[team_pair].append(m)
 
         groups_of_identical_matchups = team_pairs_to_matchups.values()
         for group in groups_of_identical_matchups:
