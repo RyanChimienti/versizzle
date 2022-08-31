@@ -5,7 +5,6 @@ from typing import Set
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
-
 from team import Team
 
 
@@ -20,6 +19,21 @@ blackouts = []
 def generate_schedule(input_dir_path):
     ingest_files(input_dir_path)
     assign_candidate_locations_to_matchups()
+    assign_candidate_gameslots_to_matchups()
+
+
+def assign_candidate_gameslots_to_matchups():
+    for m in matchups:
+        candidate_gameslots = []
+        for g in gameslots:
+            if g.location not in m.candidate_locations:
+                continue
+            if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
+                continue
+
+            candidate_gameslots.append(g)
+
+        m.candidate_gameslots = candidate_gameslots
 
 
 def assign_candidate_locations_to_matchups():
@@ -233,3 +247,10 @@ else:
     print("...{} more...".format(len(blackouts) - 20))
     for b in blackouts[-10:]:
         print(b)
+
+
+# for matchup in matchups:
+#     print(f"==================== {matchup} ==============================")
+#     print(matchup.candidate_locations)
+#     for g in matchup.candidate_gameslots:
+#         print(g)

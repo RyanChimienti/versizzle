@@ -20,8 +20,8 @@ class Blackout:
 
     def prohibits_matchup_in_slot(self, matchup: Matchup, gameslot: Gameslot) -> bool:
         return self.prohibits_team_in_slot(
-            matchup.team_a
-        ) or self.prohibits_team_in_slot(matchup.team_b)
+            matchup.team_a, gameslot
+        ) or self.prohibits_team_in_slot(matchup.team_b, gameslot)
 
     def prohibits_team_in_slot(self, team: Team, gameslot: Gameslot) -> bool:
         return (
