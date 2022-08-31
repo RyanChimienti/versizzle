@@ -1,3 +1,4 @@
+from collections import defaultdict
 import csv
 from datetime import datetime
 from typing import Set
@@ -8,11 +9,11 @@ from matchup import Matchup
 from team import Team
 
 
-divisions = set()
-teams = dict()  # dict from (division, name) -> team object
+divisions_to_counts = defaultdict(int)  # maps division -> # of teams in division
+teams = dict()  # maps (division, name) -> team object
 matchups = []
 gameslots = []
-locations = set()
+locations_to_counts = defaultdict(int)  # maps location -> # of gameslots in location
 blackouts = []
 
 
@@ -22,7 +23,7 @@ def generate_schedule(input_dir_path):
 
 
 def assign_candidate_locations_to_matchups():
-    for d in divisions:
+    for d in divisions_to_counts:
         division_matchups = [m for m in matchups if m.division == d]
 
         team_pairs_to_matchups = dict()
@@ -63,7 +64,7 @@ def assign_candidate_locations_to_matchups():
 # with no home location, this is all locations.
 def get_locations_for_home_game(team: Team) -> Set[str]:
     if team.home_location is None:
-        return {loc for loc in locations}
+        return {loc for loc in locations_to_counts}
 
     return {team.home_location}
 
@@ -96,7 +97,7 @@ def ingest_teams_file(directory_path):
             division, name, home_location = row
             home_location_obj = None if home_location == "NONE" else home_location
             teams[(division, name)] = Team(division, name, home_location_obj)
-            divisions.add(division)
+            divisions_to_counts[division] += 1
 
 
 def ingest_matchups_file(directory_path):
@@ -149,7 +150,7 @@ def ingest_gameslots_file(directory_path):
             gameslots.append(
                 Gameslot(datetime_obj.date(), datetime_obj.time(), location)
             )
-            locations.add(location)
+            locations_to_counts[location] += 1
 
 
 def ingest_blackouts_file(directory_path):
@@ -197,8 +198,8 @@ def ingest_blackouts_file(directory_path):
 
 generate_schedule("examples/volleyball_2022")
 print("======================== ingested divisions: ========================")
-for d in divisions:
-    print(d)
+for d, count in divisions_to_counts.items():
+    print(f"{d} ({count} teams)")
 print("======================== ingested teams: ========================")
 for t in teams.values():
     print(t)
@@ -223,8 +224,8 @@ else:
     for g in gameslots[-10:]:
         print(g)
 print("======================== ingested locations: ========================")
-for l in locations:
-    print(l)
+for l, count in locations_to_counts.items():
+    print(f"{l} ({count} gameslots)")
 print("======================== ingested blackouts: ========================")
 if len(blackouts) <= 20:
     for b in blackouts:
