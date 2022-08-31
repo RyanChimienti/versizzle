@@ -15,6 +15,7 @@ class Matchup:
         self.team_b = team_b
         self.candidate_locations = "undecided"
         self.candidate_gameslots = "undecided"
+        self.selected_gameslot = None
 
     def __str__(self):
         return f"< {self.division} - {self.team_a.name} vs {self.team_b.name} >"

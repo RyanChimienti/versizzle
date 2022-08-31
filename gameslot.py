@@ -7,6 +7,7 @@ class Gameslot:
         self.date = date
         self.time = time
         self.location = location
+        self.selected_matchup = None
 
     def __str__(self):
         pretty_date = utils.prettify_date(self.date)

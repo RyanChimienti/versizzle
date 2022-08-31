@@ -6,6 +6,7 @@ from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
 from team import Team
+import utils
 
 
 divisions_to_counts = defaultdict(int)  # maps division -> # of teams in division
@@ -20,6 +21,43 @@ def generate_schedule(input_dir_path):
     ingest_files(input_dir_path)
     assign_candidate_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
+
+    matchups.sort(key=lambda m: len(m.candidate_gameslots))
+
+    success = select_gameslots_for_matchups(0, set())
+
+    if success:
+        print("Success! A valid schedule was found.")
+        print()
+        pretty_print_schedule()
+    else:
+        print("There is no schedule that satisfies the constraints.")
+
+
+def select_gameslots_for_matchups(start, reserved_gameslots):
+    if start == len(matchups):
+        # now that we have selections, record the reversed selections in the gameslots
+        for matchup in matchups:
+            selected_gameslot = matchup.selected_gameslot
+            selected_gameslot.selected_matchup = matchup
+
+        return True
+
+    matchup = matchups[start]
+    for gameslot in matchup.candidate_gameslots:
+        if gameslot in reserved_gameslots:
+            continue
+
+        reserved_gameslots.add(gameslot)
+        matchup.selected_gameslot = gameslot
+
+        if select_gameslots_for_matchups(start + 1, reserved_gameslots):
+            return True
+
+        matchup.selected_gameslot = None
+        reserved_gameslots.remove(gameslot)
+
+    return False
 
 
 def assign_candidate_gameslots_to_matchups():
@@ -110,6 +148,15 @@ def ingest_teams_file(directory_path):
             teams[(division, name)] = Team(division, name, home_location_obj)
             divisions_to_counts[division] += 1
 
+    print("======================== ingested divisions: ========================")
+    for d, count in divisions_to_counts.items():
+        print(f"{d} ({count} teams)")
+    print()
+    print("======================== ingested teams: ========================")
+    for t in teams.values():
+        print(t)
+    print()
+
 
 def ingest_matchups_file(directory_path):
     file_path = "{}/matchups.csv".format(directory_path)
@@ -133,6 +180,18 @@ def ingest_matchups_file(directory_path):
             team_a = teams[(division, team_a_name)]
             team_b = teams[(division, team_b_name)]
             matchups.append(Matchup(team_a, team_b))
+
+    print("======================== ingested matchups: ========================")
+    if len(matchups) <= 20:
+        for m in matchups:
+            print(m)
+    else:
+        for m in matchups[:10]:
+            print(m)
+        print("...{} more...".format(len(matchups) - 20))
+        for m in matchups[-10:]:
+            print(m)
+    print()
 
 
 def ingest_gameslots_file(directory_path):
@@ -162,6 +221,22 @@ def ingest_gameslots_file(directory_path):
                 Gameslot(datetime_obj.date(), datetime_obj.time(), location)
             )
             locations_to_counts[location] += 1
+
+    print("======================== ingested gameslots: ========================")
+    if len(gameslots) <= 20:
+        for g in gameslots:
+            print(g)
+    else:
+        for g in gameslots[:10]:
+            print(g)
+        print("...{} more...".format(len(gameslots) - 20))
+        for g in gameslots[-10:]:
+            print(g)
+    print()
+    print("======================== ingested locations: ========================")
+    for l, count in locations_to_counts.items():
+        print(f"{l} ({count} gameslots)")
+    print()
 
 
 def ingest_blackouts_file(directory_path):
@@ -206,51 +281,56 @@ def ingest_blackouts_file(directory_path):
                 )
             )
 
+    print("======================== ingested blackouts: ========================")
+    if len(blackouts) <= 20:
+        for b in blackouts:
+            print(b)
+    else:
+        for b in blackouts[:10]:
+            print(b)
+        print("...{} more...".format(len(blackouts) - 20))
+        for b in blackouts[-10:]:
+            print(b)
+    print()
+
+
+def pretty_print_schedule():
+    gameslots_by_day = defaultdict(list)
+    blackouts_by_day = defaultdict(list)
+
+    for g in gameslots:
+        gameslots_by_day[g.date].append(g)
+    for b in blackouts:
+        blackouts_by_day[b.date].append(b)
+
+    schedule_table = [
+        ["Schedule Slot", "Scheduled Matchup", "Blackouts"],
+        ["-------------", "-----------------", "---------"],
+    ]
+
+    for day in sorted(gameslots_by_day.keys()):
+        gameslots_on_day = gameslots_by_day[day]
+        blackouts_on_day = blackouts_by_day[day]
+
+        for i, gameslot in enumerate(gameslots_on_day):
+            blackout = "" if i >= len(blackouts_on_day) else blackouts_on_day[i]
+            matchup = (
+                "Open"
+                if gameslot.selected_matchup is None
+                else gameslot.selected_matchup
+            )
+
+            row = [gameslot, matchup, blackout]
+
+            schedule_table.append(row)
+
+        if len(blackouts_on_day) > len(gameslots_on_day):
+            num_unshown_blackouts = len(blackouts_on_day) - len(gameslots_on_day)
+            schedule_table[-1][-1] += f" ({num_unshown_blackouts} blackouts not shown)"
+
+        schedule_table.append(["", "", ""])
+
+    utils.pretty_print_table(schedule_table)
+
 
 generate_schedule("examples/volleyball_2022")
-print("======================== ingested divisions: ========================")
-for d, count in divisions_to_counts.items():
-    print(f"{d} ({count} teams)")
-print("======================== ingested teams: ========================")
-for t in teams.values():
-    print(t)
-print("======================== ingested matchups: ========================")
-if len(matchups) <= 20:
-    for m in matchups:
-        print(m)
-else:
-    for m in matchups[:10]:
-        print(m)
-    print("...{} more...".format(len(matchups) - 20))
-    for m in matchups[-10:]:
-        print(m)
-print("======================== ingested gameslots: ========================")
-if len(gameslots) <= 20:
-    for g in gameslots:
-        print(g)
-else:
-    for g in gameslots[:10]:
-        print(g)
-    print("...{} more...".format(len(gameslots) - 20))
-    for g in gameslots[-10:]:
-        print(g)
-print("======================== ingested locations: ========================")
-for l, count in locations_to_counts.items():
-    print(f"{l} ({count} gameslots)")
-print("======================== ingested blackouts: ========================")
-if len(blackouts) <= 20:
-    for b in blackouts:
-        print(b)
-else:
-    for b in blackouts[:10]:
-        print(b)
-    print("...{} more...".format(len(blackouts) - 20))
-    for b in blackouts[-10:]:
-        print(b)
-
-
-# for matchup in matchups:
-#     print(f"==================== {matchup} ==============================")
-#     print(matchup.candidate_locations)
-#     for g in matchup.candidate_gameslots:
-#         print(g)
