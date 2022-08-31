@@ -1,12 +1,21 @@
 import csv
-from datetime import date, time, datetime
+from datetime import datetime
+from blackout import Blackout
+from gameslot import Gameslot
+from matchup import Matchup
+
+from team import Team
 
 
-teams = []  # team = (division, team, home location)
+teams = dict()  # dict from (division, name) -> team object
 divisions = []
-matchups = []  # matchup = (division, team a, team b)
-gameslots = []  # gameslot = (date, time, location)
-blackouts = []  # blackout = (date, start, end, division, team)
+matchups = []
+gameslots = []
+blackouts = []
+
+
+def generate_schedule(input_dir_path):
+    ingest(input_dir_path)
 
 
 def ingest(directory_path):
@@ -34,14 +43,12 @@ def ingest_teams_file(directory_path):
                 "teams.csv should have 3 columns: 'division', 'team', and 'home location'"
             )
         for row in lines[1:]:
-            teams.append(tuple(row))
+            division, name, home_location = row
+            teams[(division, name)] = Team(division, name, home_location)
 
-    teams.sort()
-
-    for team in teams:
-        division = team[0]
-        if division not in divisions:
-            divisions.append(division)
+    for team in teams.values():
+        if team.division not in divisions:
+            divisions.append(team.division)
 
 
 def ingest_matchups_file(directory_path):
@@ -62,8 +69,10 @@ def ingest_matchups_file(directory_path):
                 "matchups.csv should have 3 columns: 'division', 'team a', and 'team b'"
             )
         for row in lines[1:]:
-            division, team_a, team_b = row
-            matchups.append((division, team_a, team_b))
+            division, team_a_name, team_b_name = row
+            team_a = teams[(division, team_a_name)]
+            team_b = teams[(division, team_b_name)]
+            matchups.append(Matchup(team_a, team_b))
 
 
 def ingest_gameslots_file(directory_path):
@@ -89,7 +98,9 @@ def ingest_gameslots_file(directory_path):
             datetime_string = date_string + " " + time_string
             datetime_obj = datetime.strptime(datetime_string, "%m/%d/%Y %I:%M%p")
 
-            gameslots.append((datetime_obj.date(), datetime_obj.time(), location))
+            gameslots.append(
+                Gameslot(datetime_obj.date(), datetime_obj.time(), location)
+            )
 
 
 def ingest_blackouts_file(directory_path):
@@ -112,7 +123,7 @@ def ingest_blackouts_file(directory_path):
                 "blackouts.csv should have 5 columns: 'date', 'start time', 'end time', 'division', and 'team'"
             )
         for row in lines[1:]:
-            date_string, start_time_string, end_time_string, division, team = row
+            date_string, start_time_string, end_time_string, division, team_name = row
 
             date_obj = datetime.strptime(date_string, "%m/%d/%Y").date()
 
@@ -126,15 +137,21 @@ def ingest_blackouts_file(directory_path):
             else:
                 end_time_obj = datetime.strptime(end_time_string, "%I:%M%p").time()
 
-            blackouts.append((date_obj, start_time_obj, end_time_obj, division, team))
+            division_obj = None if division == "ALL" else division
+
+            blackouts.append(
+                Blackout(
+                    date_obj, start_time_obj, end_time_obj, division_obj, team_name
+                )
+            )
 
 
-ingest("examples/volleyball_2022")
+generate_schedule("examples/volleyball_2022")
 print("======================== ingested divisions: ========================")
 for d in divisions:
     print(d)
 print("======================== ingested teams: ========================")
-for t in teams:
+for t in teams.values():
     print(t)
 print("======================== ingested matchups: ========================")
 if len(matchups) <= 20:
