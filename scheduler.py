@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime
+from typing import Set
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
@@ -7,18 +8,67 @@ from matchup import Matchup
 from team import Team
 
 
+divisions = set()
 teams = dict()  # dict from (division, name) -> team object
-divisions = []
 matchups = []
 gameslots = []
+locations = set()
 blackouts = []
 
 
 def generate_schedule(input_dir_path):
-    ingest(input_dir_path)
+    ingest_files(input_dir_path)
+    assign_candidate_locations_to_matchups()
 
 
-def ingest(directory_path):
+def assign_candidate_locations_to_matchups():
+    for d in divisions:
+        division_matchups = [m for m in matchups if m.division == d]
+
+        team_pairs_to_matchups = dict()
+        for m in division_matchups:
+            team_pair = tuple(sorted([m.team_a.name, m.team_b.name]))
+            if team_pair not in team_pairs_to_matchups:
+                team_pairs_to_matchups[team_pair] = [m]
+            else:
+                team_pairs_to_matchups[team_pair].append(m)
+
+        groups_of_identical_matchups = team_pairs_to_matchups.values()
+        for group in groups_of_identical_matchups:
+            half_of_num_matchups = len(group) // 2
+
+            # in the first half of matchups, team A gets home games
+            for i in range(half_of_num_matchups):
+                matchup = group[i]
+                matchup.candidate_locations = get_locations_for_home_game(
+                    matchup.team_a
+                )
+
+            # in the second half of matchups, team B gets home games
+            for i in range(half_of_num_matchups, 2 * half_of_num_matchups):
+                matchup = group[i]
+                matchup.candidate_locations = get_locations_for_home_game(
+                    matchup.team_b
+                )
+
+            # if there's a game left over, either team can be home
+            if len(group) % 2 == 1:
+                matchup = group[-1]
+                matchup.candidate_locations = get_locations_for_home_game(
+                    matchup.team_a
+                ).union(get_locations_for_home_game(matchup.team_b))
+
+
+# Returns the valid locations for a home game for the given team. In the case of a team
+# with no home location, this is all locations.
+def get_locations_for_home_game(team: Team) -> Set[str]:
+    if team.home_location is None:
+        return {loc for loc in locations}
+
+    return {team.home_location}
+
+
+def ingest_files(directory_path):
     ingest_teams_file(directory_path)
     ingest_matchups_file(directory_path)
     ingest_gameslots_file(directory_path)
@@ -44,11 +94,9 @@ def ingest_teams_file(directory_path):
             )
         for row in lines[1:]:
             division, name, home_location = row
-            teams[(division, name)] = Team(division, name, home_location)
-
-    for team in teams.values():
-        if team.division not in divisions:
-            divisions.append(team.division)
+            home_location_obj = None if home_location == "NONE" else home_location
+            teams[(division, name)] = Team(division, name, home_location_obj)
+            divisions.add(division)
 
 
 def ingest_matchups_file(directory_path):
@@ -101,6 +149,7 @@ def ingest_gameslots_file(directory_path):
             gameslots.append(
                 Gameslot(datetime_obj.date(), datetime_obj.time(), location)
             )
+            locations.add(location)
 
 
 def ingest_blackouts_file(directory_path):
@@ -173,6 +222,9 @@ else:
     print("...{} more...".format(len(gameslots) - 20))
     for g in gameslots[-10:]:
         print(g)
+print("======================== ingested locations: ========================")
+for l in locations:
+    print(l)
 print("======================== ingested blackouts: ========================")
 if len(blackouts) <= 20:
     for b in blackouts:
