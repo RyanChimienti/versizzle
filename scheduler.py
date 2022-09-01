@@ -1,12 +1,13 @@
 from collections import defaultdict
 import csv
 from datetime import date, datetime
-from typing import Dict, Set, Tuple
+from typing import Dict, Set
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
 from team import Team
 import utils
+import random
 
 
 divisions_to_counts = defaultdict(int)  # maps division -> # of teams in division
@@ -17,8 +18,11 @@ locations_to_counts = defaultdict(int)  # maps location -> # of gameslots in loc
 blackouts = []
 
 
-def generate_schedule(input_dir_path):
+def generate_schedule(input_dir_path, random_seed):
+    random.seed(random_seed)
+
     ingest_files(input_dir_path)
+
     assign_candidate_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
 
@@ -40,7 +44,7 @@ def select_gameslots_for_matchups(
     reserved_dates_by_team: Dict[Team, Set[date]],
 ):
     if start == len(matchups):
-        # now that we have selections, record the reversed selections in the gameslots
+        # now that the selections are finalized, record them in the gameslots too
         for matchup in matchups:
             selected_gameslot = matchup.selected_gameslot
             selected_gameslot.selected_matchup = matchup
@@ -48,7 +52,13 @@ def select_gameslots_for_matchups(
         return True
 
     matchup = matchups[start]
-    for gameslot in matchup.candidate_gameslots:
+    num_gameslots = len(matchup.candidate_gameslots)
+    first_gameslot_index = random.randrange(num_gameslots)
+
+    for i in range(num_gameslots):
+        gameslot_index = (first_gameslot_index + i) % num_gameslots
+        gameslot = matchup.candidate_gameslots[gameslot_index]
+
         if gameslot in reserved_gameslots:
             continue
         if gameslot.date in reserved_dates_by_team[matchup.team_a]:
@@ -347,4 +357,4 @@ def pretty_print_schedule():
     utils.pretty_print_table(schedule_table)
 
 
-generate_schedule("examples/volleyball_2022")
+generate_schedule(input_dir_path="examples/volleyball_2022", random_seed=14)
