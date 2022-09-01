@@ -3,6 +3,7 @@ class Team:
         self.division = division
         self.name = name
         self.home_location = home_location
+        self.selected_dates = set()
 
     def __str__(self):
         return f"< {self.division} {self.name} >"

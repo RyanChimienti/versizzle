@@ -1,6 +1,6 @@
 from collections import defaultdict
 import csv
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Dict, Set
 from blackout import Blackout
 from gameslot import Gameslot
@@ -18,7 +18,7 @@ locations_to_counts = defaultdict(int)  # maps location -> # of gameslots in loc
 blackouts = []
 
 
-def generate_schedule(input_dir_path, random_seed):
+def generate_schedule(input_dir_path, random_seed, min_days_between_games):
     random.seed(random_seed)
 
     ingest_files(input_dir_path)
@@ -28,7 +28,7 @@ def generate_schedule(input_dir_path, random_seed):
 
     matchups.sort(key=lambda m: len(m.candidate_gameslots))
 
-    success = select_gameslots_for_matchups(0, set(), defaultdict(set))
+    success = select_gameslots_for_matchups(0, set(), min_days_between_games)
 
     if success:
         print("Success! A valid schedule was found.")
@@ -41,7 +41,7 @@ def generate_schedule(input_dir_path, random_seed):
 def select_gameslots_for_matchups(
     start: int,
     reserved_gameslots: Set[Gameslot],
-    reserved_dates_by_team: Dict[Team, Set[date]],
+    min_days_between_games: int,
 ):
     if start == len(matchups):
         # now that the selections are finalized, record them in the gameslots too
@@ -61,25 +61,42 @@ def select_gameslots_for_matchups(
 
         if gameslot in reserved_gameslots:
             continue
-        if gameslot.date in reserved_dates_by_team[matchup.team_a]:
-            continue
-        if gameslot.date in reserved_dates_by_team[matchup.team_b]:
+        if team_has_game_too_close(matchup, gameslot, min_days_between_games):
             continue
 
         reserved_gameslots.add(gameslot)
-        reserved_dates_by_team[matchup.team_a].add(gameslot.date)
-        reserved_dates_by_team[matchup.team_b].add(gameslot.date)
+        matchup.team_a.selected_dates.add(gameslot.date)
+        matchup.team_b.selected_dates.add(gameslot.date)
         matchup.selected_gameslot = gameslot
 
         if select_gameslots_for_matchups(
-            start + 1, reserved_gameslots, reserved_dates_by_team
+            start + 1, reserved_gameslots, min_days_between_games
         ):
             return True
 
         reserved_gameslots.remove(gameslot)
-        reserved_dates_by_team[matchup.team_a].remove(gameslot.date)
-        reserved_dates_by_team[matchup.team_b].remove(gameslot.date)
+        matchup.team_a.selected_dates.remove(gameslot.date)
+        matchup.team_b.selected_dates.remove(gameslot.date)
         matchup.selected_gameslot = None
+
+    return False
+
+
+# Returns true if the given matchup is prohibited from selecting the given slot due to
+# one of the teams having a scheduled game too close by.
+def team_has_game_too_close(
+    matchup: Matchup,
+    gameslot: Gameslot,
+    min_days_between_games: int,
+):
+    danger_zone_radius = min_days_between_games - 1
+    for day_offset in range(-(danger_zone_radius), danger_zone_radius + 1):
+        danger_date = gameslot.date + timedelta(days=day_offset)
+        if (
+            danger_date in matchup.team_a.selected_dates
+            or danger_date in matchup.team_b.selected_dates
+        ):
+            return True
 
     return False
 
@@ -357,4 +374,6 @@ def pretty_print_schedule():
     utils.pretty_print_table(schedule_table)
 
 
-generate_schedule(input_dir_path="examples/volleyball_2022", random_seed=14)
+generate_schedule(
+    input_dir_path="examples/volleyball_2022", random_seed=14, min_days_between_games=1
+)
