@@ -3,7 +3,7 @@ from typing import List
 
 
 def prettify_time(time: time):
-    return time.strftime("%#I:%M")
+    return time.strftime("%#I:%M %p")
 
 
 def prettify_date(date: date):

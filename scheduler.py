@@ -1,3 +1,4 @@
+import calendar
 from collections import defaultdict
 import csv
 from datetime import date, datetime, timedelta
@@ -33,7 +34,8 @@ def generate_schedule(input_dir_path, random_seed, min_days_between_games):
     if success:
         print("Success! A valid schedule was found.")
         print()
-        pretty_print_schedule()
+        print_master_schedule()
+        print_breakout_schedules()
     else:
         print("There is no schedule that satisfies the constraints.")
 
@@ -220,7 +222,13 @@ def ingest_matchups_file(directory_path):
             division, team_a_name, team_b_name = row
             team_a = teams[(division, team_a_name)]
             team_b = teams[(division, team_b_name)]
-            matchups.append(Matchup(team_a, team_b))
+
+            matchup = Matchup(team_a, team_b)
+
+            matchups.append(matchup)
+
+            team_a.matchups.append(matchup)
+            team_b.matchups.append(matchup)
 
     print("======================== ingested matchups: ========================")
     if len(matchups) <= 20:
@@ -335,7 +343,7 @@ def ingest_blackouts_file(directory_path):
     print()
 
 
-def pretty_print_schedule():
+def print_master_schedule():
     gameslots_by_day = defaultdict(list)
     blackouts_by_day = defaultdict(list)
 
@@ -372,6 +380,31 @@ def pretty_print_schedule():
         schedule_table.append(["", "", ""])
 
     utils.pretty_print_table(schedule_table)
+
+
+def print_breakout_schedules():
+    for team in teams.values():
+        table = []
+        table.append(["", "Date", "Day", "Time", "Team A", "Team B", "Location"])
+        table.append(["", "----", "---", "----", "------", "------", "--------"])
+
+        team.matchups.sort(key=lambda m: m.selected_gameslot.date)
+
+        for i, matchup in enumerate(team.matchups):
+            game_num = i + 1
+            date_str = utils.prettify_date(matchup.selected_gameslot.date)
+            day = calendar.day_name[matchup.selected_gameslot.date.weekday()]
+            time_str = utils.prettify_time(matchup.selected_gameslot.time)
+            team_a = matchup.team_a.name
+            team_b = matchup.team_b.name
+            location = matchup.selected_gameslot.location
+
+            table.append([game_num, date_str, day, time_str, team_a, team_b, location])
+
+        print(str(team))
+        print("-" * len(str(team)))
+        utils.pretty_print_table(table)
+        print()
 
 
 generate_schedule(
