@@ -7,6 +7,9 @@ class Team:
     def __str__(self):
         return f"< {self.division} {self.name} >"
 
+    def __hash__(self):
+        return hash((self.division, self.name))
+
     def __eq__(self, other):
         return (
             self.division == other.division

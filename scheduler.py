@@ -1,7 +1,7 @@
 from collections import defaultdict
 import csv
-from datetime import datetime
-from typing import Set
+from datetime import date, datetime
+from typing import Dict, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
@@ -24,7 +24,7 @@ def generate_schedule(input_dir_path):
 
     matchups.sort(key=lambda m: len(m.candidate_gameslots))
 
-    success = select_gameslots_for_matchups(0, set())
+    success = select_gameslots_for_matchups(0, set(), defaultdict(set))
 
     if success:
         print("Success! A valid schedule was found.")
@@ -34,7 +34,11 @@ def generate_schedule(input_dir_path):
         print("There is no schedule that satisfies the constraints.")
 
 
-def select_gameslots_for_matchups(start, reserved_gameslots):
+def select_gameslots_for_matchups(
+    start: int,
+    reserved_gameslots: Set[Gameslot],
+    reserved_dates_by_team: Dict[Team, Set[date]],
+):
     if start == len(matchups):
         # now that we have selections, record the reversed selections in the gameslots
         for matchup in matchups:
@@ -47,15 +51,25 @@ def select_gameslots_for_matchups(start, reserved_gameslots):
     for gameslot in matchup.candidate_gameslots:
         if gameslot in reserved_gameslots:
             continue
+        if gameslot.date in reserved_dates_by_team[matchup.team_a]:
+            continue
+        if gameslot.date in reserved_dates_by_team[matchup.team_b]:
+            continue
 
         reserved_gameslots.add(gameslot)
+        reserved_dates_by_team[matchup.team_a].add(gameslot.date)
+        reserved_dates_by_team[matchup.team_b].add(gameslot.date)
         matchup.selected_gameslot = gameslot
 
-        if select_gameslots_for_matchups(start + 1, reserved_gameslots):
+        if select_gameslots_for_matchups(
+            start + 1, reserved_gameslots, reserved_dates_by_team
+        ):
             return True
 
-        matchup.selected_gameslot = None
         reserved_gameslots.remove(gameslot)
+        reserved_dates_by_team[matchup.team_a].remove(gameslot.date)
+        reserved_dates_by_team[matchup.team_b].remove(gameslot.date)
+        matchup.selected_gameslot = None
 
     return False
 
