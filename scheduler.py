@@ -18,6 +18,8 @@ gameslots = []
 locations_to_counts = defaultdict(int)  # maps location -> # of gameslots in location
 blackouts = []
 
+search_dead_ends: int
+
 
 def generate_schedule(input_dir_path, random_seed, min_days_between_games):
     random.seed(random_seed)
@@ -30,6 +32,8 @@ def generate_schedule(input_dir_path, random_seed, min_days_between_games):
     matchups.sort(key=lambda m: len(m.candidate_gameslots))
 
     success = select_gameslots_for_matchups(0, set(), min_days_between_games)
+
+    print(f"Search completed after {search_dead_ends} dead ends.")
 
     if success:
         print("Success! A valid schedule was found.")
@@ -45,6 +49,10 @@ def select_gameslots_for_matchups(
     reserved_gameslots: Set[Gameslot],
     min_days_between_games: int,
 ):
+    global search_dead_ends
+    if start == 0:
+        search_dead_ends = 0
+
     if start == len(matchups):
         # now that the selections are finalized, record them in the gameslots too
         for matchup in matchups:
@@ -81,6 +89,9 @@ def select_gameslots_for_matchups(
         matchup.team_b.selected_dates.remove(gameslot.date)
         matchup.selected_gameslot = None
 
+    search_dead_ends += 1
+    if search_dead_ends % 100000 == 0:
+        print(f"Search has hit {search_dead_ends} dead ends")
     return False
 
 
