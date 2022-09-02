@@ -1,8 +1,8 @@
 import calendar
 from collections import defaultdict
 import csv
-from datetime import date, datetime, timedelta
-from typing import Dict, Set
+from datetime import datetime, timedelta
+from typing import List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
@@ -21,7 +21,9 @@ blackouts = []
 search_dead_ends: int
 
 
-def generate_schedule(input_dir_path, random_seed, min_days_between_games):
+def generate_schedule(
+    input_dir_path: str, random_seed: int, window_constraints: List[Tuple[int, int]]
+):
     random.seed(random_seed)
 
     ingest_files(input_dir_path)
@@ -41,7 +43,7 @@ def generate_schedule(input_dir_path, random_seed, min_days_between_games):
     # it at the end.
     matchups.sort(key=lambda m: len(m.preferred_gameslots))
 
-    success = select_gameslots_for_matchups(0, set(), min_days_between_games)
+    success = select_gameslots_for_matchups(0, set(), window_constraints)
 
     print(f"Search completed after {search_dead_ends} dead ends.")
 
@@ -57,7 +59,7 @@ def generate_schedule(input_dir_path, random_seed, min_days_between_games):
 def select_gameslots_for_matchups(
     start: int,
     reserved_gameslots: Set[Gameslot],
-    min_days_between_games: int,
+    window_constraints: List[Tuple[int, int]],
 ):
     global search_dead_ends
     if start == 0:
@@ -83,22 +85,24 @@ def select_gameslots_for_matchups(
 
             if gameslot in reserved_gameslots:
                 continue
-            if team_has_game_too_close(matchup, gameslot, min_days_between_games):
+            if selection_violates_window_constraints(
+                matchup, gameslot, window_constraints
+            ):
                 continue
 
             reserved_gameslots.add(gameslot)
-            matchup.team_a.selected_dates.add(gameslot.date)
-            matchup.team_b.selected_dates.add(gameslot.date)
+            matchup.team_a.num_games_by_date[gameslot.date] += 1
+            matchup.team_b.num_games_by_date[gameslot.date] += 1
             matchup.selected_gameslot = gameslot
 
             if select_gameslots_for_matchups(
-                start + 1, reserved_gameslots, min_days_between_games
+                start + 1, reserved_gameslots, window_constraints
             ):
                 return True
 
             reserved_gameslots.remove(gameslot)
-            matchup.team_a.selected_dates.remove(gameslot.date)
-            matchup.team_b.selected_dates.remove(gameslot.date)
+            matchup.team_a.num_games_by_date[gameslot.date] -= 1
+            matchup.team_b.num_games_by_date[gameslot.date] -= 1
             matchup.selected_gameslot = None
 
     search_dead_ends += 1
@@ -107,21 +111,39 @@ def select_gameslots_for_matchups(
     return False
 
 
-# Returns true if the given matchup is prohibited from selecting the given slot due to
-# one of the teams having a scheduled game too close by.
-def team_has_game_too_close(
-    matchup: Matchup,
-    gameslot: Gameslot,
-    min_days_between_games: int,
+# Returns true if the given matchup is prohibited from selecting the given slot because
+# one of the teams will have too many games in a window
+def selection_violates_window_constraints(
+    matchup: Matchup, gameslot: Gameslot, window_constraints: List[Tuple[int, int]]
 ):
-    danger_zone_radius = min_days_between_games - 1
-    for day_offset in range(-(danger_zone_radius), danger_zone_radius + 1):
-        danger_date = gameslot.date + timedelta(days=day_offset)
-        if (
-            danger_date in matchup.team_a.selected_dates
-            or danger_date in matchup.team_b.selected_dates
-        ):
-            return True
+    candidate_date = gameslot.date
+
+    for team in matchup.team_a, matchup.team_b:
+        for window_constraint in window_constraints:
+            window_size, max_in_window = window_constraint
+
+            num_selected_dates_in_window = 0
+
+            left = candidate_date - timedelta(days=window_size - 1)
+            right = left - timedelta(days=1)
+
+            for _ in range(window_size):
+                right += timedelta(days=1)
+                num_selected_dates_in_window += team.num_games_by_date[right]
+
+            if num_selected_dates_in_window >= max_in_window:
+                # Equality will lead to a violation because the candidate will push
+                # num_selected_dates_in_window above the max.
+                return True
+
+            for _ in range(window_size - 1):
+                num_selected_dates_in_window -= team.num_games_by_date[left]
+                left += timedelta(days=1)
+                right += timedelta(days=1)
+                num_selected_dates_in_window += team.num_games_by_date[right]
+
+                if num_selected_dates_in_window >= max_in_window:
+                    return True
 
     return False
 
@@ -470,5 +492,7 @@ def print_breakout_schedules():
 
 
 generate_schedule(
-    input_dir_path="examples/volleyball_2022", random_seed=14, min_days_between_games=1
+    input_dir_path="examples/volleyball_2022",
+    random_seed=14,
+    window_constraints=[(1, 1), (5, 2)],
 )

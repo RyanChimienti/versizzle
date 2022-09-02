@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 class Team:
     def __init__(self, division: str, name: str, home_location: str):
         self.division = division
@@ -7,7 +10,7 @@ class Team:
         self.matchups = []
         self.num_games = 0
         self.num_preferred_home_games = 0
-        self.selected_dates = set()
+        self.num_games_by_date = defaultdict(int)
 
     def __str__(self):
         return f"< {self.division} {self.name} >"
