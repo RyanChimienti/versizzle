@@ -26,10 +26,20 @@ def generate_schedule(input_dir_path, random_seed, min_days_between_games):
 
     ingest_files(input_dir_path)
 
-    assign_candidate_locations_to_matchups()
+    assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
 
-    matchups.sort(key=lambda m: len(m.candidate_gameslots))
+    # Randomize before sorting so that matchups with equal number of preferred
+    # gameslots end up in random order. If we don't do this, teams near the end of
+    # teams.csv get processed last, meaning their preferences are less likely to be
+    # satisified.
+    random.shuffle(matchups)
+
+    # Process most constrained first, per https://www.youtube.com/watch?v=dARl_gGrS4o.
+    # The idea is that if a matchup has many preferred slots, it's unlikely that an
+    # earlier matchup would have taken all of them. Therefore it's safe to consider
+    # it at the end.
+    matchups.sort(key=lambda m: len(m.preferred_gameslots))
 
     success = select_gameslots_for_matchups(0, set(), min_days_between_games)
 
@@ -62,32 +72,34 @@ def select_gameslots_for_matchups(
         return True
 
     matchup = matchups[start]
-    num_gameslots = len(matchup.candidate_gameslots)
-    first_gameslot_index = random.randrange(num_gameslots)
 
-    for i in range(num_gameslots):
-        gameslot_index = (first_gameslot_index + i) % num_gameslots
-        gameslot = matchup.candidate_gameslots[gameslot_index]
+    for candidate_gameslots in (matchup.preferred_gameslots, matchup.backup_gameslots):
+        num_gameslots = len(candidate_gameslots)
+        first_gameslot_index = random.randrange(num_gameslots)
 
-        if gameslot in reserved_gameslots:
-            continue
-        if team_has_game_too_close(matchup, gameslot, min_days_between_games):
-            continue
+        for i in range(num_gameslots):
+            gameslot_index = (first_gameslot_index + i) % num_gameslots
+            gameslot = candidate_gameslots[gameslot_index]
 
-        reserved_gameslots.add(gameslot)
-        matchup.team_a.selected_dates.add(gameslot.date)
-        matchup.team_b.selected_dates.add(gameslot.date)
-        matchup.selected_gameslot = gameslot
+            if gameslot in reserved_gameslots:
+                continue
+            if team_has_game_too_close(matchup, gameslot, min_days_between_games):
+                continue
 
-        if select_gameslots_for_matchups(
-            start + 1, reserved_gameslots, min_days_between_games
-        ):
-            return True
+            reserved_gameslots.add(gameslot)
+            matchup.team_a.selected_dates.add(gameslot.date)
+            matchup.team_b.selected_dates.add(gameslot.date)
+            matchup.selected_gameslot = gameslot
 
-        reserved_gameslots.remove(gameslot)
-        matchup.team_a.selected_dates.remove(gameslot.date)
-        matchup.team_b.selected_dates.remove(gameslot.date)
-        matchup.selected_gameslot = None
+            if select_gameslots_for_matchups(
+                start + 1, reserved_gameslots, min_days_between_games
+            ):
+                return True
+
+            reserved_gameslots.remove(gameslot)
+            matchup.team_a.selected_dates.remove(gameslot.date)
+            matchup.team_b.selected_dates.remove(gameslot.date)
+            matchup.selected_gameslot = None
 
     search_dead_ends += 1
     if search_dead_ends % 100000 == 0:
@@ -116,19 +128,19 @@ def team_has_game_too_close(
 
 def assign_candidate_gameslots_to_matchups():
     for m in matchups:
-        candidate_gameslots = []
+        m.preferred_gameslots = []
+        m.backup_gameslots = []
         for g in gameslots:
-            if g.location not in m.candidate_locations:
-                continue
             if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
                 continue
 
-            candidate_gameslots.append(g)
+            if g.location in m.preferred_locations:
+                m.preferred_gameslots.append(g)
+            else:
+                m.backup_gameslots.append(g)
 
-        m.candidate_gameslots = candidate_gameslots
 
-
-def assign_candidate_locations_to_matchups():
+def assign_preferred_locations_to_matchups():
     for d in divisions_to_counts:
         division_matchups = [m for m in matchups if m.division == d]
 
@@ -139,28 +151,58 @@ def assign_candidate_locations_to_matchups():
 
         groups_of_identical_matchups = team_pairs_to_matchups.values()
         for group in groups_of_identical_matchups:
+            first_team, second_team = group[0].team_a, group[0].team_b
+
             half_of_num_matchups = len(group) // 2
 
-            # in the first half of matchups, team A gets home games
+            # in the first half of matchups, first team gets home games
             for i in range(half_of_num_matchups):
                 matchup = group[i]
-                matchup.candidate_locations = get_locations_for_home_game(
-                    matchup.team_a
-                )
+                matchup.preferred_home_team = first_team
+                matchup.preferred_locations = get_locations_for_home_game(first_team)
+                first_team.num_preferred_home_games += 1
+                matchup.team_a.num_games += 1
+                matchup.team_b.num_games += 1
 
-            # in the second half of matchups, team B gets home games
+            # in the second half of matchups, second team gets home games
             for i in range(half_of_num_matchups, 2 * half_of_num_matchups):
                 matchup = group[i]
-                matchup.candidate_locations = get_locations_for_home_game(
-                    matchup.team_b
-                )
+                matchup.preferred_home_team = second_team
+                matchup.preferred_locations = get_locations_for_home_game(second_team)
+                second_team.num_preferred_home_games += 1
+                matchup.team_a.num_games += 1
+                matchup.team_b.num_games += 1
 
             # if there's a game left over, either team can be home
             if len(group) % 2 == 1:
                 matchup = group[-1]
-                matchup.candidate_locations = get_locations_for_home_game(
-                    matchup.team_a
-                ).union(get_locations_for_home_game(matchup.team_b))
+                home_team = get_fairer_home_team(first_team, second_team)
+                matchup.preferred_home_team = home_team
+                matchup.preferred_locations = get_locations_for_home_game(home_team)
+                home_team.num_preferred_home_games += 1
+                matchup.team_a.num_games += 1
+                matchup.team_b.num_games += 1
+
+
+# The fairer home team is whichever has a lower ratio of home to away games. If the
+# ratios are equal, we'll choose a team at random. Random is better than saying either
+# team can be home, because allowing either will tend to favor the team with more
+# gameslots at their home court, leading to systematic bias in favor of certain schools.
+def get_fairer_home_team(team_1: Team, team_2: Team):
+    team_1_home_ratio = (
+        0.5
+        if team_1.num_games == 0
+        else team_1.num_preferred_home_games / float(team_1.num_games)
+    )
+    team_2_home_ratio = (
+        0.5
+        if team_2.num_games == 0
+        else team_2.num_preferred_home_games / float(team_2.num_games)
+    )
+    if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
+        return random.choice([team_1, team_2])
+
+    return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
 
 
 # Returns the valid locations for a home game for the given team. In the case of a team
@@ -396,8 +438,8 @@ def print_master_schedule():
 def print_breakout_schedules():
     for team in teams.values():
         table = []
-        table.append(["", "Date", "Day", "Time", "Team A", "Team B", "Location"])
-        table.append(["", "----", "---", "----", "------", "------", "--------"])
+        table.append(["", "Date", "Day", "Time", "Home Team", "Away Team", "Location"])
+        table.append(["", "----", "---", "----", "---------", "---------", "--------"])
 
         team.matchups.sort(key=lambda m: m.selected_gameslot.date)
 
@@ -406,11 +448,20 @@ def print_breakout_schedules():
             date_str = utils.prettify_date(matchup.selected_gameslot.date)
             day = calendar.day_name[matchup.selected_gameslot.date.weekday()]
             time_str = utils.prettify_time(matchup.selected_gameslot.time)
-            team_a = matchup.team_a.name
-            team_b = matchup.team_b.name
+            home_team, away_team = matchup.get_teams_in_home_away_order()
             location = matchup.selected_gameslot.location
 
-            table.append([game_num, date_str, day, time_str, team_a, team_b, location])
+            table.append(
+                [
+                    game_num,
+                    date_str,
+                    day,
+                    time_str,
+                    home_team.name,
+                    away_team.name,
+                    location,
+                ]
+            )
 
         print(str(team))
         print("-" * len(str(team)))

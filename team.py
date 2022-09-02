@@ -3,7 +3,10 @@ class Team:
         self.division = division
         self.name = name
         self.home_location = home_location
+
         self.matchups = []
+        self.num_games = 0
+        self.num_preferred_home_games = 0
         self.selected_dates = set()
 
     def __str__(self):

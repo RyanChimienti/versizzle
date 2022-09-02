@@ -1,3 +1,4 @@
+from typing import Tuple
 from team import Team
 
 
@@ -13,9 +14,30 @@ class Matchup:
         self.division = team_a.division
         self.team_a = team_a
         self.team_b = team_b
-        self.candidate_locations = "undecided"
-        self.candidate_gameslots = "undecided"
+
+        self.preferred_home_team = None
+        self.preferred_locations = "undecided"
+        self.preferred_gameslots = "undecided"
+        self.backup_gameslots = "undecided"
+
         self.selected_gameslot = None
+
+    def get_teams_in_home_away_order(self) -> Tuple[Team]:
+        location = self.selected_gameslot.location
+        if (
+            location == self.team_a.home_location
+            and location != self.team_b.home_location
+        ):
+            return self.team_a, self.team_b
+        if (
+            location == self.team_b.home_location
+            and location != self.team_a.home_location
+        ):
+            return self.team_b, self.team_a
+
+        home_team = self.preferred_home_team
+        away_team = self.team_b if self.team_a == home_team else self.team_a
+        return home_team, away_team
 
     def __str__(self):
         return f"< {self.division} - {self.team_a.name} vs {self.team_b.name} >"
