@@ -1,7 +1,7 @@
 from typing import List, Tuple
-from gameslot import *
 from team import *
 import location
+import gameslot
 
 
 class Matchup:
@@ -19,11 +19,33 @@ class Matchup:
 
         self.preferred_home_team: Team = None
         self.preferred_locations: List[location.Location] = None
-        self.preferred_gameslots: List[Gameslot] = None
-        self.backup_gameslots: List[Gameslot] = None
+        self.preferred_gameslots: List[gameslot.Gameslot] = None
+        self.backup_gameslots: List[gameslot.Gameslot] = None
 
-        self.selected_gameslot: Gameslot = None
+        self.selected_gameslot: gameslot.Gameslot = None
         self.selected_gameslot_is_preferred: bool = False
+
+    def select_gameslot(self, gameslot: gameslot.Gameslot):
+        if self.selected_gameslot is not None:
+            raise Exception("Must deselect gameslot before selecting a new one")
+
+        self.selected_gameslot = gameslot
+        self.team_a.num_games_by_date[gameslot.date] += 1
+        self.team_b.num_games_by_date[gameslot.date] += 1
+        gameslot.selected_matchup = self
+        gameslot.location.num_games_by_date[gameslot.date] += 1
+
+    def deselect_gameslot(self):
+        if self.selected_gameslot is None:
+            raise Exception("Tried to deselect gameslot when none is selected")
+
+        prev_gameslot = self.selected_gameslot
+
+        self.selected_gameslot = None
+        self.team_a.num_games_by_date[prev_gameslot.date] -= 1
+        self.team_b.num_games_by_date[prev_gameslot.date] -= 1
+        prev_gameslot.selected_matchup = None
+        prev_gameslot.location.num_games_by_date[prev_gameslot.date] -= 1
 
     def get_teams_in_home_away_order(self) -> Tuple[Team]:
         location = self.selected_gameslot.location

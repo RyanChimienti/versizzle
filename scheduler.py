@@ -1,12 +1,14 @@
 import calendar
 from collections import defaultdict
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
 from location import Location
 from matchup import Matchup
+from postprocessor import PostProcessor
+from window_constraint import WindowConstraint
 from team import Team
 import utils
 import random
@@ -26,7 +28,7 @@ greatest_depth_reached: int
 
 
 def generate_schedule(
-    input_dir_path: str, random_seed: int, window_constraints: List[Tuple[int, int]]
+    input_dir_path: str, random_seed: int, window_constraints: List[WindowConstraint]
 ):
     random.seed(random_seed)
 
@@ -36,18 +38,21 @@ def generate_schedule(
     assign_candidate_gameslots_to_matchups()
     put_matchups_in_search_order()
 
-    success = select_gameslots_for_matchups(0, set(), window_constraints)
+    success = select_gameslots_for_matchups(0, window_constraints)
 
     print(f"Search completed after {search_dead_ends} dead ends.")
 
-    if success:
-        print("Success! A valid schedule was found.")
-        print()
-        print_schedule_metrics()
-        # print_master_schedule()
-        # print_breakout_schedules()
-    else:
+    if not success:
         print("There is no schedule that satisfies the constraints.")
+        return
+
+    PostProcessor(matchups, gameslots, window_constraints).post_process()
+
+    print("Success! A valid schedule was found.")
+    print()
+    print_schedule_metrics()
+    print_master_schedule()
+    print_breakout_schedules()
 
 
 def put_matchups_in_search_order():
@@ -79,8 +84,7 @@ def put_matchups_in_search_order():
 
 def select_gameslots_for_matchups(
     start: int,
-    reserved_gameslots: Set[Gameslot],
-    window_constraints: List[Tuple[int, int]],
+    window_constraints: List[WindowConstraint],
 ):
     global search_dead_ends
     global greatest_depth_reached
@@ -93,11 +97,6 @@ def select_gameslots_for_matchups(
         print(f"New depth reached: {greatest_depth_reached} / {len(matchups)}")
 
     if start == len(matchups):
-        # now that the selections are finalized, record them in the gameslots too
-        for matchup in matchups:
-            selected_gameslot = matchup.selected_gameslot
-            selected_gameslot.selected_matchup = matchup
-
         return True
 
     matchup = matchups[start]
@@ -108,7 +107,7 @@ def select_gameslots_for_matchups(
         )
         for reuse_single_use_location in True, False:
             for gameslot in candidate_gameslots:
-                if gameslot in reserved_gameslots:
+                if gameslot.selected_matchup is not None:
                     continue
                 if (
                     reuse_single_use_location
@@ -120,70 +119,22 @@ def select_gameslots_for_matchups(
                     and gameslot.location.num_games_by_date[gameslot.date] == 1
                 ):
                     continue
-                if selection_violates_window_constraints(
-                    matchup, gameslot, window_constraints
+                if not all(
+                    w.is_satisfied_by_selection(matchup, gameslot)
+                    for w in window_constraints
                 ):
                     continue
 
-                reserved_gameslots.add(gameslot)
-                gameslot.location.num_games_by_date[gameslot.date] += 1
-                matchup.team_a.num_games_by_date[gameslot.date] += 1
-                matchup.team_b.num_games_by_date[gameslot.date] += 1
-                matchup.selected_gameslot = gameslot
+                matchup.select_gameslot(gameslot)
 
-                if select_gameslots_for_matchups(
-                    start + 1,
-                    reserved_gameslots,
-                    window_constraints,
-                ):
+                if select_gameslots_for_matchups(start + 1, window_constraints):
                     return True
 
-                reserved_gameslots.remove(gameslot)
-                gameslot.location.num_games_by_date[gameslot.date] -= 1
-                matchup.team_a.num_games_by_date[gameslot.date] -= 1
-                matchup.team_b.num_games_by_date[gameslot.date] -= 1
-                matchup.selected_gameslot = None
+                matchup.deselect_gameslot(gameslot)
 
     search_dead_ends += 1
     if search_dead_ends % 10000 == 0:
         print(f"Search has hit {search_dead_ends} dead ends")
-    return False
-
-
-# Returns true if the given matchup is prohibited from selecting the given slot because
-# one of the teams will have too many games in a window
-def selection_violates_window_constraints(
-    matchup: Matchup, gameslot: Gameslot, window_constraints: List[Tuple[int, int]]
-):
-    candidate_date = gameslot.date
-
-    for team in matchup.team_a, matchup.team_b:
-        for window_constraint in window_constraints:
-            window_size, max_in_window = window_constraint
-
-            num_selected_dates_in_window = 0
-
-            left = candidate_date - timedelta(days=window_size - 1)
-            right = left - timedelta(days=1)
-
-            for _ in range(window_size):
-                right += timedelta(days=1)
-                num_selected_dates_in_window += team.num_games_by_date[right]
-
-            if num_selected_dates_in_window >= max_in_window:
-                # Equality will lead to a violation because the candidate will push
-                # num_selected_dates_in_window above the max.
-                return True
-
-            for _ in range(window_size - 1):
-                num_selected_dates_in_window -= team.num_games_by_date[left]
-                left += timedelta(days=1)
-                right += timedelta(days=1)
-                num_selected_dates_in_window += team.num_games_by_date[right]
-
-                if num_selected_dates_in_window >= max_in_window:
-                    return True
-
     return False
 
 
@@ -618,5 +569,5 @@ def print_location_reuse_metrics():
 generate_schedule(
     input_dir_path="examples/volleyball_2022",
     random_seed=14,
-    window_constraints=[(1, 1), (5, 2)],
+    window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
 )
