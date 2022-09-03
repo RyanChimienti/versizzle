@@ -2,7 +2,7 @@ import calendar
 from collections import defaultdict
 import csv
 from datetime import datetime, timedelta
-from typing import List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
 from matchup import Matchup
@@ -11,14 +11,19 @@ import utils
 import random
 
 
-divisions_to_counts = defaultdict(int)  # maps division -> # of teams in division
-teams = dict()  # maps (division, name) -> team object
-matchups = []
-gameslots = []
-locations_to_counts = defaultdict(int)  # maps location -> # of gameslots in location
-blackouts = []
+divisions_to_counts: Dict[str, int] = defaultdict(
+    int
+)  # maps division -> # of teams in division
+teams: Dict[Tuple[str, str], Team] = dict()  # maps (division, name) -> team object
+matchups: List[Matchup] = []
+gameslots: List[Gameslot] = []
+locations_to_counts: Dict[str, int] = defaultdict(
+    int
+)  # maps location -> # of gameslots in location
+blackouts: List[Blackout] = []
 
 search_dead_ends: int
+greatest_depth_reached: int
 
 
 def generate_schedule(
@@ -50,8 +55,9 @@ def generate_schedule(
     if success:
         print("Success! A valid schedule was found.")
         print()
-        print_master_schedule()
-        print_breakout_schedules()
+        print_schedule_metrics()
+        # print_master_schedule()
+        # print_breakout_schedules()
     else:
         print("There is no schedule that satisfies the constraints.")
 
@@ -62,8 +68,14 @@ def select_gameslots_for_matchups(
     window_constraints: List[Tuple[int, int]],
 ):
     global search_dead_ends
+    global greatest_depth_reached
     if start == 0:
         search_dead_ends = 0
+        greatest_depth_reached = 0
+
+    if start > greatest_depth_reached:
+        greatest_depth_reached = start
+        print(f"New depth reached: {greatest_depth_reached} / {len(matchups)}")
 
     if start == len(matchups):
         # now that the selections are finalized, record them in the gameslots too
@@ -76,13 +88,11 @@ def select_gameslots_for_matchups(
     matchup = matchups[start]
 
     for candidate_gameslots in (matchup.preferred_gameslots, matchup.backup_gameslots):
-        num_gameslots = len(candidate_gameslots)
-        first_gameslot_index = random.randrange(num_gameslots)
+        matchup.selected_gameslot_is_preferred = (
+            candidate_gameslots is matchup.preferred_gameslots
+        )
 
-        for i in range(num_gameslots):
-            gameslot_index = (first_gameslot_index + i) % num_gameslots
-            gameslot = candidate_gameslots[gameslot_index]
-
+        for gameslot in candidate_gameslots:
             if gameslot in reserved_gameslots:
                 continue
             if selection_violates_window_constraints(
@@ -106,7 +116,7 @@ def select_gameslots_for_matchups(
             matchup.selected_gameslot = None
 
     search_dead_ends += 1
-    if search_dead_ends % 100000 == 0:
+    if search_dead_ends % 10000 == 0:
         print(f"Search has hit {search_dead_ends} dead ends")
     return False
 
@@ -160,6 +170,9 @@ def assign_candidate_gameslots_to_matchups():
                 m.preferred_gameslots.append(g)
             else:
                 m.backup_gameslots.append(g)
+
+        random.shuffle(m.preferred_gameslots)
+        random.shuffle(m.backup_gameslots)
 
 
 def assign_preferred_locations_to_matchups():
@@ -487,6 +500,42 @@ def print_breakout_schedules():
 
         print(str(team))
         print("-" * len(str(team)))
+        utils.pretty_print_table(table)
+        print()
+
+
+def print_schedule_metrics():
+    print_non_preferred_gameslot_metrics()
+
+
+def print_non_preferred_gameslot_metrics():
+    non_preferred_matchups = list(
+        filter(lambda m: not m.selected_gameslot_is_preferred, matchups)
+    )
+    non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.name)
+    non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.division)
+
+    print(
+        f"{len(non_preferred_matchups)} out of {len(matchups)} matchups received "
+        + "non-preferred locations. Non-preferred assignments (if any) are listed below."
+    )
+    print()
+    if non_preferred_matchups:
+        table = [
+            ["", "Matchup", "Preferred Home Team", "Assigned Location"],
+            ["", "-------", "-------------------", "-----------------"],
+        ]
+        for i, matchup in enumerate(non_preferred_matchups):
+            if i > 0 and matchup.division != non_preferred_matchups[i - 1].division:
+                table.append(["", "", "", ""])
+            table.append(
+                [
+                    str(i + 1),
+                    matchup,
+                    matchup.preferred_home_team.name,
+                    matchup.selected_gameslot.location,
+                ]
+            )
         utils.pretty_print_table(table)
         print()
 

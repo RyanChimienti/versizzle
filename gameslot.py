@@ -1,5 +1,6 @@
 from datetime import date, time
 import utils
+import matchup
 
 
 class Gameslot:
@@ -7,7 +8,7 @@ class Gameslot:
         self.date = date
         self.time = time
         self.location = location
-        self.selected_matchup = None
+        self.selected_matchup: matchup.Matchup = None
 
     def __str__(self):
         pretty_date = utils.prettify_date(self.date)

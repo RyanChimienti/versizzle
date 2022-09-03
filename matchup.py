@@ -1,5 +1,6 @@
-from typing import Tuple
-from team import Team
+from typing import List, Tuple
+from gameslot import *
+from team import *
 
 
 class Matchup:
@@ -11,16 +12,17 @@ class Matchup:
         if team_a.name == team_b.name:
             raise Exception(f"tried to create matchup of {team_a} against itself")
 
-        self.division = team_a.division
-        self.team_a = team_a
-        self.team_b = team_b
+        self.division: str = team_a.division
+        self.team_a: Team = team_a
+        self.team_b: Team = team_b
 
-        self.preferred_home_team = None
-        self.preferred_locations = "undecided"
-        self.preferred_gameslots = "undecided"
-        self.backup_gameslots = "undecided"
+        self.preferred_home_team: Team = None
+        self.preferred_locations: List[str] = None
+        self.preferred_gameslots: List[Gameslot] = None
+        self.backup_gameslots: List[Gameslot] = None
 
-        self.selected_gameslot = None
+        self.selected_gameslot: Gameslot = None
+        self.selected_gameslot_is_preferred: bool = False
 
     def get_teams_in_home_away_order(self) -> Tuple[Team]:
         location = self.selected_gameslot.location
