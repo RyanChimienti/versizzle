@@ -2,10 +2,11 @@ from datetime import date, time
 from typing import List
 import utils
 import matchup
+import location
 
 
 class Gameslot:
-    def __init__(self, date: date, time: time, location: str):
+    def __init__(self, date: date, time: time, location: location.Location):
         self.date = date
         self.time = time
         self.location = location

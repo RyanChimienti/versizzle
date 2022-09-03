@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from gameslot import *
 from team import *
+import location
 
 
 class Matchup:
@@ -17,7 +18,7 @@ class Matchup:
         self.team_b: Team = team_b
 
         self.preferred_home_team: Team = None
-        self.preferred_locations: List[str] = None
+        self.preferred_locations: List[location.Location] = None
         self.preferred_gameslots: List[Gameslot] = None
         self.backup_gameslots: List[Gameslot] = None
 

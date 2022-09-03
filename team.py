@@ -1,14 +1,15 @@
 from collections import defaultdict
 from datetime import date
 from typing import Dict, List
+from location import Location
 import matchup
 
 
 class Team:
-    def __init__(self, division: str, name: str, home_location: str):
+    def __init__(self, division: str, name: str, home_location: Location):
         self.division: str = division
         self.name: str = name
-        self.home_location: str = home_location
+        self.home_location: Location = home_location
 
         self.matchups: List[matchup.Matchup] = []
         self.num_games: int = 0

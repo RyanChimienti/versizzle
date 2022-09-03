@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
+from location import Location
 from matchup import Matchup
 from team import Team
 import utils
@@ -14,12 +15,10 @@ import random
 divisions_to_counts: Dict[str, int] = defaultdict(
     int
 )  # maps division -> # of teams in division
-teams: Dict[Tuple[str, str], Team] = dict()  # maps (division, name) -> team object
+teams: Dict[Tuple[str, str], Team] = dict()  # maps (division, team name) -> team object
 matchups: List[Matchup] = []
 gameslots: List[Gameslot] = []
-locations_to_counts: Dict[str, int] = defaultdict(
-    int
-)  # maps location -> # of gameslots in location
+locations: Dict[str, Location] = dict()  # maps location name -> location object
 blackouts: List[Blackout] = []
 
 search_dead_ends: int
@@ -107,29 +106,43 @@ def select_gameslots_for_matchups(
         matchup.selected_gameslot_is_preferred = (
             candidate_gameslots is matchup.preferred_gameslots
         )
+        for reuse_single_use_location in True, False:
+            for gameslot in candidate_gameslots:
+                if gameslot in reserved_gameslots:
+                    continue
+                if (
+                    reuse_single_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] != 1
+                ):
+                    continue
+                if (
+                    not reuse_single_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] == 1
+                ):
+                    continue
+                if selection_violates_window_constraints(
+                    matchup, gameslot, window_constraints
+                ):
+                    continue
 
-        for gameslot in candidate_gameslots:
-            if gameslot in reserved_gameslots:
-                continue
-            if selection_violates_window_constraints(
-                matchup, gameslot, window_constraints
-            ):
-                continue
+                reserved_gameslots.add(gameslot)
+                gameslot.location.num_games_by_date[gameslot.date] += 1
+                matchup.team_a.num_games_by_date[gameslot.date] += 1
+                matchup.team_b.num_games_by_date[gameslot.date] += 1
+                matchup.selected_gameslot = gameslot
 
-            reserved_gameslots.add(gameslot)
-            matchup.team_a.num_games_by_date[gameslot.date] += 1
-            matchup.team_b.num_games_by_date[gameslot.date] += 1
-            matchup.selected_gameslot = gameslot
+                if select_gameslots_for_matchups(
+                    start + 1,
+                    reserved_gameslots,
+                    window_constraints,
+                ):
+                    return True
 
-            if select_gameslots_for_matchups(
-                start + 1, reserved_gameslots, window_constraints
-            ):
-                return True
-
-            reserved_gameslots.remove(gameslot)
-            matchup.team_a.num_games_by_date[gameslot.date] -= 1
-            matchup.team_b.num_games_by_date[gameslot.date] -= 1
-            matchup.selected_gameslot = None
+                reserved_gameslots.remove(gameslot)
+                gameslot.location.num_games_by_date[gameslot.date] -= 1
+                matchup.team_a.num_games_by_date[gameslot.date] -= 1
+                matchup.team_b.num_games_by_date[gameslot.date] -= 1
+                matchup.selected_gameslot = None
 
     search_dead_ends += 1
     if search_dead_ends % 10000 == 0:
@@ -262,9 +275,9 @@ def get_fairer_home_team(team_1: Team, team_2: Team):
 
 # Returns the valid locations for a home game for the given team. In the case of a team
 # with no home location, this is all locations.
-def get_locations_for_home_game(team: Team) -> Set[str]:
+def get_locations_for_home_game(team: Team) -> Set[Location]:
     if team.home_location is None:
-        return {loc for loc in locations_to_counts}
+        return locations.values().copy()
 
     return {team.home_location}
 
@@ -294,8 +307,15 @@ def ingest_teams_file(directory_path):
                 "teams.csv should have 3 columns: 'division', 'team', and 'home location'"
             )
         for row in lines[1:]:
-            division, name, home_location = row
-            home_location_obj = None if home_location == "NONE" else home_location
+            division, name, home_location_name = row
+            if home_location_name == "NONE":
+                home_location_obj = None
+            elif home_location_name in locations:
+                home_location_obj = locations[home_location_name]
+            else:
+                home_location_obj = Location(home_location_name)
+                locations[home_location_name] = home_location_obj
+
             teams[(division, name)] = Team(division, name, home_location_obj)
             divisions_to_counts[division] += 1
 
@@ -369,15 +389,21 @@ def ingest_gameslots_file(directory_path):
                 "gameslots.csv should have 3 columns: 'date', 'time', and 'location'"
             )
         for row in lines[1:]:
-            date_string, time_string, location = row
+            date_string, time_string, location_name = row
+
+            if location_name in locations:
+                location_obj = locations[location_name]
+            else:
+                location_obj = Location(location_name)
+                locations[location_name] = location_obj
 
             datetime_string = date_string + " " + time_string
             datetime_obj = datetime.strptime(datetime_string, "%m/%d/%Y %I:%M%p")
 
             gameslots.append(
-                Gameslot(datetime_obj.date(), datetime_obj.time(), location)
+                Gameslot(datetime_obj.date(), datetime_obj.time(), location_obj)
             )
-            locations_to_counts[location] += 1
+            location_obj.num_gameslots += 1
 
     print("======================== ingested gameslots: ========================")
     if len(gameslots) <= 20:
@@ -391,8 +417,8 @@ def ingest_gameslots_file(directory_path):
             print(g)
     print()
     print("======================== ingested locations: ========================")
-    for l, count in locations_to_counts.items():
-        print(f"{l} ({count} gameslots)")
+    for l in locations.values():
+        print(f"{l} ({l.num_gameslots} gameslots)")
     print()
 
 
@@ -526,6 +552,7 @@ def print_breakout_schedules():
 
 def print_schedule_metrics():
     print_non_preferred_gameslot_metrics()
+    print_location_reuse_metrics()
 
 
 def print_non_preferred_gameslot_metrics():
@@ -558,6 +585,34 @@ def print_non_preferred_gameslot_metrics():
             )
         utils.pretty_print_table(table)
         print()
+
+
+def print_location_reuse_metrics():
+
+    table = [
+        ["# of Games in Block", "# of Occurrences"],
+        ["-------------------", "----------------"],
+    ]
+
+    block_sizes_to_counts = defaultdict(int)
+    for location in locations.values():
+        for num_games in location.num_games_by_date.values():
+            if num_games != 0:
+                block_sizes_to_counts[num_games] += 1
+
+    for block_size, count in sorted(block_sizes_to_counts.items()):
+        table.append([block_size, count])
+
+    total_blocks = sum(block_sizes_to_counts.values())
+
+    print(
+        f"Total number of single-location blocks: {total_blocks}. Fewer is better. "
+        + "Detailed breakdown below."
+    )
+    print()
+
+    utils.pretty_print_table(table)
+    print()
 
 
 generate_schedule(
