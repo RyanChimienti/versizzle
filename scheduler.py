@@ -35,11 +35,26 @@ def generate_schedule(
 
     assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
+    put_matchups_in_search_order()
 
-    # Randomize before sorting so that matchups with equal number of preferred
-    # gameslots end up in random order. If we don't do this, teams near the end of
-    # teams.csv get processed last, meaning their preferences are less likely to be
-    # satisified.
+    success = select_gameslots_for_matchups(0, set(), window_constraints)
+
+    print(f"Search completed after {search_dead_ends} dead ends.")
+
+    if success:
+        print("Success! A valid schedule was found.")
+        print()
+        print_schedule_metrics()
+        # print_master_schedule()
+        # print_breakout_schedules()
+    else:
+        print("There is no schedule that satisfies the constraints.")
+
+
+def put_matchups_in_search_order():
+    # Randomize before sorting so that matchups which are otherwise equal end up in
+    # random order. If we don't do this, teams near the end of teams.csv get processed
+    # last, meaning their preferences are less likely to be satisified.
     random.shuffle(matchups)
 
     # Process most constrained first, per https://www.youtube.com/watch?v=dARl_gGrS4o.
@@ -55,18 +70,12 @@ def generate_schedule(
         )
     )
 
-    success = select_gameslots_for_matchups(0, set(), window_constraints)
-
-    print(f"Search completed after {search_dead_ends} dead ends.")
-
-    if success:
-        print("Success! A valid schedule was found.")
-        print()
-        print_schedule_metrics()
-        # print_master_schedule()
-        # print_breakout_schedules()
-    else:
-        print("There is no schedule that satisfies the constraints.")
+    # If both teams in the matchup have the same home location, it would be egregious
+    # for them to have to travel elsewhere. So move those matchups to the start to make
+    # sure they get their preferred location.
+    matchups.sort(
+        key=lambda m: 1 if m.team_a.home_location == m.team_b.home_location else 2
+    )
 
 
 def select_gameslots_for_matchups(
