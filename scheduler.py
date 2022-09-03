@@ -45,8 +45,15 @@ def generate_schedule(
     # Process most constrained first, per https://www.youtube.com/watch?v=dARl_gGrS4o.
     # The idea is that if a matchup has many preferred slots, it's unlikely that an
     # earlier matchup would have taken all of them. Therefore it's safe to consider
-    # it at the end.
-    matchups.sort(key=lambda m: len(m.preferred_gameslots))
+    # it at the end. On the other hand, if a matchup has few preferred slots, or if its
+    # preferred slots are also preferred by a lot of other matchups, then it's in danger
+    # of losing its preferred slots, so it should be considered early.
+    matchups.sort(
+        key=lambda m: sum(
+            1 / float(len(p.matchups_that_prefer_this_slot))
+            for p in m.preferred_gameslots
+        )
+    )
 
     success = select_gameslots_for_matchups(0, set(), window_constraints)
 
@@ -159,6 +166,9 @@ def selection_violates_window_constraints(
 
 
 def assign_candidate_gameslots_to_matchups():
+    for g in gameslots:
+        g.matchups_that_prefer_this_slot = []
+
     for m in matchups:
         m.preferred_gameslots = []
         m.backup_gameslots = []
@@ -168,6 +178,7 @@ def assign_candidate_gameslots_to_matchups():
 
             if g.location in m.preferred_locations:
                 m.preferred_gameslots.append(g)
+                g.matchups_that_prefer_this_slot.append(m)
             else:
                 m.backup_gameslots.append(g)
 

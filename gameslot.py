@@ -1,4 +1,5 @@
 from datetime import date, time
+from typing import List
 import utils
 import matchup
 
@@ -8,6 +9,8 @@ class Gameslot:
         self.date = date
         self.time = time
         self.location = location
+
+        self.matchups_that_prefer_this_slot: List[matchup.Matchup] = None
         self.selected_matchup: matchup.Matchup = None
 
     def __str__(self):
