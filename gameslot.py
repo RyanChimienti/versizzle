@@ -1,5 +1,5 @@
 from datetime import date, time
-from typing import List
+from typing import List, Set
 import utils
 import location
 
@@ -14,7 +14,7 @@ class Gameslot:
         self.time = time
         self.location = location
 
-        self.matchups_that_prefer_this_slot: List[Matchup] = None
+        self.matchups_that_prefer_this_slot: Set[Matchup] = None
         self.selected_matchup: Matchup = None
 
     def __str__(self):

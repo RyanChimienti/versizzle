@@ -23,8 +23,8 @@ gameslots: List[Gameslot] = []
 locations: Dict[str, Location] = dict()  # maps location name -> location object
 blackouts: List[Blackout] = []
 
-search_dead_ends: int
-greatest_depth_reached: int
+backup_selection_dead_ends: int
+backup_selection_depth: int
 
 
 def generate_schedule(
@@ -36,29 +36,61 @@ def generate_schedule(
 
     assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
-    put_matchups_in_search_order()
 
-    success = select_gameslots_for_matchups(0, window_constraints)
-
-    print(f"Search completed after {search_dead_ends} dead ends.")
+    success = select_gameslots_for_matchups(window_constraints)
 
     if not success:
-        print("There is no schedule that satisfies the constraints.")
+        print("Failed to find a schedule. Try relaxing your window constraints.")
         return
 
-    PostProcessor(matchups, gameslots, window_constraints).post_process()
-
-    print("Success! A valid schedule was found.")
+    print("A valid schedule was found!")
     print()
-    print_schedule_metrics()
-    print_master_schedule()
-    print_breakout_schedules()
+
+    print_non_preferred_gameslot_metrics()
+    print_block_size_metrics()
+    # print_master_schedule()
+    # print_breakout_schedules()
 
 
-def put_matchups_in_search_order():
+def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
+    print("Ordering matchups for preferred selection phase.")
+
+    put_matchups_in_preferred_selection_order()
+
+    print("Ordering matchups complete.")
+    print("Preferred selection phase started.")
+
+    for matchup in matchups:
+        select_preferred_gameslot_for_matchup(matchup, window_constraints)
+
+    print("Preferred selection phase complete.")
+
+    matchups_using_backup_slots = list(
+        filter(lambda m: m.selected_gameslot is None, matchups)
+    )
+
+    print(
+        f"Number of matchups that did not get preferred selection: {len(matchups_using_backup_slots)}"
+    )
+    print("Block sizes after preferred selection phase:")
+    print()
+    print_block_size_metrics()
+    print("Backup selection phase started.")
+
+    matchups_using_backup_slots.sort(key=lambda m: len(m.backup_gameslots))
+    success = select_backup_gameslots(
+        matchups_using_backup_slots, 0, window_constraints
+    )
+
+    print(f"Backup selection completed with {backup_selection_dead_ends} dead ends.")
+
+    return success
+
+
+def put_matchups_in_preferred_selection_order():
     # Randomize before sorting so that matchups which are otherwise equal end up in
     # random order. If we don't do this, teams near the end of teams.csv get processed
-    # last, meaning their preferences are less likely to be satisified.
+    # later, meaning their preferences are less likely to be satisified.
     random.shuffle(matchups)
 
     # Process most constrained first, per https://www.youtube.com/watch?v=dARl_gGrS4o.
@@ -82,65 +114,115 @@ def put_matchups_in_search_order():
     )
 
 
-def select_gameslots_for_matchups(
+# If the given matchup has at least one preferred gameslot that can be selected,
+# selects the best preferred gameslot. Returns True if a gameslot was selected, False if
+# not.
+#
+# TODO: Consider favoring gameslots that avoid consecutive game days. You could do this
+# with a "soft" WindowConstraint(2, 1)
+def select_preferred_gameslot_for_matchup(
+    matchup: Matchup, window_constraints: List[WindowConstraint]
+) -> bool:
+    for reuse_location in True, False:
+        for gameslot in matchup.preferred_gameslots:
+            if gameslot.selected_matchup is not None:
+                continue
+            if (
+                reuse_location
+                and gameslot.location.num_games_by_date[gameslot.date] == 0
+            ):
+                continue
+            if (
+                not reuse_location
+                and gameslot.location.num_games_by_date[gameslot.date] != 0
+            ):
+                continue
+            if not all(
+                w.is_satisfied_by_selection(matchup, gameslot)
+                for w in window_constraints
+            ):
+                continue
+
+            matchup.select_gameslot(gameslot)
+            return True
+
+    return False
+
+
+def select_backup_gameslots(
+    matchups_using_backup_slots: List[Matchup],
     start: int,
     window_constraints: List[WindowConstraint],
 ):
-    global search_dead_ends
-    global greatest_depth_reached
+    global backup_selection_dead_ends
+    global backup_selection_depth
     if start == 0:
-        search_dead_ends = 0
-        greatest_depth_reached = 0
+        backup_selection_dead_ends = 0
+        backup_selection_depth = 0
 
-    if start > greatest_depth_reached:
-        greatest_depth_reached = start
-        print(f"New depth reached: {greatest_depth_reached} / {len(matchups)}")
+    if start > backup_selection_depth:
+        backup_selection_depth = start
+        print(
+            f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}"
+        )
 
-    if start == len(matchups):
+    if start == len(matchups_using_backup_slots):
         return True
 
-    matchup = matchups[start]
+    matchup = matchups_using_backup_slots[start]
 
-    for candidate_gameslots in (matchup.preferred_gameslots, matchup.backup_gameslots):
-        matchup.selected_gameslot_is_preferred = (
-            candidate_gameslots is matchup.preferred_gameslots
-        )
-        for reuse_single_use_location in True, False:
-            for gameslot in candidate_gameslots:
-                if gameslot.selected_matchup is not None:
-                    continue
-                if (
-                    reuse_single_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] != 1
-                ):
-                    continue
-                if (
-                    not reuse_single_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] == 1
-                ):
-                    continue
-                if not all(
-                    w.is_satisfied_by_selection(matchup, gameslot)
-                    for w in window_constraints
-                ):
-                    continue
+    for reuse_single_use_location, reuse_multi_use_location in (
+        (True, False),
+        (False, True),
+        (False, False),
+    ):
+        for gameslot in matchup.backup_gameslots:
+            if gameslot.selected_matchup is not None:
+                continue
+            if (
+                reuse_single_use_location
+                and gameslot.location.num_games_by_date[gameslot.date] != 1
+            ):
+                continue
+            if (
+                not reuse_single_use_location
+                and gameslot.location.num_games_by_date[gameslot.date] == 1
+            ):
+                continue
+            if (
+                reuse_multi_use_location
+                and gameslot.location.num_games_by_date[gameslot.date] <= 1
+            ):
+                continue
+            if (
+                not reuse_multi_use_location
+                and gameslot.location.num_games_by_date[gameslot.date] > 1
+            ):
+                continue
+            if not all(
+                w.is_satisfied_by_selection(matchup, gameslot)
+                for w in window_constraints
+            ):
+                continue
 
-                matchup.select_gameslot(gameslot)
+            matchup.select_gameslot(gameslot)
 
-                if select_gameslots_for_matchups(start + 1, window_constraints):
-                    return True
+            if select_backup_gameslots(
+                matchups_using_backup_slots, start + 1, window_constraints
+            ):
+                return True
 
-                matchup.deselect_gameslot(gameslot)
+            matchup.deselect_gameslot(gameslot)
 
-    search_dead_ends += 1
-    if search_dead_ends % 10000 == 0:
-        print(f"Search has hit {search_dead_ends} dead ends")
+    backup_selection_dead_ends += 1
+    if backup_selection_dead_ends % 10000 == 0:
+        print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
     return False
 
 
 def assign_candidate_gameslots_to_matchups():
     for g in gameslots:
-        g.matchups_that_prefer_this_slot = []
+        g.matchups_that_prefer_this_slot = set()
 
     for m in matchups:
         m.preferred_gameslots = []
@@ -151,7 +233,7 @@ def assign_candidate_gameslots_to_matchups():
 
             if g.location in m.preferred_locations:
                 m.preferred_gameslots.append(g)
-                g.matchups_that_prefer_this_slot.append(m)
+                g.matchups_that_prefer_this_slot.add(m)
             else:
                 m.backup_gameslots.append(g)
 
@@ -501,11 +583,6 @@ def print_breakout_schedules():
         print()
 
 
-def print_schedule_metrics():
-    print_non_preferred_gameslot_metrics()
-    print_location_reuse_metrics()
-
-
 def print_non_preferred_gameslot_metrics():
     non_preferred_matchups = list(
         filter(lambda m: not m.selected_gameslot_is_preferred, matchups)
@@ -538,8 +615,7 @@ def print_non_preferred_gameslot_metrics():
         print()
 
 
-def print_location_reuse_metrics():
-
+def print_block_size_metrics():
     table = [
         ["# of Games in Block", "# of Occurrences"],
         ["-------------------", "----------------"],
@@ -555,12 +631,8 @@ def print_location_reuse_metrics():
         table.append([block_size, count])
 
     total_blocks = sum(block_sizes_to_counts.values())
-
-    print(
-        f"Total number of single-location blocks: {total_blocks}. Fewer is better. "
-        + "Detailed breakdown below."
-    )
-    print()
+    table.append(["", ""])
+    table.append(["TOTAL BLOCKS", total_blocks])
 
     utils.pretty_print_table(table)
     print()

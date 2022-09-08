@@ -28,8 +28,15 @@ class Matchup:
     def select_gameslot(self, gameslot: gameslot.Gameslot):
         if self.selected_gameslot is not None:
             raise Exception("Must deselect gameslot before selecting a new one")
+        if gameslot.selected_matchup is not None:
+            raise Exception(
+                "Tried to select gameslot that is selected by another matchup"
+            )
 
         self.selected_gameslot = gameslot
+        self.selected_gameslot_is_preferred = (
+            self in gameslot.matchups_that_prefer_this_slot
+        )
         self.team_a.num_games_by_date[gameslot.date] += 1
         self.team_b.num_games_by_date[gameslot.date] += 1
         gameslot.selected_matchup = self
@@ -42,6 +49,7 @@ class Matchup:
         prev_gameslot = self.selected_gameslot
 
         self.selected_gameslot = None
+        self.selected_gameslot_is_preferred = False
         self.team_a.num_games_by_date[prev_gameslot.date] -= 1
         self.team_b.num_games_by_date[prev_gameslot.date] -= 1
         prev_gameslot.selected_matchup = None
@@ -67,5 +75,10 @@ class Matchup:
     def __str__(self):
         return f"< {self.division} - {self.team_a.name} vs {self.team_b.name} >"
 
+    def __hash__(self):
+        return hash((self.division, self.team_a.name, self.team_b.name))
+
     def __eq__(self, other):
-        return self.team_a == other.team_a and self.team_b == other.team_b
+        # It would not be sufficient to check that team_a and team_b match, since there
+        # may be multiple distinct matchups which have the same team_a and team_b.
+        return self is other
