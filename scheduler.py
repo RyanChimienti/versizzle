@@ -30,7 +30,7 @@ backup_selection_depth: int
 def generate_schedule(
     input_dir_path: str, random_seed: int, window_constraints: List[WindowConstraint]
 ):
-    random.seed(random_seed)
+    random.seed(random_seed + 6)
 
     ingest_files(input_dir_path)
 
@@ -44,11 +44,12 @@ def generate_schedule(
         return
 
     print("A valid schedule was found!")
-    print()
+
+    PostProcessor(matchups, gameslots, window_constraints).post_process()
 
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
-    # print_master_schedule()
+    print_master_schedule()
     # print_breakout_schedules()
 
 
