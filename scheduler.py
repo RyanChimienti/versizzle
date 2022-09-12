@@ -50,7 +50,7 @@ def generate_schedule(
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
     print_consecutive_game_day_metrics()
-    # print_master_schedule()
+    print_master_schedule()
     # print_breakout_schedules()
 
 
@@ -126,27 +126,40 @@ def select_preferred_gameslot_for_matchup(
     matchup: Matchup, window_constraints: List[WindowConstraint]
 ) -> bool:
     for reuse_location in True, False:
-        for gameslot in matchup.preferred_gameslots:
-            if gameslot.selected_matchup is not None:
-                continue
-            if (
-                reuse_location
-                and gameslot.location.num_games_by_date[gameslot.date] == 0
-            ):
-                continue
-            if (
-                not reuse_location
-                and gameslot.location.num_games_by_date[gameslot.date] != 0
-            ):
-                continue
-            if not all(
-                w.is_satisfied_by_selection(matchup, gameslot)
-                for w in window_constraints
-            ):
-                continue
+        for avoid_consecutive_days in True, False:
+            for gameslot in matchup.preferred_gameslots:
+                if gameslot.selected_matchup is not None:
+                    continue
+                if (
+                    reuse_location
+                    and gameslot.location.num_games_by_date[gameslot.date] == 0
+                ):
+                    continue
+                if (
+                    not reuse_location
+                    and gameslot.location.num_games_by_date[gameslot.date] != 0
+                ):
+                    continue
+                if (
+                    avoid_consecutive_days
+                    and selection_will_create_consecutive_game_days(matchup, gameslot)
+                ):
+                    continue
+                if (
+                    not avoid_consecutive_days
+                    and not selection_will_create_consecutive_game_days(
+                        matchup, gameslot
+                    )
+                ):
+                    continue
+                if not all(
+                    w.is_satisfied_by_selection(matchup, gameslot)
+                    for w in window_constraints
+                ):
+                    continue
 
-            matchup.select_gameslot(gameslot)
-            return True
+                matchup.select_gameslot(gameslot)
+                return True
 
     return False
 
@@ -178,48 +191,75 @@ def select_backup_gameslots(
         (False, True),
         (False, False),
     ):
-        for gameslot in matchup.backup_gameslots:
-            if gameslot.selected_matchup is not None:
-                continue
-            if (
-                reuse_single_use_location
-                and gameslot.location.num_games_by_date[gameslot.date] != 1
-            ):
-                continue
-            if (
-                not reuse_single_use_location
-                and gameslot.location.num_games_by_date[gameslot.date] == 1
-            ):
-                continue
-            if (
-                reuse_multi_use_location
-                and gameslot.location.num_games_by_date[gameslot.date] <= 1
-            ):
-                continue
-            if (
-                not reuse_multi_use_location
-                and gameslot.location.num_games_by_date[gameslot.date] > 1
-            ):
-                continue
-            if not all(
-                w.is_satisfied_by_selection(matchup, gameslot)
-                for w in window_constraints
-            ):
-                continue
+        for avoid_consecutive_days in True, False:
+            for gameslot in matchup.backup_gameslots:
+                if gameslot.selected_matchup is not None:
+                    continue
+                if (
+                    reuse_single_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] != 1
+                ):
+                    continue
+                if (
+                    not reuse_single_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] == 1
+                ):
+                    continue
+                if (
+                    reuse_multi_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] <= 1
+                ):
+                    continue
+                if (
+                    not reuse_multi_use_location
+                    and gameslot.location.num_games_by_date[gameslot.date] > 1
+                ):
+                    continue
+                if (
+                    avoid_consecutive_days
+                    and selection_will_create_consecutive_game_days(matchup, gameslot)
+                ):
+                    continue
+                if (
+                    not avoid_consecutive_days
+                    and not selection_will_create_consecutive_game_days(
+                        matchup, gameslot
+                    )
+                ):
+                    continue
+                if not all(
+                    w.is_satisfied_by_selection(matchup, gameslot)
+                    for w in window_constraints
+                ):
+                    continue
 
-            matchup.select_gameslot(gameslot)
+                matchup.select_gameslot(gameslot)
 
-            if select_backup_gameslots(
-                matchups_using_backup_slots, start + 1, window_constraints
-            ):
-                return True
+                if select_backup_gameslots(
+                    matchups_using_backup_slots, start + 1, window_constraints
+                ):
+                    return True
 
-            matchup.deselect_gameslot(gameslot)
+                matchup.deselect_gameslot(gameslot)
 
     backup_selection_dead_ends += 1
     if backup_selection_dead_ends % 10000 == 0:
         print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
     return False
+
+
+def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Gameslot):
+    team_a, team_b = matchup.team_a, matchup.team_b
+
+    prev_day = gameslot.date - timedelta(days=1)
+    next_day = gameslot.date + timedelta(days=1)
+
+    return (
+        team_a.num_games_by_date[prev_day]
+        or team_a.num_games_by_date[next_day]
+        or team_b.num_games_by_date[prev_day]
+        or team_b.num_games_by_date[next_day]
+    )
 
 
 def assign_candidate_gameslots_to_matchups():
@@ -610,6 +650,7 @@ def print_consecutive_game_day_metrics():
     table.append(["TOTAL PAIRS", total_pairs])
 
     utils.pretty_print_table(table)
+    print()
 
 
 def print_non_preferred_gameslot_metrics():
@@ -669,6 +710,6 @@ def print_block_size_metrics():
 
 generate_schedule(
     input_dir_path="examples/volleyball_2022",
-    random_seed=14,
+    random_seed=0,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
 )
