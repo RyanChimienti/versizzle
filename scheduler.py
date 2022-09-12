@@ -1,7 +1,7 @@
 import calendar
 from collections import defaultdict
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
@@ -30,7 +30,7 @@ backup_selection_depth: int
 def generate_schedule(
     input_dir_path: str, random_seed: int, window_constraints: List[WindowConstraint]
 ):
-    random.seed(random_seed + 6)
+    random.seed(random_seed)
 
     ingest_files(input_dir_path)
 
@@ -49,7 +49,8 @@ def generate_schedule(
 
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
-    print_master_schedule()
+    print_consecutive_game_day_metrics()
+    # print_master_schedule()
     # print_breakout_schedules()
 
 
@@ -582,6 +583,33 @@ def print_breakout_schedules():
         print("-" * len(str(team)))
         utils.pretty_print_table(table)
         print()
+
+
+def print_consecutive_game_day_metrics():
+    num_pairs_to_num_teams = defaultdict(int)
+
+    for team in teams.values():
+        num_pairs_for_team = 0
+        for date in team.num_games_by_date:
+            next_day = date + timedelta(days=1)
+            if team.num_games_by_date[date] and team.num_games_by_date[next_day]:
+                num_pairs_for_team += 1
+
+        num_pairs_to_num_teams[num_pairs_for_team] += 1
+
+    table = [
+        ["# of Consecutive Game Day Pairs", "# of Teams With That Many Pairs"],
+        ["-------------------------------", "-------------------------------"],
+    ]
+    for num_pairs, num_teams in sorted(num_pairs_to_num_teams.items()):
+        table.append([num_pairs, num_teams])
+
+    table.append(["", ""])
+
+    total_pairs = sum(p * t for p, t in num_pairs_to_num_teams.items())
+    table.append(["TOTAL PAIRS", total_pairs])
+
+    utils.pretty_print_table(table)
 
 
 def print_non_preferred_gameslot_metrics():
