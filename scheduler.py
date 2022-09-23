@@ -50,7 +50,7 @@ def generate_schedule(
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
     print_consecutive_game_day_metrics()
-    print_master_schedule()
+    # print_master_schedule()
     # print_breakout_schedules()
 
 
@@ -114,6 +114,23 @@ def put_matchups_in_preferred_selection_order():
     matchups.sort(
         key=lambda m: 1 if m.team_a.home_location == m.team_b.home_location else 2
     )
+
+    print()
+    print("==================== selection order: ====================")
+    print()
+
+    table = [
+        ["", "Matchup", "Preferred home", "Slot availability score"],
+        ["", "-------", "--------------", "-----------------------"],
+    ]
+    for i, m in enumerate(matchups):
+        m_slot_availability_score = sum(
+            1 / float(len(p.matchups_that_prefer_this_slot))
+            for p in m.preferred_gameslots
+        )
+        table.append([i + 1, m, m.preferred_home_team, m_slot_availability_score])
+    utils.pretty_print_table(table)
+    print()
 
 
 # If the given matchup has at least one preferred gameslot that can be selected,
@@ -191,61 +208,81 @@ def select_backup_gameslots(
         (False, True),
         (False, False),
     ):
-        for avoid_consecutive_days in True, False:
-            for gameslot in matchup.backup_gameslots:
-                if gameslot.selected_matchup is not None:
-                    continue
-                if (
-                    reuse_single_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] != 1
-                ):
-                    continue
-                if (
-                    not reuse_single_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] == 1
-                ):
-                    continue
-                if (
-                    reuse_multi_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] <= 1
-                ):
-                    continue
-                if (
-                    not reuse_multi_use_location
-                    and gameslot.location.num_games_by_date[gameslot.date] > 1
-                ):
-                    continue
-                if (
-                    avoid_consecutive_days
-                    and selection_will_create_consecutive_game_days(matchup, gameslot)
-                ):
-                    continue
-                if (
-                    not avoid_consecutive_days
-                    and not selection_will_create_consecutive_game_days(
-                        matchup, gameslot
-                    )
-                ):
-                    continue
-                if not all(
-                    w.is_satisfied_by_selection(matchup, gameslot)
-                    for w in window_constraints
-                ):
-                    continue
+        for give_nonpreferred_team_home in True, False:
+            for avoid_consecutive_days in True, False:
+                for gameslot in matchup.backup_gameslots:
+                    if gameslot.selected_matchup is not None:
+                        continue
+                    if (
+                        reuse_single_use_location
+                        and gameslot.location.num_games_by_date[gameslot.date] != 1
+                    ):
+                        continue
+                    if (
+                        not reuse_single_use_location
+                        and gameslot.location.num_games_by_date[gameslot.date] == 1
+                    ):
+                        continue
+                    if (
+                        reuse_multi_use_location
+                        and gameslot.location.num_games_by_date[gameslot.date] <= 1
+                    ):
+                        continue
+                    if (
+                        not reuse_multi_use_location
+                        and gameslot.location.num_games_by_date[gameslot.date] > 1
+                    ):
+                        continue
+                    if (
+                        give_nonpreferred_team_home
+                        and not selection_gives_either_team_home(matchup, gameslot)
+                    ):
+                        continue
+                    if (
+                        not give_nonpreferred_team_home
+                        and selection_gives_either_team_home(matchup, gameslot)
+                    ):
+                        continue
+                    if (
+                        avoid_consecutive_days
+                        and selection_will_create_consecutive_game_days(
+                            matchup, gameslot
+                        )
+                    ):
+                        continue
+                    if (
+                        not avoid_consecutive_days
+                        and not selection_will_create_consecutive_game_days(
+                            matchup, gameslot
+                        )
+                    ):
+                        continue
+                    if not all(
+                        w.is_satisfied_by_selection(matchup, gameslot)
+                        for w in window_constraints
+                    ):
+                        continue
 
-                matchup.select_gameslot(gameslot)
+                    matchup.select_gameslot(gameslot)
 
-                if select_backup_gameslots(
-                    matchups_using_backup_slots, start + 1, window_constraints
-                ):
-                    return True
+                    if select_backup_gameslots(
+                        matchups_using_backup_slots, start + 1, window_constraints
+                    ):
+                        return True
 
-                matchup.deselect_gameslot(gameslot)
+                    matchup.deselect_gameslot(gameslot)
 
     backup_selection_dead_ends += 1
     if backup_selection_dead_ends % 10000 == 0:
         print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
     return False
+
+
+def selection_gives_either_team_home(matchup: Matchup, gameslot: Gameslot):
+    return (
+        gameslot.location == matchup.team_a.home_location
+        or gameslot.location == matchup.team_b.home_location
+    )
 
 
 def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Gameslot):
@@ -683,6 +720,19 @@ def print_non_preferred_gameslot_metrics():
             )
         utils.pretty_print_table(table)
         print()
+
+    num_games_at_neither_home = 0
+    for m in matchups:
+        if (
+            m.selected_gameslot.location != m.team_a.home_location
+            and m.selected_gameslot.location != m.team_b.home_location
+        ):
+            num_games_at_neither_home += 1
+    print(
+        f"{num_games_at_neither_home} games were at *neither* team's home location "
+        + "(you can find them in the table above)."
+    )
+    print()
 
 
 def print_block_size_metrics():
