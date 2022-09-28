@@ -2,6 +2,7 @@ import calendar
 from collections import defaultdict
 import csv
 from datetime import datetime, timedelta
+import os
 from typing import Dict, List, Set, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
@@ -29,10 +30,14 @@ backup_selection_depth: int
 
 def generate_schedule(
     input_dir_path: str,
+    output_dir_path: str,
     random_seed: int,
     window_constraints: List[WindowConstraint],
     scarce_location_names: List[str],
+    is_test_run_for_seed: bool = False,
 ):
+    clear_globals()
+
     random.seed(random_seed)
 
     ingest_files(input_dir_path, scarce_location_names)
@@ -50,12 +55,37 @@ def generate_schedule(
 
     PostProcessor(matchups, gameslots, window_constraints).post_process()
 
+    if is_test_run_for_seed:
+        log_seed_info_from_test_run(output_dir_path, random_seed)
+        return
+
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
     print_weekday_metrics()
     print_consecutive_game_day_metrics()
     # print_master_schedule()
     # print_breakout_schedules()
+
+
+def clear_globals():
+    global divisions_to_counts
+    global teams
+    global matchups
+    global gameslots
+    global locations
+    global blackouts
+    global backup_selection_dead_ends
+    global backup_selection_depth
+
+    divisions_to_counts = defaultdict(int)
+    teams = dict()
+    matchups = []
+    gameslots = []
+    locations = dict()  # maps location name -> location object
+    blackouts = []
+
+    backup_selection_dead_ends = 0
+    backup_selection_depth = 0
 
 
 def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
@@ -757,6 +787,26 @@ def print_breakout_schedules():
 
 
 def print_consecutive_game_day_metrics():
+    table = [
+        ["# of Consecutive Game Day Pairs", "# of Teams With That Many Pairs"],
+        ["-------------------------------", "-------------------------------"],
+    ]
+
+    num_pairs_to_num_teams = get_num_consecutive_pairs_to_num_teams()
+
+    for num_pairs, num_teams in sorted(num_pairs_to_num_teams.items()):
+        table.append([num_pairs, num_teams])
+
+    table.append(["", ""])
+
+    total_pairs = sum(p * t for p, t in num_pairs_to_num_teams.items())
+    table.append(["TOTAL PAIRS", total_pairs])
+
+    utils.pretty_print_table(table)
+    print()
+
+
+def get_num_consecutive_pairs_to_num_teams():
     num_pairs_to_num_teams = defaultdict(int)
 
     for team in teams.values():
@@ -768,20 +818,7 @@ def print_consecutive_game_day_metrics():
 
         num_pairs_to_num_teams[num_pairs_for_team] += 1
 
-    table = [
-        ["# of Consecutive Game Day Pairs", "# of Teams With That Many Pairs"],
-        ["-------------------------------", "-------------------------------"],
-    ]
-    for num_pairs, num_teams in sorted(num_pairs_to_num_teams.items()):
-        table.append([num_pairs, num_teams])
-
-    table.append(["", ""])
-
-    total_pairs = sum(p * t for p, t in num_pairs_to_num_teams.items())
-    table.append(["TOTAL PAIRS", total_pairs])
-
-    utils.pretty_print_table(table)
-    print()
+    return num_pairs_to_num_teams
 
 
 def print_non_preferred_gameslot_metrics():
@@ -835,11 +872,7 @@ def print_block_size_metrics():
         ["-------------------", "----------------"],
     ]
 
-    block_sizes_to_counts = defaultdict(int)
-    for location in locations.values():
-        for num_games in location.num_games_by_date.values():
-            if num_games != 0:
-                block_sizes_to_counts[num_games] += 1
+    block_sizes_to_counts = get_block_sizes_to_counts()
 
     for block_size, count in sorted(block_sizes_to_counts.items()):
         table.append([block_size, count])
@@ -850,6 +883,16 @@ def print_block_size_metrics():
 
     utils.pretty_print_table(table)
     print()
+
+
+def get_block_sizes_to_counts() -> Dict[int, int]:
+    block_sizes_to_counts = defaultdict(int)
+    for location in locations.values():
+        for num_games in location.num_games_by_date.values():
+            if num_games != 0:
+                block_sizes_to_counts[num_games] += 1
+
+    return block_sizes_to_counts
 
 
 def print_weekday_metrics():
@@ -887,9 +930,82 @@ def print_weekday_metrics():
     print()
 
 
+def do_test_run_for_seeds(
+    start_seed,
+    end_seed,
+    input_dir_path,
+    output_dir_path,
+    window_constraints,
+    scarce_location_names,
+):
+    seed_file_path = output_dir_path + "/seeds.csv"
+
+    cols = [
+        "seed",
+        "non preferred locs",
+        "smallest block size",
+        "num smallest blocks",
+        "most consec pairs",
+        "teams with most consec",
+    ]
+    with open(seed_file_path, "w") as f:
+        f.write(",".join(cols) + "\n")
+
+    for i in range(start_seed, end_seed + 1):
+        generate_schedule(
+            input_dir_path=input_dir_path,
+            output_dir_path=output_dir_path,
+            random_seed=i,
+            window_constraints=window_constraints,
+            scarce_location_names=scarce_location_names,
+            is_test_run_for_seed=True,
+        )
+
+
+def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
+    seed_file_path = output_dir_path + "/seeds.csv"
+
+    with open(seed_file_path, "a") as f:
+        num_non_preferred_locs = len(
+            list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
+        )
+
+        block_sizes_to_counts = get_block_sizes_to_counts()
+        smallest_block_size_to_count = sorted(block_sizes_to_counts.items())[0]
+        smallest_block_size, num_smallest_blocks = smallest_block_size_to_count
+
+        num_consec_pairs_to_num_teams = get_num_consecutive_pairs_to_num_teams()
+        largest_consec_pairs_to_num_teams = sorted(
+            num_consec_pairs_to_num_teams.items()
+        )[-1]
+        most_consec_pairs, teams_with_most_consec = largest_consec_pairs_to_num_teams
+
+        csv_line = ",".join(
+            [
+                str(random_seed),
+                str(num_non_preferred_locs),
+                str(smallest_block_size),
+                str(num_smallest_blocks),
+                str(most_consec_pairs),
+                str(teams_with_most_consec),
+            ]
+        )
+        f.write(csv_line + "\n")
+
+
 generate_schedule(
     input_dir_path="examples/volleyball_2022",
-    random_seed=0,
+    output_dir_path="out",
+    random_seed=100,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
     scarce_location_names=["Park Place", "Christ the King"],
 )
+
+# do_test_run_for_seeds(
+#     0,
+#     100,
+#     input_dir_path="examples/volleyball_2022",
+#     output_dir_path="out",
+#     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
+#     scarce_location_names=["Park Place", "Christ the King"],
+# )
