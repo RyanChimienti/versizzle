@@ -28,11 +28,14 @@ backup_selection_depth: int
 
 
 def generate_schedule(
-    input_dir_path: str, random_seed: int, window_constraints: List[WindowConstraint]
+    input_dir_path: str,
+    random_seed: int,
+    window_constraints: List[WindowConstraint],
+    scarce_location_names: List[str],
 ):
     random.seed(random_seed)
 
-    ingest_files(input_dir_path)
+    ingest_files(input_dir_path, scarce_location_names)
 
     assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
@@ -55,15 +58,9 @@ def generate_schedule(
 
 
 def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
-    print("Ordering matchups for preferred selection phase.")
-
-    put_matchups_in_preferred_selection_order()
-
-    print("Ordering matchups complete.")
     print("Preferred selection phase started.")
 
-    for matchup in matchups:
-        select_preferred_gameslot_for_matchup(matchup, window_constraints)
+    select_preferred_gameslots(window_constraints)
 
     print("Preferred selection phase complete.")
 
@@ -77,6 +74,7 @@ def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
     print("Block sizes after preferred selection phase:")
     print()
     print_block_size_metrics()
+
     print("Backup selection phase started.")
 
     matchups_using_backup_slots.sort(key=lambda m: len(m.backup_gameslots))
@@ -89,48 +87,130 @@ def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
     return success
 
 
-def put_matchups_in_preferred_selection_order():
+def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
     # Randomize before sorting so that matchups which are otherwise equal end up in
     # random order. If we don't do this, teams near the end of teams.csv get processed
     # later, meaning their preferences are less likely to be satisified.
     random.shuffle(matchups)
 
-    # Process most constrained first, per https://www.youtube.com/watch?v=dARl_gGrS4o.
-    # The idea is that if a matchup has many preferred slots, it's unlikely that an
-    # earlier matchup would have taken all of them. Therefore it's safe to consider
-    # it at the end. On the other hand, if a matchup has few preferred slots, or if its
-    # preferred slots are also preferred by a lot of other matchups, then it's in danger
-    # of losing its preferred slots, so it should be considered early.
-    matchups.sort(
-        key=lambda m: sum(
-            1 / float(len(p.matchups_that_prefer_this_slot))
-            for p in m.preferred_gameslots
-        )
-    )
+    print("Starting step 1 of preferred selection phase (same home matchups)")
 
-    # If both teams in the matchup have the same home location, it would be egregious
-    # for them to have to travel elsewhere. So move those matchups to the start to make
-    # sure they get their preferred location.
-    matchups.sort(
-        key=lambda m: 1 if m.team_a.home_location == m.team_b.home_location else 2
-    )
-
-    print()
-    print("==================== selection order: ====================")
-    print()
-
-    table = [
-        ["", "Matchup", "Preferred home", "Slot availability score"],
-        ["", "-------", "--------------", "-----------------------"],
+    # If both teams in a matchup have the same home location, it would be egregious
+    # for them to have to travel elsewhere. So those matchups are processed first to
+    # make sure they get their preferred location.
+    same_home_matchups = [
+        m for m in matchups if m.team_a.home_location == m.team_b.home_location
     ]
-    for i, m in enumerate(matchups):
-        m_slot_availability_score = sum(
-            1 / float(len(p.matchups_that_prefer_this_slot))
-            for p in m.preferred_gameslots
+    print(f"{len(same_home_matchups)} same home matchups to process")
+    for matchup in same_home_matchups:
+        select_preferred_gameslot_for_matchup(matchup, window_constraints)
+
+    print("Starting step 2 of preferred selection phase (scarce home matchups)")
+
+    # Next we process the matchups with scarce home locations. A location is scarce if it
+    # does not have enough gameslots to comfortably give all the teams with that home
+    # location the desired number of home games. When a location is scarce, there is a
+    # risk that one team with that home location gets many more home games than another.
+    # We avoid this by always processing the matchup where the preferred home team has
+    # the smallest fraction of home games.
+    scarce_home_matchups = [
+        m
+        for m in matchups
+        if m not in same_home_matchups
+        and m.preferred_home_team is not None
+        and m.preferred_home_team.home_location is not None
+        and m.preferred_home_team.home_location.is_scarce
+    ]
+    print(
+        f"Scarce location(s): {', '.join([str(l) for l in locations.values() if l.is_scarce])}"
+    )
+    print(f"{len(scarce_home_matchups)} scarce home matchups to process")
+    unprocessed_scarce_home_matchups = scarce_home_matchups.copy()
+    while unprocessed_scarce_home_matchups:
+        if len(unprocessed_scarce_home_matchups) % 10 == 0:
+            print(f"{len(unprocessed_scarce_home_matchups)} remaining")
+
+        smallest_home_percentage = min(
+            m.preferred_home_team.get_home_percentage()
+            for m in unprocessed_scarce_home_matchups
         )
-        table.append([i + 1, m, m.preferred_home_team, m_slot_availability_score])
-    utils.pretty_print_table(table)
-    print()
+        matchups_with_smallest_home_percentage = [
+            m
+            for m in unprocessed_scarce_home_matchups
+            if abs(
+                m.preferred_home_team.get_home_percentage() - smallest_home_percentage
+            )
+            < 0.0001
+        ]
+        matchup_to_process = get_most_constrained_matchup_in_list(
+            matchups_with_smallest_home_percentage, window_constraints
+        )
+        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
+        unprocessed_scarce_home_matchups.remove(matchup_to_process)
+
+    print("Starting step 3 of preferred selection phase (ordinary matchups)")
+
+    # Finally we process the matchups with no special properties.
+    unprocessed_matchups = [
+        m
+        for m in matchups
+        if m not in same_home_matchups and m not in scarce_home_matchups
+    ]
+    print(f"{len(unprocessed_matchups)} ordinary matchups to process")
+    while unprocessed_matchups:
+        if len(unprocessed_matchups) % 10 == 0:
+            print(f"{len(unprocessed_matchups)} remaining")
+
+        matchup_to_process = get_most_constrained_matchup_in_list(
+            unprocessed_matchups, window_constraints
+        )
+        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
+        unprocessed_matchups.remove(matchup_to_process)
+
+
+def get_most_constrained_matchup_in_list(
+    matchup_list: List[Matchup], window_constraints: List[WindowConstraint]
+) -> Matchup:
+    if not matchup_list:
+        raise Exception("Called get_most_constrained_matchup_in_list on empty list")
+
+    most_constrained_matchup = None
+    min_slot_availability_score = float("inf")
+
+    for matchup in matchup_list:
+        score = get_slot_availability_score(matchup, window_constraints)
+        if score < min_slot_availability_score:
+            most_constrained_matchup = matchup
+            min_slot_availability_score = score
+
+    return most_constrained_matchup
+
+
+# Returns a score indicating how many preferred gameslots are still available for the given
+# matchup.
+#
+# This score helps us to decide the order in which to process matchups. The idea is that
+# if a matchup has many preferred slots, it's unlikely that an earlier matchup will take
+# all of them. Therefore it's safe to consider it at the end. On the other hand, if a
+# matchup has few preferred slots, then it's in danger of losing its preferred slots, so
+# it should be considered early.
+def get_slot_availability_score(
+    matchup: Matchup, window_constraints: List[WindowConstraint]
+) -> float:
+    if matchup.selected_gameslot is not None:
+        raise Exception(
+            "Tried to calculate slot availability score for matchup "
+            + "that has already selected a gameslot."
+        )
+
+    return len(
+        [
+            g
+            for g in matchup.preferred_gameslots
+            if g.selected_matchup is None
+            and all(w.is_satisfied_by_selection(matchup, g) for w in window_constraints)
+        ]
+    )
 
 
 # If the given matchup has at least one preferred gameslot that can be selected,
@@ -391,14 +471,14 @@ def get_locations_for_home_game(team: Team) -> Set[Location]:
     return {team.home_location}
 
 
-def ingest_files(directory_path):
-    ingest_teams_file(directory_path)
+def ingest_files(directory_path: str, scarce_location_names: List[str]):
+    ingest_teams_file(directory_path, scarce_location_names)
     ingest_matchups_file(directory_path)
-    ingest_gameslots_file(directory_path)
+    ingest_gameslots_file(directory_path, scarce_location_names)
     ingest_blackouts_file(directory_path)
 
 
-def ingest_teams_file(directory_path):
+def ingest_teams_file(directory_path: str, scarce_location_names: List[str]):
     file_path = "{}/teams.csv".format(directory_path)
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
@@ -422,7 +502,10 @@ def ingest_teams_file(directory_path):
             elif home_location_name in locations:
                 home_location_obj = locations[home_location_name]
             else:
-                home_location_obj = Location(home_location_name)
+                home_location_is_scarce = home_location_name in scarce_location_names
+                home_location_obj = Location(
+                    home_location_name, home_location_is_scarce
+                )
                 locations[home_location_name] = home_location_obj
 
             teams[(division, name)] = Team(division, name, home_location_obj)
@@ -480,7 +563,7 @@ def ingest_matchups_file(directory_path):
     print()
 
 
-def ingest_gameslots_file(directory_path):
+def ingest_gameslots_file(directory_path: str, scarce_location_names: List[str]):
     file_path = "{}/gameslots.csv".format(directory_path)
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
@@ -503,7 +586,8 @@ def ingest_gameslots_file(directory_path):
             if location_name in locations:
                 location_obj = locations[location_name]
             else:
-                location_obj = Location(location_name)
+                location_is_scarce = location_name in scarce_location_names
+                location_obj = Location(location_name, location_is_scarce)
                 locations[location_name] = location_obj
 
             datetime_string = date_string + " " + time_string
@@ -759,4 +843,5 @@ generate_schedule(
     input_dir_path="examples/volleyball_2022",
     random_seed=0,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
+    scarce_location_names=["Park Place", "Christ the King"],
 )

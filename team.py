@@ -16,6 +16,20 @@ class Team:
         self.num_preferred_home_games: int = 0
         self.num_games_by_date: Dict[date, int] = defaultdict(int)
 
+    # Returns the ratio of currently scheduled home games to total games in season
+    def get_home_percentage(self) -> float:
+        num_scheduled_home_games = len(
+            list(
+                filter(
+                    lambda m: m.selected_gameslot is not None
+                    and m.selected_gameslot.location == self.home_location,
+                    self.matchups,
+                )
+            )
+        )
+
+        return num_scheduled_home_games / len(self.matchups)
+
     def __str__(self):
         return f"< {self.division} {self.name} >"
 
