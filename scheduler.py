@@ -52,6 +52,7 @@ def generate_schedule(
 
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
+    print_weekday_metrics()
     print_consecutive_game_day_metrics()
     # print_master_schedule()
     # print_breakout_schedules()
@@ -835,6 +836,41 @@ def print_block_size_metrics():
     table.append(["", ""])
     table.append(["TOTAL BLOCKS", total_blocks])
 
+    utils.pretty_print_table(table)
+    print()
+
+
+def print_weekday_metrics():
+    table = [
+        ["# of Weekday Games", "# of Teams With That Many Weekday Games"],
+        ["------------------", "---------------------------------------"],
+    ]
+
+    num_weekday_games_to_num_teams = defaultdict(int)
+
+    for team in teams.values():
+        num_weekday_games = 0
+
+        for matchup in team.matchups:
+            game_is_weekend = matchup.selected_gameslot.date.weekday() in [4, 5]
+            if not game_is_weekend:
+                num_weekday_games += 1
+
+        num_weekday_games_to_num_teams[num_weekday_games] += 1
+
+    for num_games, num_teams in sorted(num_weekday_games_to_num_teams.items()):
+        table.append([num_games, num_teams])
+    table.append(["", ""])
+    table.append(
+        [
+            "TOTAL WEEKDAY GAMES",
+            sum(g * t for g, t in num_weekday_games_to_num_teams.items()),
+        ]
+    )
+
+    print("In the next table, weekdays are any day other than Friday or Saturday.")
+    print("(We try to avoid weekday games.)")
+    print()
     utils.pretty_print_table(table)
     print()
 
