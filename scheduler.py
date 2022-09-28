@@ -136,9 +136,6 @@ def put_matchups_in_preferred_selection_order():
 # If the given matchup has at least one preferred gameslot that can be selected,
 # selects the best preferred gameslot. Returns True if a gameslot was selected, False if
 # not.
-#
-# TODO: Consider favoring gameslots that avoid consecutive game days. You could do this
-# with a "soft" WindowConstraint(2, 1)
 def select_preferred_gameslot_for_matchup(
     matchup: Matchup, window_constraints: List[WindowConstraint]
 ) -> bool:
