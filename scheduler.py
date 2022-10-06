@@ -60,13 +60,13 @@ def generate_schedule(
         log_seed_info_from_test_run(output_dir_path, random_seed)
         return
 
+    print_master_schedule()
+    # print_breakout_schedules()
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
     print_weekday_metrics()
     print_consecutive_game_day_metrics()
     print_sticky_matchup_metrics()
-    # print_master_schedule()
-    print_breakout_schedules()
 
 
 def clear_globals():
@@ -762,7 +762,7 @@ def ingest_blackouts_file(directory_path):
 
             division_obj = None if division == "ALL" else division
 
-            team_name_obj = None if team_name == "ALL" else team_name 
+            team_name_obj = None if team_name == "ALL" else team_name
 
             blackouts.append(
                 Blackout(
@@ -802,14 +802,16 @@ def print_master_schedule():
         blackouts_on_day = blackouts_by_day[day]
 
         for i, gameslot in enumerate(gameslots_on_day):
-            blackout = "" if i >= len(blackouts_on_day) else blackouts_on_day[i]
-            matchup = (
+            blackout_str = (
+                "" if i >= len(blackouts_on_day) else str(blackouts_on_day[i])
+            )
+            matchup_str = (
                 "Open"
                 if gameslot.selected_matchup is None
-                else gameslot.selected_matchup
+                else str(gameslot.selected_matchup)
             )
 
-            row = [gameslot, matchup, blackout]
+            row = [str(gameslot), matchup_str, blackout_str]
 
             schedule_table.append(row)
 
@@ -1108,12 +1110,12 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 
 
 generate_schedule(
-    input_dir_path="examples/volleyball_2022",
+    input_dir_path="in",
     output_dir_path="out",
-    random_seed=100,
+    random_seed=1,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-    scarce_location_names=["Park Place", "Christ the King"],
-    sticky_team_groups=[[("5/6G", "St. Isidore"), ("7/8B", "St. Isidore")]],
+    scarce_location_names=[],
+    sticky_team_groups=[],
 )
 
 # do_test_run_for_seeds(
