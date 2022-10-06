@@ -25,7 +25,7 @@ class Blackout:
 
     def prohibits_team_in_slot(self, team: Team, gameslot: Gameslot) -> bool:
         return (
-            team.name == self.team_name
+            (team.name == self.team_name or self.team_name is None)
             and (team.division == self.division or self.division is None)
             and gameslot.date == self.date
             and self._is_time_within_range(gameslot.time)
@@ -57,5 +57,6 @@ class Blackout:
             time_string = f"from {start_string} to {end_string}"
 
         division_string = "ALL DIVISIONS" if self.division is None else self.division
+        team_string = "ALL TEAMS" if self.team_name is None else self.team_name
 
-        return f"< {pretty_date} {time_string} for {division_string} {self.team_name} >"
+        return f"< {pretty_date} {time_string} for {division_string} {team_string} >"

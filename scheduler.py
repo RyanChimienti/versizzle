@@ -762,9 +762,11 @@ def ingest_blackouts_file(directory_path):
 
             division_obj = None if division == "ALL" else division
 
+            team_name_obj = None if team_name == "ALL" else team_name 
+
             blackouts.append(
                 Blackout(
-                    date_obj, start_time_obj, end_time_obj, division_obj, team_name
+                    date_obj, start_time_obj, end_time_obj, division_obj, team_name_obj
                 )
             )
 
