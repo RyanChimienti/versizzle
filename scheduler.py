@@ -8,6 +8,7 @@ from blackout import Blackout
 from gameslot import Gameslot
 from location import Location
 from matchup import Matchup
+from preassignment import Preassignment
 from postprocessor import PostProcessor
 from window_constraint import WindowConstraint
 from team import Team
@@ -23,6 +24,7 @@ matchups: List[Matchup] = []
 gameslots: List[Gameslot] = []
 locations: Dict[str, Location] = dict()  # maps location name -> location object
 blackouts: List[Blackout] = []
+preassignments: List[Preassignment] = []
 
 backup_selection_dead_ends: int
 backup_selection_depth: int
@@ -45,6 +47,7 @@ def generate_schedule(
 
     assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
+    do_preassignments()
 
     success = select_gameslots_for_matchups(window_constraints)
 
@@ -60,8 +63,8 @@ def generate_schedule(
         log_seed_info_from_test_run(output_dir_path, random_seed)
         return
 
-    print_master_schedule()
-    # print_breakout_schedules()
+    # print_master_schedule()
+    print_breakout_schedules()
     print_non_preferred_gameslot_metrics()
     print_block_size_metrics()
     print_weekday_metrics()
@@ -76,6 +79,7 @@ def clear_globals():
     global gameslots
     global locations
     global blackouts
+    global preassignments
     global backup_selection_dead_ends
     global backup_selection_depth
 
@@ -85,9 +89,18 @@ def clear_globals():
     gameslots = []
     locations = dict()  # maps location name -> location object
     blackouts = []
+    preassignments = []
 
     backup_selection_dead_ends = 0
     backup_selection_depth = 0
+
+
+def do_preassignments():
+    print(f"Performing {len(preassignments)} preassignments")
+    print("Preassignments complete.")
+
+    for preassignment in preassignments:
+        preassignment.assign(matchups)
 
 
 def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
@@ -124,7 +137,7 @@ def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
     # Randomize processing order for matchups. If we don't do this, matchups near the end
     # of matchups.csv get processed later, meaning their preferences are less likely to be
     # satisified.
-    unprocessed_matchups = matchups.copy()
+    unprocessed_matchups = [m for m in matchups if m.selected_gameslot is None]
     random.shuffle(unprocessed_matchups)
 
     print("Starting step 1 of preferred selection phase (sticky team matchups)")
@@ -423,7 +436,7 @@ def select_backup_gameslots(
                         ):
                             return True
 
-                        matchup.deselect_gameslot(gameslot)
+                        matchup.deselect_gameslot()
 
     backup_selection_dead_ends += 1
     if backup_selection_dead_ends % 10000 == 0:
@@ -578,6 +591,7 @@ def ingest_files(
     ingest_matchups_file(directory_path)
     ingest_gameslots_file(directory_path, scarce_location_names)
     ingest_blackouts_file(directory_path)
+    ingest_preassignments_file(directory_path)
 
 
 def ingest_teams_file(
@@ -783,6 +797,44 @@ def ingest_blackouts_file(directory_path):
     print()
 
 
+def ingest_preassignments_file(directory_path):
+    file_path = "{}/preassignments.csv".format(directory_path)
+    with open(file_path, "r") as file:
+        lines = list(csv.reader(file))
+        if len(lines) == 0:
+            raise Exception(
+                "preassignments.csv must contain at least 1 line (a header)"
+            )
+
+        first_row = lines[0]
+        if not (
+            len(first_row) == 6
+            and first_row[0] == "date"
+            and first_row[1] == "time"
+            and first_row[2] == "location"
+            and first_row[3] == "division"
+            and first_row[4] == "team a"
+            and first_row[5] == "team b"
+        ):
+            raise Exception(
+                "preassignments.csv should have 6 columns: 'date', 'time',"
+                + " 'location', 'division', 'team a', and 'team b'"
+            )
+
+        for row in lines[1:]:
+            date_str, time_str, location_str, division, team_a_name, team_b_name = row
+
+            date_obj = datetime.strptime(date_str, "%m/%d/%Y").date()
+            time_obj = datetime.strptime(time_str, "%I:%M%p").time()
+            location = locations[location_str]
+            team_a = teams[(division, team_a_name)]
+            team_b = teams[(division, team_b_name)]
+
+            preassignments.append(
+                Preassignment(date_obj, time_obj, location, team_a, team_b)
+            )
+
+
 def print_master_schedule():
     gameslots_by_day = defaultdict(list)
     blackouts_by_day = defaultdict(list)
@@ -883,7 +935,7 @@ def get_num_consecutive_pairs_to_num_teams():
 
     for team in teams.values():
         num_pairs_for_team = 0
-        for date in team.games_by_date:
+        for date in list(team.games_by_date.keys()):
             next_day = date + timedelta(days=1)
             if team.games_by_date[date] and team.games_by_date[next_day]:
                 num_pairs_for_team += 1
@@ -973,17 +1025,7 @@ def print_weekday_metrics():
         ["------------------", "---------------------------------------"],
     ]
 
-    num_weekday_games_to_num_teams = defaultdict(int)
-
-    for team in teams.values():
-        num_weekday_games = 0
-
-        for matchup in team.matchups:
-            game_is_weekend = matchup.selected_gameslot.date.weekday() in [4, 5]
-            if not game_is_weekend:
-                num_weekday_games += 1
-
-        num_weekday_games_to_num_teams[num_weekday_games] += 1
+    num_weekday_games_to_num_teams = get_num_weekday_games_to_num_teams()
 
     for num_games, num_teams in sorted(num_weekday_games_to_num_teams.items()):
         table.append([num_games, num_teams])
@@ -1000,6 +1042,22 @@ def print_weekday_metrics():
     print()
     utils.pretty_print_table(table)
     print()
+
+
+def get_num_weekday_games_to_num_teams():
+    num_weekday_games_to_num_teams = defaultdict(int)
+
+    for team in teams.values():
+        num_weekday_games = 0
+
+        for matchup in team.matchups:
+            game_is_weekend = matchup.selected_gameslot.date.weekday() in [4, 5]
+            if not game_is_weekend:
+                num_weekday_games += 1
+
+        num_weekday_games_to_num_teams[num_weekday_games] += 1
+
+    return num_weekday_games_to_num_teams
 
 
 def print_sticky_matchup_metrics():
@@ -1049,12 +1107,14 @@ def do_test_run_for_seeds(
     output_dir_path,
     window_constraints,
     scarce_location_names,
+    sticky_team_groups,
 ):
     seed_file_path = output_dir_path + "/seeds.csv"
 
     cols = [
         "seed",
         "num isolated sticky matchups",
+        "num weekday games",
         "non preferred locs",
         "smallest block size",
         "num smallest blocks",
@@ -1071,6 +1131,7 @@ def do_test_run_for_seeds(
             random_seed=i,
             window_constraints=window_constraints,
             scarce_location_names=scarce_location_names,
+            sticky_team_groups=sticky_team_groups,
             is_test_run_for_seed=True,
         )
 
@@ -1080,6 +1141,11 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 
     with open(seed_file_path, "a") as f:
         num_isolated_sticky_matchups = get_num_isolated_sticky_matchups()
+
+        num_weekday_games_to_num_teams = get_num_weekday_games_to_num_teams()
+        total_weekday_games = sum(
+            g * t for g, t in num_weekday_games_to_num_teams.items()
+        )
 
         num_non_preferred_locs = len(
             list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
@@ -1099,6 +1165,7 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
             [
                 str(random_seed),
                 str(num_isolated_sticky_matchups),
+                str(total_weekday_games),
                 str(num_non_preferred_locs),
                 str(smallest_block_size),
                 str(num_smallest_blocks),
@@ -1114,16 +1181,20 @@ generate_schedule(
     output_dir_path="out",
     random_seed=1,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-    scarce_location_names=[],
-    sticky_team_groups=[],
+    scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
+    sticky_team_groups=[
+        [("7/8B South", "St. John Vianney"), ("5/6G", "St. John Vianney")]
+    ],
 )
 
 # do_test_run_for_seeds(
-#     0,
-#     100,
-#     input_dir_path="examples/volleyball_2022",
+#     57,
+#     200,
+#     input_dir_path="in",
 #     output_dir_path="out",
 #     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-#     scarce_location_names=["Park Place", "Christ the King"],
-#     sticky_team_groups=[[("5/6G", "St. Isidore"), ("7/8B", "St. Isidore")]]
+#     scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
+#     sticky_team_groups=[
+#         [("7/8B South", "St. John Vianney"), ("5/6G", "St. John Vianney")]
+#     ],
 # )
