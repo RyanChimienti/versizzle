@@ -27,7 +27,7 @@ class WindowConstraint:
 
             for _ in range(self.window_size):
                 right += timedelta(days=1)
-                num_selected_dates_in_window += team.num_games_by_date[right]
+                num_selected_dates_in_window += len(team.games_by_date[right])
 
             if num_selected_dates_in_window >= self.max_games_in_window:
                 # Equality will lead to a violation because the candidate will push
@@ -35,10 +35,10 @@ class WindowConstraint:
                 return False
 
             for _ in range(self.window_size - 1):
-                num_selected_dates_in_window -= team.num_games_by_date[left]
+                num_selected_dates_in_window -= len(team.games_by_date[left])
                 left += timedelta(days=1)
                 right += timedelta(days=1)
-                num_selected_dates_in_window += team.num_games_by_date[right]
+                num_selected_dates_in_window += len(team.games_by_date[right])
 
                 if num_selected_dates_in_window >= self.max_games_in_window:
                     return False

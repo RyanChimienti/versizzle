@@ -11,10 +11,23 @@ class Team:
         self.name: str = name
         self.home_location: Location = home_location
 
+        # All of the matchups (scheduled or not) that include this team
         self.matchups: List[matchup.Matchup] = []
+
+        # The number of matchups which include this team and have chosen a preferred
+        # home team
         self.num_games: int = 0
+
+        # The number of matchups which include this team and have chosen this team as
+        # their preferred home team
         self.num_preferred_home_games: int = 0
-        self.num_games_by_date: Dict[date, int] = defaultdict(int)
+
+        # A map from dates to all of the games (AKA *scheduled* matchups) that this team
+        # is playing on that date
+        self.games_by_date: Dict[date, List[matchup.Matchup]] = defaultdict(list)
+
+        # Teams that this team would prefer to have its games back-to-back with.
+        self.sticky_group: List[Team] = None
 
     # Returns the ratio of currently scheduled home games to total games in season
     def get_home_percentage(self) -> float:

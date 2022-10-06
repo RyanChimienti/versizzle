@@ -34,13 +34,14 @@ def generate_schedule(
     random_seed: int,
     window_constraints: List[WindowConstraint],
     scarce_location_names: List[str],
+    sticky_team_groups: List[List[Tuple[str, str]]],
     is_test_run_for_seed: bool = False,
 ):
     clear_globals()
 
     random.seed(random_seed)
 
-    ingest_files(input_dir_path, scarce_location_names)
+    ingest_files(input_dir_path, scarce_location_names, sticky_team_groups)
 
     assign_preferred_locations_to_matchups()
     assign_candidate_gameslots_to_matchups()
@@ -63,8 +64,9 @@ def generate_schedule(
     print_block_size_metrics()
     print_weekday_metrics()
     print_consecutive_game_day_metrics()
+    print_sticky_matchup_metrics()
     # print_master_schedule()
-    # print_breakout_schedules()
+    print_breakout_schedules()
 
 
 def clear_globals():
@@ -119,24 +121,40 @@ def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
 
 
 def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
-    # Randomize before sorting so that matchups which are otherwise equal end up in
-    # random order. If we don't do this, teams near the end of teams.csv get processed
-    # later, meaning their preferences are less likely to be satisified.
-    random.shuffle(matchups)
+    # Randomize processing order for matchups. If we don't do this, matchups near the end
+    # of matchups.csv get processed later, meaning their preferences are less likely to be
+    # satisified.
+    unprocessed_matchups = matchups.copy()
+    random.shuffle(unprocessed_matchups)
 
-    print("Starting step 1 of preferred selection phase (same home matchups)")
+    print("Starting step 1 of preferred selection phase (sticky team matchups)")
+
+    sticky_team_matchups = [
+        m
+        for m in unprocessed_matchups
+        if m.team_a.sticky_group or m.team_b.sticky_group
+    ]
+    print(f"{len(sticky_team_matchups)} sticky team matchups to process")
+    for matchup in sticky_team_matchups:
+        select_preferred_gameslot_for_matchup(matchup, window_constraints)
+        unprocessed_matchups.remove(matchup)
+
+    print("Starting step 2 of preferred selection phase (same home matchups)")
 
     # If both teams in a matchup have the same home location, it would be egregious
-    # for them to have to travel elsewhere. So those matchups are processed first to
+    # for them to have to travel elsewhere. So those matchups are processed early to
     # make sure they get their preferred location.
     same_home_matchups = [
-        m for m in matchups if m.team_a.home_location == m.team_b.home_location
+        m
+        for m in unprocessed_matchups
+        if m.team_a.home_location == m.team_b.home_location
     ]
     print(f"{len(same_home_matchups)} same home matchups to process")
     for matchup in same_home_matchups:
         select_preferred_gameslot_for_matchup(matchup, window_constraints)
+        unprocessed_matchups.remove(matchup)
 
-    print("Starting step 2 of preferred selection phase (scarce home matchups)")
+    print("Starting step 3 of preferred selection phase (scarce home matchups)")
 
     # Next we process the matchups with scarce home locations. A location is scarce if it
     # does not have enough gameslots to comfortably give all the teams with that home
@@ -146,9 +164,8 @@ def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
     # the smallest fraction of home games.
     scarce_home_matchups = [
         m
-        for m in matchups
-        if m not in same_home_matchups
-        and m.preferred_home_team is not None
+        for m in unprocessed_matchups
+        if m.preferred_home_team is not None
         and m.preferred_home_team.home_location is not None
         and m.preferred_home_team.home_location.is_scarce
     ]
@@ -178,15 +195,11 @@ def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
         )
         select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
         unprocessed_scarce_home_matchups.remove(matchup_to_process)
+        unprocessed_matchups.remove(matchup_to_process)
 
-    print("Starting step 3 of preferred selection phase (ordinary matchups)")
+    print("Starting step 4 of preferred selection phase (ordinary matchups)")
 
     # Finally we process the matchups with no special properties.
-    unprocessed_matchups = [
-        m
-        for m in matchups
-        if m not in same_home_matchups and m not in scarce_home_matchups
-    ]
     print(f"{len(unprocessed_matchups)} ordinary matchups to process")
     while unprocessed_matchups:
         if len(unprocessed_matchups) % 10 == 0:
@@ -250,48 +263,68 @@ def get_slot_availability_score(
 def select_preferred_gameslot_for_matchup(
     matchup: Matchup, window_constraints: List[WindowConstraint]
 ) -> bool:
-    for reuse_location in True, False:
-        for use_weekend in True, False:
-            for avoid_consecutive_days in True, False:
-                for gameslot in matchup.preferred_gameslots:
-                    if gameslot.selected_matchup is not None:
-                        continue
-                    if (
-                        reuse_location
-                        and gameslot.location.num_games_by_date[gameslot.date] == 0
-                    ):
-                        continue
-                    if (
-                        not reuse_location
-                        and gameslot.location.num_games_by_date[gameslot.date] != 0
-                    ):
-                        continue
-                    if use_weekend and gameslot.date.weekday() not in [4, 5]:
-                        continue
-                    if not use_weekend and gameslot.date.weekday() in [4, 5]:
-                        continue
-                    if (
-                        avoid_consecutive_days
-                        and selection_will_create_consecutive_game_days(
-                            matchup, gameslot
-                        )
-                    ):
-                        continue
-                    if (
-                        not avoid_consecutive_days
-                        and not selection_will_create_consecutive_game_days(
-                            matchup, gameslot
-                        )
-                    ):
-                        continue
-                    if not all(
-                        w.is_satisfied_by_selection(matchup, gameslot)
-                        for w in window_constraints
-                    ):
-                        continue
+    for respect_stickiness in True, False:
+        if (
+            not respect_stickiness
+            and not matchup.team_a.sticky_group
+            and not matchup.team_b.sticky_group
+        ):
+            # It is impossible not to respect stickiness for a matchup with no stickiness
+            # requirements. Therefore we can skip this phase.
+            continue
 
-                    matchup.select_gameslot(gameslot)
-                    return True
+        for reuse_location in True, False:
+            for use_weekend in True, False:
+                for avoid_consecutive_days in True, False:
+                    for gameslot in matchup.preferred_gameslots:
+                        if gameslot.selected_matchup is not None:
+                            continue
+                        if (
+                            respect_stickiness
+                            and not selection_will_respect_stickiness(matchup, gameslot)
+                        ):
+                            continue
+                        if (
+                            not respect_stickiness
+                            and selection_will_respect_stickiness(matchup, gameslot)
+                        ):
+                            continue
+                        if (
+                            reuse_location
+                            and gameslot.location.num_games_by_date[gameslot.date] == 0
+                        ):
+                            continue
+                        if (
+                            not reuse_location
+                            and gameslot.location.num_games_by_date[gameslot.date] != 0
+                        ):
+                            continue
+                        if use_weekend and gameslot.date.weekday() not in [4, 5]:
+                            continue
+                        if not use_weekend and gameslot.date.weekday() in [4, 5]:
+                            continue
+                        if (
+                            avoid_consecutive_days
+                            and selection_will_create_consecutive_game_days(
+                                matchup, gameslot
+                            )
+                        ):
+                            continue
+                        if (
+                            not avoid_consecutive_days
+                            and not selection_will_create_consecutive_game_days(
+                                matchup, gameslot
+                            )
+                        ):
+                            continue
+                        if not all(
+                            w.is_satisfied_by_selection(matchup, gameslot)
+                            for w in window_constraints
+                        ):
+                            continue
+
+                        matchup.select_gameslot(gameslot)
+                        return True
 
     return False
 
@@ -398,6 +431,28 @@ def select_backup_gameslots(
     return False
 
 
+def selection_will_respect_stickiness(matchup: Matchup, gameslot: Gameslot):
+    if matchup.team_a.sticky_group is None and matchup.team_b.sticky_group is None:
+        return True
+
+    sticky_group_a = (
+        matchup.team_a.sticky_group if matchup.team_a.sticky_group is not None else []
+    )
+    sticky_group_b = (
+        matchup.team_b.sticky_group if matchup.team_b.sticky_group is not None else []
+    )
+    all_sticky_teams = set(sticky_group_a + sticky_group_b)
+
+    for sticky_team in all_sticky_teams:
+        if any(
+            m.selected_gameslot.location == gameslot.location
+            for m in sticky_team.games_by_date[gameslot.date]
+        ):
+            return True
+
+    return False
+
+
 def selection_gives_either_team_home(matchup: Matchup, gameslot: Gameslot):
     return (
         gameslot.location == matchup.team_a.home_location
@@ -412,10 +467,10 @@ def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Game
     next_day = gameslot.date + timedelta(days=1)
 
     return (
-        team_a.num_games_by_date[prev_day]
-        or team_a.num_games_by_date[next_day]
-        or team_b.num_games_by_date[prev_day]
-        or team_b.num_games_by_date[next_day]
+        team_a.games_by_date[prev_day]
+        or team_a.games_by_date[next_day]
+        or team_b.games_by_date[prev_day]
+        or team_b.games_by_date[next_day]
     )
 
 
@@ -514,14 +569,22 @@ def get_locations_for_home_game(team: Team) -> Set[Location]:
     return {team.home_location}
 
 
-def ingest_files(directory_path: str, scarce_location_names: List[str]):
-    ingest_teams_file(directory_path, scarce_location_names)
+def ingest_files(
+    directory_path: str,
+    scarce_location_names: List[str],
+    sticky_team_groups: List[List[Tuple[str, str]]],
+):
+    ingest_teams_file(directory_path, scarce_location_names, sticky_team_groups)
     ingest_matchups_file(directory_path)
     ingest_gameslots_file(directory_path, scarce_location_names)
     ingest_blackouts_file(directory_path)
 
 
-def ingest_teams_file(directory_path: str, scarce_location_names: List[str]):
+def ingest_teams_file(
+    directory_path: str,
+    scarce_location_names: List[str],
+    sticky_team_groups: List[List[Tuple[str, str]]],
+):
     file_path = "{}/teams.csv".format(directory_path)
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
@@ -553,6 +616,11 @@ def ingest_teams_file(directory_path: str, scarce_location_names: List[str]):
 
             teams[(division, name)] = Team(division, name, home_location_obj)
             divisions_to_counts[division] += 1
+
+    for sticky_group in sticky_team_groups:
+        sticky_group_objs = [teams[div, name] for div, name in sticky_group]
+        for team in sticky_group_objs:
+            team.sticky_group = sticky_group_objs.copy()
 
     print("======================== ingested divisions: ========================")
     for d, count in divisions_to_counts.items():
@@ -811,9 +879,9 @@ def get_num_consecutive_pairs_to_num_teams():
 
     for team in teams.values():
         num_pairs_for_team = 0
-        for date in team.num_games_by_date:
+        for date in team.games_by_date:
             next_day = date + timedelta(days=1)
-            if team.num_games_by_date[date] and team.num_games_by_date[next_day]:
+            if team.games_by_date[date] and team.games_by_date[next_day]:
                 num_pairs_for_team += 1
 
         num_pairs_to_num_teams[num_pairs_for_team] += 1
@@ -930,6 +998,46 @@ def print_weekday_metrics():
     print()
 
 
+def print_sticky_matchup_metrics():
+    print(f"# of isolated sticky matchups: {get_num_isolated_sticky_matchups()}")
+    print()
+
+
+def get_num_isolated_sticky_matchups():
+    num_isolated_sticky_matchups = 0
+    for matchup in matchups:
+        if matchup_is_isolated_sticky_matchup(matchup):
+            num_isolated_sticky_matchups += 1
+
+    return num_isolated_sticky_matchups
+
+
+def matchup_is_isolated_sticky_matchup(matchup: Matchup):
+    matchup_is_sticky = matchup.team_a.sticky_group or matchup.team_b.sticky_group
+    if not matchup_is_sticky:
+        return False
+
+    sticky_group_a = (
+        matchup.team_a.sticky_group if matchup.team_a.sticky_group is not None else []
+    )
+    sticky_group_b = (
+        matchup.team_b.sticky_group if matchup.team_b.sticky_group is not None else []
+    )
+    all_sticky_teams = set(sticky_group_a + sticky_group_b)
+
+    for sticky_team in all_sticky_teams:
+        matchups_on_same_day = sticky_team.games_by_date[matchup.selected_gameslot.date]
+        for matchup_on_same_day in matchups_on_same_day:
+            if (
+                matchup_on_same_day is not matchup
+                and matchup_on_same_day.selected_gameslot.location
+                == matchup.selected_gameslot.location
+            ):
+                return False
+
+    return True
+
+
 def do_test_run_for_seeds(
     start_seed,
     end_seed,
@@ -942,6 +1050,7 @@ def do_test_run_for_seeds(
 
     cols = [
         "seed",
+        "num isolated sticky matchups",
         "non preferred locs",
         "smallest block size",
         "num smallest blocks",
@@ -966,6 +1075,8 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
     seed_file_path = output_dir_path + "/seeds.csv"
 
     with open(seed_file_path, "a") as f:
+        num_isolated_sticky_matchups = get_num_isolated_sticky_matchups()
+
         num_non_preferred_locs = len(
             list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
         )
@@ -983,6 +1094,7 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         csv_line = ",".join(
             [
                 str(random_seed),
+                str(num_isolated_sticky_matchups),
                 str(num_non_preferred_locs),
                 str(smallest_block_size),
                 str(num_smallest_blocks),
@@ -999,6 +1111,7 @@ generate_schedule(
     random_seed=100,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
     scarce_location_names=["Park Place", "Christ the King"],
+    sticky_team_groups=[[("5/6G", "St. Isidore"), ("7/8B", "St. Isidore")]],
 )
 
 # do_test_run_for_seeds(
@@ -1008,4 +1121,5 @@ generate_schedule(
 #     output_dir_path="out",
 #     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
 #     scarce_location_names=["Park Place", "Christ the King"],
+#     sticky_team_groups=[[("5/6G", "St. Isidore"), ("7/8B", "St. Isidore")]]
 # )

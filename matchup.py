@@ -37,8 +37,8 @@ class Matchup:
         self.selected_gameslot_is_preferred = (
             self in gameslot.matchups_that_prefer_this_slot
         )
-        self.team_a.num_games_by_date[gameslot.date] += 1
-        self.team_b.num_games_by_date[gameslot.date] += 1
+        self.team_a.games_by_date[gameslot.date].append(self)
+        self.team_b.games_by_date[gameslot.date].append(self)
         gameslot.selected_matchup = self
         gameslot.location.num_games_by_date[gameslot.date] += 1
 
@@ -50,8 +50,8 @@ class Matchup:
 
         self.selected_gameslot = None
         self.selected_gameslot_is_preferred = False
-        self.team_a.num_games_by_date[prev_gameslot.date] -= 1
-        self.team_b.num_games_by_date[prev_gameslot.date] -= 1
+        self.team_a.games_by_date[prev_gameslot.date].remove(self)
+        self.team_b.games_by_date[prev_gameslot.date].remove(self)
         prev_gameslot.selected_matchup = None
         prev_gameslot.location.num_games_by_date[prev_gameslot.date] -= 1
 
