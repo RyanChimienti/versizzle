@@ -359,6 +359,10 @@ def select_backup_gameslots(
             f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}"
         )
 
+    if backup_selection_dead_ends >= 10000:
+        # It's taking too long. We assume it will not complete in a reasonable time.
+        return False
+
     if start == len(matchups_using_backup_slots):
         return True
 
@@ -439,8 +443,9 @@ def select_backup_gameslots(
                         matchup.deselect_gameslot()
 
     backup_selection_dead_ends += 1
-    if backup_selection_dead_ends % 10000 == 0:
+    if backup_selection_dead_ends % 1000 == 0:
         print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
+
     return False
 
 
@@ -1100,6 +1105,19 @@ def matchup_is_isolated_sticky_matchup(matchup: Matchup):
     return True
 
 
+def get_longest_gap_between_games():
+    longest_gap_in_days = 0
+    for team in teams.values():
+        ordered_matchups = sorted(team.matchups, key=lambda m: m.selected_gameslot.date)
+        for i in range(len(ordered_matchups) - 1):
+            first_game_date = ordered_matchups[i].selected_gameslot.date
+            second_game_date = ordered_matchups[i + 1].selected_gameslot.date
+            gap_in_days = (second_game_date - first_game_date).days
+            longest_gap_in_days = max(gap_in_days, longest_gap_in_days)
+
+    return longest_gap_in_days
+
+
 def do_test_run_for_seeds(
     start_seed,
     end_seed,
@@ -1109,7 +1127,7 @@ def do_test_run_for_seeds(
     scarce_location_names,
     sticky_team_groups,
 ):
-    seed_file_path = output_dir_path + "/seeds.csv"
+    seed_file_path = output_dir_path + "/seeds.txt"
 
     cols = [
         "seed",
@@ -1120,6 +1138,7 @@ def do_test_run_for_seeds(
         "num smallest blocks",
         "most consec pairs",
         "teams with most consec",
+        "longest gap between games",
     ]
     with open(seed_file_path, "w") as f:
         f.write(",".join(cols) + "\n")
@@ -1137,7 +1156,7 @@ def do_test_run_for_seeds(
 
 
 def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
-    seed_file_path = output_dir_path + "/seeds.csv"
+    seed_file_path = output_dir_path + "/seeds.txt"
 
     with open(seed_file_path, "a") as f:
         num_isolated_sticky_matchups = get_num_isolated_sticky_matchups()
@@ -1161,40 +1180,35 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         )[-1]
         most_consec_pairs, teams_with_most_consec = largest_consec_pairs_to_num_teams
 
-        csv_line = ",".join(
-            [
-                str(random_seed),
-                str(num_isolated_sticky_matchups),
-                str(total_weekday_games),
-                str(num_non_preferred_locs),
-                str(smallest_block_size),
-                str(num_smallest_blocks),
-                str(most_consec_pairs),
-                str(teams_with_most_consec),
-            ]
+        file_line = (
+            f"{random_seed} - {num_isolated_sticky_matchups}"
+            + f" - {total_weekday_games} - {num_non_preferred_locs}"
+            + f" - {smallest_block_size} {num_smallest_blocks}"
+            + f" - {most_consec_pairs} {teams_with_most_consec}"
+            + f" - {get_longest_gap_between_games()}"
         )
-        f.write(csv_line + "\n")
+        f.write(file_line + "\n")
 
 
-generate_schedule(
-    input_dir_path="in",
-    output_dir_path="out",
-    random_seed=1,
-    window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-    scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
-    sticky_team_groups=[
-        [("7/8B South", "St. John Vianney"), ("5/6G", "St. John Vianney")]
-    ],
-)
-
-# do_test_run_for_seeds(
-#     57,
-#     200,
+# generate_schedule(
 #     input_dir_path="in",
 #     output_dir_path="out",
+#     random_seed=204,
 #     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
 #     scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
 #     sticky_team_groups=[
 #         [("7/8B South", "St. John Vianney"), ("5/6G", "St. John Vianney")]
 #     ],
 # )
+
+do_test_run_for_seeds(
+    345,
+    1000,
+    input_dir_path="in",
+    output_dir_path="out",
+    window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
+    scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
+    sticky_team_groups=[
+        [("7/8B South", "St. John Vianney"), ("5/6G", "St. John Vianney")]
+    ],
+)
