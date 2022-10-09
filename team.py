@@ -26,9 +26,6 @@ class Team:
         # is playing on that date
         self.games_by_date: Dict[date, List[matchup.Matchup]] = defaultdict(list)
 
-        # Teams that this team would prefer to have its games back-to-back with.
-        self.sticky_group: List[Team] = None
-
     # Returns the ratio of currently scheduled home games to total games in season
     def get_home_percentage(self) -> float:
         num_scheduled_home_games = len(
