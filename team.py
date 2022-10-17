@@ -14,11 +14,11 @@ class Team:
         # All of the matchups (scheduled or not) that include this team
         self.matchups: List[matchup.Matchup] = []
 
-        # The number of matchups which include this team and have chosen a preferred
+        # The number of matchups that include this team and have chosen a preferred
         # home team
-        self.num_games: int = 0
+        self.num_matchups_with_home_preference_chosen: int = 0
 
-        # The number of matchups which include this team and have chosen this team as
+        # The number of matchups that include this team and have chosen this team as
         # their preferred home team
         self.num_preferred_home_games: int = 0
 

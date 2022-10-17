@@ -1,10 +1,11 @@
 from typing import List
+from blackout import Blackout
 from gameslot import Gameslot
 from location import Location
 from matchup import Matchup
-from datetime import date, time
-
 from team import Team
+from datetime import date, time
+import utils
 
 
 class Preassignment:
@@ -22,36 +23,65 @@ class Preassignment:
         self.team_a = team_a
         self.team_b = team_b
 
-    def assign(self, matchups: List[Matchup]):
-        candidate_matchups: List[Matchup] = []
+    def assign(
+        self,
+        matchups: List[Matchup],
+        gameslots: List[Gameslot],
+        blackouts: List[Blackout],
+    ):
+        matchup_to_use = None
         for matchup in matchups:
-            matchup_has_these_teams = (
-                matchup.team_a == self.team_a and matchup.team_b == self.team_b
-            ) or (matchup.team_a == self.team_b and matchup.team_b == self.team_a)
+            if self.describes_matchup(matchup) and matchup.selected_gameslot is None:
+                matchup_to_use = matchup
+                break
 
-            if matchup_has_these_teams and matchup.selected_gameslot is None:
-                candidate_matchups.append(matchup)
+        if matchup_to_use is None:
+            raise Exception(f"Could not find a matchup to use for preassignment {self}")
 
-        for cand_matchup in candidate_matchups:
-            for gameslot in cand_matchup.preferred_gameslots:
-                if (
-                    gameslot.selected_matchup is None
-                    and gameslot.location == self.location
-                    and gameslot.time == self.time
-                    and gameslot.date == self.date
-                ):
-                    cand_matchup.select_gameslot(gameslot)
-                    return
+        gameslot_to_use = None
+        for gameslot in gameslots:
+            if self.describes_gameslot(gameslot) and gameslot.selected_matchup is None:
+                gameslot_to_use = gameslot
+                break
 
-        for cand_matchup in candidate_matchups:
-            for gameslot in cand_matchup.backup_gameslots:
-                if (
-                    gameslot.selected_matchup is None
-                    and gameslot.location == self.location
-                    and gameslot.time == self.time
-                    and gameslot.date == self.date
-                ):
-                    cand_matchup.select_gameslot(gameslot)
-                    return
+        if gameslot_to_use is None:
+            raise Exception(
+                f"Could not find a gameslot to use for preassignment {self}"
+            )
 
-        raise Exception("Error: unable to perform preassignment")
+        if any(
+            b.prohibits_matchup_in_slot(matchup_to_use, gameslot_to_use)
+            for b in blackouts
+        ):
+            raise Exception(f"Preassignment {self} is prohibited by a blackout")
+
+        matchup_to_use.is_preassigned = True
+        matchup_to_use.preferred_gameslots = [gameslot_to_use]
+        matchup_to_use.backup_gameslots = []
+
+        gameslot_to_use.is_preassigned = True
+        gameslot_to_use.matchups_that_prefer_this_slot = {matchup_to_use}
+
+        matchup_to_use.select_gameslot(gameslot_to_use)
+
+    def describes_matchup(self, matchup: Matchup):
+        return (matchup.team_a == self.team_a and matchup.team_b == self.team_b) or (
+            matchup.team_a == self.team_b and matchup.team_b == self.team_a
+        )
+
+    def describes_gameslot(self, gameslot: Gameslot):
+        return (
+            gameslot.date == self.date
+            and gameslot.time == self.time
+            and gameslot.location == self.location
+        )
+
+    def __str__(self):
+        pretty_date = utils.prettify_date(self.date)
+        pretty_time = utils.prettify_time(self.time)
+
+        return (
+            f"< {self.team_a.division} - "
+            + f"{self.team_a.name} vs {self.team_b.name} - "
+            + f"{pretty_date} {pretty_time} at {self.location} >"
+        )

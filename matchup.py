@@ -17,13 +17,35 @@ class Matchup:
         self.team_a: Team = team_a
         self.team_b: Team = team_b
 
+        self.is_preassigned = False
+
         self.preferred_home_team: Team = None
-        self.preferred_locations: List[location.Location] = None
+
         self.preferred_gameslots: List[gameslot.Gameslot] = None
         self.backup_gameslots: List[gameslot.Gameslot] = None
 
         self.selected_gameslot: gameslot.Gameslot = None
         self.selected_gameslot_is_preferred: bool = False
+
+    def select_preferred_home_team(self, team: Team):
+        if self.preferred_home_team is not None:
+            raise Exception(
+                "Can't assign a preferred home team to a matchup that already has one"
+            )
+        if team != self.team_a and team != self.team_b:
+            raise Exception(
+                "Preferred home team for a matchup must be one of the teams in the matchup"
+            )
+
+        self.preferred_home_team = team
+
+        if team == self.team_a:
+            self.team_a.num_preferred_home_games += 1
+        else:
+            self.team_b.num_preferred_home_games += 1
+
+        self.team_a.num_matchups_with_home_preference_chosen += 1
+        self.team_b.num_matchups_with_home_preference_chosen += 1
 
     def select_gameslot(self, gameslot: gameslot.Gameslot):
         if self.selected_gameslot is not None:
@@ -37,6 +59,7 @@ class Matchup:
         self.selected_gameslot_is_preferred = (
             self in gameslot.matchups_that_prefer_this_slot
         )
+
         self.team_a.games_by_date[gameslot.date].append(self)
         self.team_b.games_by_date[gameslot.date].append(self)
         gameslot.selected_matchup = self

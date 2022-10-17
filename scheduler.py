@@ -44,9 +44,9 @@ def generate_schedule(
 
     ingest_files(input_dir_path, scarce_location_names)
 
-    assign_preferred_locations_to_matchups()
-    assign_candidate_gameslots_to_matchups()
     do_preassignments()
+    assign_preferred_home_teams_to_matchups()
+    assign_candidate_gameslots_to_matchups()
 
     success = select_gameslots_for_matchups(window_constraints)
 
@@ -63,11 +63,11 @@ def generate_schedule(
         return
 
     # print_master_schedule()
-    print_breakout_schedules()
-    print_non_preferred_gameslot_metrics()
-    print_block_size_metrics()
-    print_weekday_metrics()
-    print_consecutive_game_day_metrics()
+    # print_breakout_schedules()
+    # print_non_preferred_gameslot_metrics()
+    # print_block_size_metrics()
+    # print_weekday_metrics()
+    # print_consecutive_game_day_metrics()
 
 
 def clear_globals():
@@ -95,10 +95,12 @@ def clear_globals():
 
 def do_preassignments():
     print(f"Performing {len(preassignments)} preassignments")
-    print("Preassignments complete.")
 
     for preassignment in preassignments:
-        preassignment.assign(matchups)
+        preassignment.assign(matchups, gameslots, blackouts)
+
+    print("Preassignments complete.")
+    print()
 
 
 def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
@@ -438,16 +440,25 @@ def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Game
 
 def assign_candidate_gameslots_to_matchups():
     for g in gameslots:
+        if g.is_preassigned:
+            continue
+
         g.matchups_that_prefer_this_slot = set()
 
     for m in matchups:
+        if m.is_preassigned:
+            continue
+
         m.preferred_gameslots = []
         m.backup_gameslots = []
+
         for g in gameslots:
+            if g.is_preassigned:
+                continue
             if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
                 continue
 
-            if g.location in m.preferred_locations:
+            if m.preferred_home_team.home_location == g.location:
                 m.preferred_gameslots.append(g)
                 g.matchups_that_prefer_this_slot.add(m)
             else:
@@ -457,7 +468,7 @@ def assign_candidate_gameslots_to_matchups():
         random.shuffle(m.backup_gameslots)
 
 
-def assign_preferred_locations_to_matchups():
+def assign_preferred_home_teams_to_matchups():
     for d in divisions_to_counts:
         division_matchups = [m for m in matchups if m.division == d]
 
@@ -467,54 +478,98 @@ def assign_preferred_locations_to_matchups():
             team_pairs_to_matchups[team_pair].append(m)
 
         groups_of_identical_matchups = team_pairs_to_matchups.values()
+
         for group in groups_of_identical_matchups:
             first_team, second_team = group[0].team_a, group[0].team_b
 
-            half_of_num_matchups = len(group) // 2
+            num_preassigned_home_games_for_first_team = 0
+            num_preassigned_home_games_for_second_team = 0
 
-            # in the first half of matchups, first team gets home games
-            for i in range(half_of_num_matchups):
-                matchup = group[i]
-                matchup.preferred_home_team = first_team
-                matchup.preferred_locations = get_locations_for_home_game(first_team)
-                first_team.num_preferred_home_games += 1
-                matchup.team_a.num_games += 1
-                matchup.team_b.num_games += 1
+            for matchup in group:
+                if matchup.is_preassigned:
+                    if matchup.selected_gameslot.location == first_team.home_location:
+                        matchup.select_preferred_home_team(first_team)
+                        num_preassigned_home_games_for_first_team += 1
+                    elif (
+                        matchup.selected_gameslot.location == second_team.home_location
+                    ):
+                        matchup.select_preferred_home_team(second_team)
+                        num_preassigned_home_games_for_second_team += 1
 
-            # in the second half of matchups, second team gets home games
-            for i in range(half_of_num_matchups, 2 * half_of_num_matchups):
-                matchup = group[i]
-                matchup.preferred_home_team = second_team
-                matchup.preferred_locations = get_locations_for_home_game(second_team)
-                second_team.num_preferred_home_games += 1
-                matchup.team_a.num_games += 1
-                matchup.team_b.num_games += 1
+            team_with_fewer_preassigned_home_games = (
+                first_team
+                if num_preassigned_home_games_for_first_team
+                < num_preassigned_home_games_for_second_team
+                else second_team
+            )
+            difference_in_preassigned_home = abs(
+                num_preassigned_home_games_for_first_team
+                - num_preassigned_home_games_for_second_team
+            )
 
-            # if there's a game left over, either team can be home
-            if len(group) % 2 == 1:
-                matchup = group[-1]
-                home_team = get_fairer_home_team(first_team, second_team)
-                matchup.preferred_home_team = home_team
-                matchup.preferred_locations = get_locations_for_home_game(home_team)
-                home_team.num_preferred_home_games += 1
-                matchup.team_a.num_games += 1
-                matchup.team_b.num_games += 1
+            remaining_nonpreassigned_matchups = [
+                m for m in group if not m.is_preassigned
+            ]
+            while remaining_nonpreassigned_matchups and difference_in_preassigned_home:
+                matchup = remaining_nonpreassigned_matchups.pop()
+                matchup.select_preferred_home_team(
+                    team_with_fewer_preassigned_home_games
+                )
+                difference_in_preassigned_home -= 1
+
+            for _ in range(len(remaining_nonpreassigned_matchups) // 2):
+                matchup_1 = remaining_nonpreassigned_matchups.pop()
+                matchup_1.select_preferred_home_team(first_team)
+
+                matchup_2 = remaining_nonpreassigned_matchups.pop()
+                matchup_2.select_preferred_home_team(second_team)
+
+        # In each matchup group, there may be 1 nonpreassigned matchup that hasn't
+        # received a home team. These matchups are special because, unlike the matchups
+        # processed so far, they have no natural home team. Therefore we can assign them
+        # home teams in whatever way best balances the number of home games for each team.
+        for group in groups_of_identical_matchups:
+            for matchup in group:
+                if not matchup.is_preassigned and matchup.preferred_home_team is None:
+                    home_team = get_team_with_lower_preferred_home_ratio(
+                        matchup.team_a, matchup.team_b
+                    )
+                    matchup.select_preferred_home_team(home_team)
+                    break
+
+        # Finally, we address the matchups that are preassigned, but to a location that
+        # is neither team's home. We give them preferred home teams so that all matchups
+        # have preferred home teams, but really it's futile because they have already been
+        # preassigned to a different location.
+        for group in groups_of_identical_matchups:
+            for matchup in group:
+                if (
+                    matchup.is_preassigned
+                    and matchup.selected_gameslot.location
+                    != matchup.team_a.home_location
+                    and matchup.selected_gameslot.location
+                    != matchup.team_b.home_location
+                ):
+                    home_team = get_team_with_lower_preferred_home_ratio(
+                        matchup.team_a, matchup.team_b
+                    )
+                    matchup.select_preferred_home_team(home_team)
+
+    print_home_preference_metrics()
 
 
-# The fairer home team is whichever has a lower ratio of home to away games. If the
-# ratios are equal, we'll choose a team at random. Random is better than saying either
-# team can be home, because allowing either will tend to favor the team with more
-# gameslots at their home court, leading to systematic bias in favor of certain schools.
-def get_fairer_home_team(team_1: Team, team_2: Team):
+def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
     team_1_home_ratio = (
         0.5
-        if team_1.num_games == 0
-        else team_1.num_preferred_home_games / float(team_1.num_games)
+        if team_1.num_matchups_with_home_preference_chosen == 0
+        else team_1.num_preferred_home_games
+        / float(team_1.num_matchups_with_home_preference_chosen)
     )
     team_2_home_ratio = (
         0.5
-        if team_2.num_games == 0
-        else team_2.num_preferred_home_games / float(team_2.num_games)
+        if team_2.num_matchups_with_home_preference_chosen == 0
+        else team_2.num_preferred_home_games
+        / float(team_2.num_matchups_with_home_preference_chosen)
     )
     if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
         return random.choice([team_1, team_2])
@@ -522,13 +577,22 @@ def get_fairer_home_team(team_1: Team, team_2: Team):
     return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
 
 
-# Returns the valid locations for a home game for the given team. In the case of a team
-# with no home location, this is all locations.
-def get_locations_for_home_game(team: Team) -> Set[Location]:
-    if team.home_location is None:
-        return locations.values().copy()
+def print_home_preference_metrics():
+    table = [
+        ["# of Preferred Home Games", "# of Teams With That Many"],
+        ["-------------------------", "-------------------------"],
+    ]
 
-    return {team.home_location}
+    num_preferred_home_games_to_num_teams = defaultdict(int)
+
+    for t in teams.values():
+        num_preferred_home_games_to_num_teams[t.num_preferred_home_games] += 1
+
+    for num_games, num_teams in sorted(num_preferred_home_games_to_num_teams.items()):
+        table.append([num_games, num_teams])
+
+    utils.pretty_print_table(table)
+    print()
 
 
 def ingest_files(
@@ -1085,7 +1149,7 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 generate_schedule(
     input_dir_path="in",
     output_dir_path="out",
-    random_seed=204,
+    random_seed=12,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
     scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
 )

@@ -14,6 +14,8 @@ class Gameslot:
         self.time = time
         self.location = location
 
+        self.is_preassigned = False
+
         self.matchups_that_prefer_this_slot: Set[Matchup] = None
         self.selected_matchup: Matchup = None
 
