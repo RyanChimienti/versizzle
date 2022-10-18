@@ -10,7 +10,7 @@ def prettify_date(date: date):
     return date.strftime("%#m/%#d/%#y")
 
 
-def pretty_print_table(table: List[List[str]]):
+def pretty_print_table(table: List[List[str]], file=None):
     if not table:
         return
 
@@ -31,4 +31,4 @@ def pretty_print_table(table: List[List[str]]):
 
     for row in table:
         str_row = map(str, row)
-        print(row_template.format(*str_row))
+        print(row_template.format(*str_row), file=file)

@@ -64,10 +64,11 @@ def generate_schedule(
 
     # print_master_schedule()
     # print_breakout_schedules()
-    # print_non_preferred_gameslot_metrics()
-    # print_block_size_metrics()
-    # print_weekday_metrics()
-    # print_consecutive_game_day_metrics()
+    create_pasteable_schedule_file(output_dir_path)
+    print_non_preferred_gameslot_metrics()
+    print_block_size_metrics()
+    print_weekday_metrics()
+    print_consecutive_game_day_metrics()
 
 
 def clear_globals():
@@ -882,6 +883,37 @@ def print_master_schedule():
     utils.pretty_print_table(schedule_table)
 
 
+def create_pasteable_schedule_file(output_dir_path: str):
+
+    gameslots_by_day = defaultdict(list)
+
+    for g in gameslots:
+        gameslots_by_day[g.date].append(g)
+
+    pasteable_file_path = output_dir_path + "/pasteable.txt"
+    with open(pasteable_file_path, "w") as f:
+
+        for day in sorted(gameslots_by_day.keys()):
+            gameslots_on_day = gameslots_by_day[day]
+
+            for gameslot in gameslots_on_day:
+                if gameslot.selected_matchup is None:
+                    matchup_str = "\t\tOPEN"
+                else:
+                    matchup = gameslot.selected_matchup
+                    division = matchup.division
+                    division_str = (
+                        "7/8B" if division in ["7/8B South", "7/8B North"] else division
+                    )
+                    home_team, away_team = matchup.get_teams_in_home_away_order()
+
+                    matchup_str = f"{division_str}\t{home_team.name}\t{away_team.name}"
+
+                print(matchup_str, file=f)
+
+            print(file=f)
+
+
 def print_breakout_schedules():
     for team in teams.values():
         table = []
@@ -1149,13 +1181,13 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 generate_schedule(
     input_dir_path="in",
     output_dir_path="out",
-    random_seed=12,
+    random_seed=103,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
     scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
 )
 
 # do_test_run_for_seeds(
-#     345,
+#     1,
 #     1000,
 #     input_dir_path="in",
 #     output_dir_path="out",
