@@ -486,8 +486,41 @@ def assign_preferred_home_teams_to_matchups():
             num_preassigned_home_games_for_first_team = 0
             num_preassigned_home_games_for_second_team = 0
 
-            for matchup in group:
-                if matchup.is_preassigned:
+            # First we process preassigned matchups that have been assigned to either
+            # team's home. If the teams have different home locations this is easy; the
+            # preferred home team is the one whose location was preassigned. If the teams
+            # have the same home location, then we distribute the home games evenly between
+            # them, giving the last game (if there are an odd number) to whichever team
+            # has fewer home games so far.
+            preassigned_matchups = [m for m in group if m.is_preassigned]
+            if first_team.home_location == second_team.home_location:
+                matchups_preassigned_to_home_location = [
+                    m
+                    for m in preassigned_matchups
+                    if m.selected_gameslot.location == first_team.home_location
+                ]
+
+                for i in range(len(matchups_preassigned_to_home_location) // 2):
+                    matchup_1 = matchups_preassigned_to_home_location[i]
+                    matchup_1.select_preferred_home_team(first_team)
+                    num_preassigned_home_games_for_first_team += 1
+
+                    matchup_2 = matchups_preassigned_to_home_location[i + 1]
+                    matchup_2.select_preferred_home_team(second_team)
+                    num_preassigned_home_games_for_second_team += 1
+
+                if len(matchups_preassigned_to_home_location) % 2 == 1:
+                    leftover_matchup = matchups_preassigned_to_home_location[-1]
+                    home_team = get_team_with_lower_preferred_home_ratio(
+                        first_team, second_team
+                    )
+                    leftover_matchup.select_preferred_home_team(home_team)
+                    if home_team == first_team:
+                        num_preassigned_home_games_for_first_team += 1
+                    else:
+                        num_preassigned_home_games_for_second_team += 1
+            else:
+                for matchup in preassigned_matchups:
                     if matchup.selected_gameslot.location == first_team.home_location:
                         matchup.select_preferred_home_team(first_team)
                         num_preassigned_home_games_for_first_team += 1
@@ -884,7 +917,6 @@ def print_master_schedule():
 
 
 def create_pasteable_schedule_file(output_dir_path: str):
-
     gameslots_by_day = defaultdict(list)
 
     for g in gameslots:
@@ -892,7 +924,6 @@ def create_pasteable_schedule_file(output_dir_path: str):
 
     pasteable_file_path = output_dir_path + "/pasteable.txt"
     with open(pasteable_file_path, "w") as f:
-
         for day in sorted(gameslots_by_day.keys()):
             gameslots_on_day = gameslots_by_day[day]
 
@@ -1181,9 +1212,9 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 generate_schedule(
     input_dir_path="in",
     output_dir_path="out",
-    random_seed=103,
+    random_seed=22,
     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-    scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
+    scarce_location_names=["SJE"],
 )
 
 # do_test_run_for_seeds(
@@ -1192,5 +1223,5 @@ generate_schedule(
 #     input_dir_path="in",
 #     output_dir_path="out",
 #     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-#     scarce_location_names=["SJE", "Queen of the Rosary", "St. Walter", "St. Philip"],
+#     scarce_location_names=["SJE"],
 # )
