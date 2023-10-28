@@ -1,0 +1,412 @@
+date,time,location
+1/6/2023,6:00PM,St. Matthew
+1/6/2023,7:00PM,St. Matthew
+1/6/2023,8:00PM,St. Matthew
+1/6/2023,5:00PM,St. Isidore
+1/6/2023,6:00PM,St. Isidore
+1/6/2023,7:00PM,St. Isidore
+1/6/2023,8:00PM,St. Isidore
+1/7/2023,10:00AM,St. Matthew
+1/7/2023,11:00AM,St. Matthew
+1/7/2023,12:00PM,St. Matthew
+1/7/2023,8:00AM,St. Isidore
+1/7/2023,9:00AM,St. Isidore
+1/7/2023,10:00AM,St. Isidore
+1/7/2023,11:00AM,St. Isidore
+1/9/2023,6:00PM,St. John Vianney
+1/9/2023,7:00PM,St. John Vianney
+1/9/2023,8:00PM,St. John Vianney
+1/11/2023,6:15PM,Queen of the Rosary
+1/11/2023,7:15PM,Queen of the Rosary
+1/11/2023,8:15PM,Queen of the Rosary
+1/12/2023,6:00PM,St. Matthew
+1/12/2023,7:00PM,St. Matthew
+1/12/2023,8:00PM,St. Matthew
+1/13/2023,6:00PM,St. Matthew
+1/13/2023,7:00PM,St. Matthew
+1/13/2023,8:00PM,St. Matthew
+1/13/2023,6:00PM,St. James
+1/13/2023,7:00PM,St. James
+1/13/2023,8:00PM,St. James
+1/13/2023,5:00PM,St. Isidore
+1/13/2023,6:00PM,St. Isidore
+1/13/2023,7:00PM,St. Isidore
+1/13/2023,8:00PM,St. Isidore
+1/13/2023,6:00PM,SJE
+1/13/2023,7:00PM,SJE
+1/13/2023,6:30PM,St. Philip
+1/13/2023,7:30PM,St. Philip
+1/13/2023,8:30PM,St. Philip
+1/14/2023,10:00AM,St. Matthew
+1/14/2023,11:00AM,St. Matthew
+1/14/2023,12:00PM,St. Matthew
+1/14/2023,8:00AM,St. James
+1/14/2023,9:00AM,St. James
+1/14/2023,10:00AM,St. James
+1/14/2023,11:00AM,St. James
+1/14/2023,12:00PM,St. James
+1/14/2023,8:00AM,St. Isidore
+1/14/2023,9:00AM,St. Isidore
+1/14/2023,10:00AM,St. Isidore
+1/14/2023,11:00AM,St. Isidore
+1/14/2023,12:30PM,Queen of the Rosary
+1/14/2023,1:30PM,Queen of the Rosary
+1/14/2023,2:30PM,Queen of the Rosary
+1/14/2023,9:30AM,St. Philip
+1/14/2023,10:30AM,St. Philip
+1/14/2023,11:30AM,St. Philip
+1/14/2023,8:30AM,St. Walter
+1/14/2023,9:30AM,St. Walter
+1/14/2023,10:30AM,St. Walter
+1/14/2023,11:30AM,St. Walter
+1/14/2023,12:30PM,St. Walter
+1/16/2023,6:00PM,St. John Vianney
+1/16/2023,7:00PM,St. John Vianney
+1/16/2023,8:00PM,St. John Vianney
+1/17/2023,6:00PM,St. Walter
+1/17/2023,7:00PM,St. Walter
+1/17/2023,8:00PM,St. Walter
+1/19/2023,6:00PM,St. Matthew
+1/19/2023,7:00PM,St. Matthew
+1/19/2023,8:00PM,St. Matthew
+1/20/2023,6:00PM,St. Matthew
+1/20/2023,7:00PM,St. Matthew
+1/20/2023,8:00PM,St. Matthew
+1/20/2023,6:00PM,St. James
+1/20/2023,7:00PM,St. James
+1/20/2023,8:00PM,St. James
+1/20/2023,5:00PM,St. Isidore
+1/20/2023,6:00PM,St. Isidore
+1/20/2023,7:00PM,St. Isidore
+1/20/2023,8:00PM,St. Isidore
+1/20/2023,6:00PM,SJE
+1/20/2023,7:00PM,SJE
+1/20/2023,6:30PM,St. Philip
+1/20/2023,7:30PM,St. Philip
+1/20/2023,8:30PM,St. Philip
+1/20/2023,6:15PM,St. Walter
+1/20/2023,7:15PM,St. Walter
+1/20/2023,8:15PM,St. Walter
+1/20/2023,6:00PM,Holy Trinity
+1/20/2023,7:00PM,Holy Trinity
+1/20/2023,8:00PM,Holy Trinity
+1/21/2023,10:00AM,St. Matthew
+1/21/2023,11:00AM,St. Matthew
+1/21/2023,12:00PM,St. Matthew
+1/21/2023,8:00AM,St. James
+1/21/2023,9:00AM,St. James
+1/21/2023,10:00AM,St. James
+1/21/2023,11:00AM,St. James
+1/21/2023,12:00PM,St. James
+1/21/2023,8:00AM,St. Isidore
+1/21/2023,9:00AM,St. Isidore
+1/21/2023,10:00AM,St. Isidore
+1/21/2023,11:00AM,St. Isidore
+1/21/2023,8:30AM,St. Walter
+1/21/2023,9:30AM,St. Walter
+1/21/2023,10:30AM,St. Walter
+1/21/2023,11:30AM,St. Walter
+1/21/2023,9:00AM,Holy Trinity
+1/21/2023,10:00AM,Holy Trinity
+1/21/2023,11:00AM,Holy Trinity
+1/23/2023,6:00PM,St. John Vianney
+1/23/2023,7:00PM,St. John Vianney
+1/23/2023,8:00PM,St. John Vianney
+1/25/2023,6:15PM,Queen of the Rosary
+1/25/2023,7:15PM,Queen of the Rosary
+1/25/2023,8:15PM,Queen of the Rosary
+1/26/2023,6:00PM,St. Matthew
+1/26/2023,7:00PM,St. Matthew
+1/26/2023,8:00PM,St. Matthew
+1/26/2023,6:00PM,St. John Vianney
+1/26/2023,7:00PM,St. John Vianney
+1/26/2023,8:00PM,St. John Vianney
+1/27/2023,6:00PM,St. Matthew
+1/27/2023,7:00PM,St. Matthew
+1/27/2023,8:00PM,St. Matthew
+1/27/2023,6:00PM,St. James
+1/27/2023,7:00PM,St. James
+1/27/2023,8:00PM,St. James
+1/27/2023,5:00PM,St. Isidore
+1/27/2023,6:00PM,St. Isidore
+1/27/2023,7:00PM,St. Isidore
+1/27/2023,8:00PM,St. Isidore
+1/27/2023,6:00PM,SJE
+1/27/2023,7:00PM,SJE
+1/27/2023,6:30PM,St. Philip
+1/27/2023,7:30PM,St. Philip
+1/27/2023,8:30PM,St. Philip
+1/27/2023,6:15PM,St. Walter
+1/27/2023,7:15PM,St. Walter
+1/27/2023,8:15PM,St. Walter
+1/28/2023,10:00AM,St. Matthew
+1/28/2023,11:00AM,St. Matthew
+1/28/2023,12:00PM,St. Matthew
+1/28/2023,8:00AM,St. James
+1/28/2023,9:00AM,St. James
+1/28/2023,10:00AM,St. James
+1/28/2023,11:00AM,St. James
+1/28/2023,12:00PM,St. James
+1/28/2023,8:00AM,St. Isidore
+1/28/2023,9:00AM,St. Isidore
+1/28/2023,10:00AM,St. Isidore
+1/28/2023,11:00AM,St. Isidore
+1/28/2023,8:30AM,St. Walter
+1/28/2023,9:30AM,St. Walter
+1/28/2023,10:30AM,St. Walter
+1/28/2023,11:30AM,St. Walter
+1/28/2023,9:00AM,Holy Trinity
+1/28/2023,10:00AM,Holy Trinity
+1/28/2023,11:00AM,Holy Trinity
+1/30/2023,6:00PM,St. John Vianney
+1/30/2023,7:00PM,St. John Vianney
+1/30/2023,8:00PM,St. John Vianney
+1/31/2023,6:00PM,St. Walter
+1/31/2023,7:00PM,St. Walter
+1/31/2023,8:00PM,St. Walter
+2/1/2023,6:00PM,St. John Vianney
+2/1/2023,7:00PM,St. John Vianney
+2/1/2023,8:00PM,St. John Vianney
+2/2/2023,6:00PM,St. Matthew
+2/2/2023,7:00PM,St. Matthew
+2/2/2023,8:00PM,St. Matthew
+2/2/2023,6:00PM,St. John Vianney
+2/2/2023,7:00PM,St. John Vianney
+2/2/2023,8:00PM,St. John Vianney
+2/2/2023,6:15PM,St. Walter
+2/2/2023,7:15PM,St. Walter
+2/2/2023,8:15PM,St. Walter
+2/3/2023,6:00PM,St. Matthew
+2/3/2023,7:00PM,St. Matthew
+2/3/2023,8:00PM,St. Matthew
+2/3/2023,6:00PM,St. James
+2/3/2023,7:00PM,St. James
+2/3/2023,8:00PM,St. James
+2/3/2023,5:00PM,St. Isidore
+2/3/2023,6:00PM,St. Isidore
+2/3/2023,7:00PM,St. Isidore
+2/3/2023,8:00PM,St. Isidore
+2/3/2023,6:00PM,SJE
+2/3/2023,7:00PM,SJE
+2/3/2023,6:30PM,St. Philip
+2/3/2023,7:30PM,St. Philip
+2/3/2023,8:30PM,St. Philip
+2/3/2023,6:00PM,Holy Trinity
+2/3/2023,7:00PM,Holy Trinity
+2/3/2023,8:00PM,Holy Trinity
+2/4/2023,10:00AM,St. Matthew
+2/4/2023,11:00AM,St. Matthew
+2/4/2023,12:00PM,St. Matthew
+2/4/2023,8:00AM,St. Isidore
+2/4/2023,9:00AM,St. Isidore
+2/4/2023,10:00AM,St. Isidore
+2/4/2023,11:00AM,St. Isidore
+2/4/2023,9:00AM,Holy Trinity
+2/4/2023,10:00AM,Holy Trinity
+2/4/2023,11:00AM,Holy Trinity
+2/6/2023,6:00PM,St. John Vianney
+2/6/2023,7:00PM,St. John Vianney
+2/6/2023,8:00PM,St. John Vianney
+2/9/2023,6:00PM,St. Matthew
+2/9/2023,7:00PM,St. Matthew
+2/9/2023,8:00PM,St. Matthew
+2/10/2023,6:00PM,St. Matthew
+2/10/2023,7:00PM,St. Matthew
+2/10/2023,8:00PM,St. Matthew
+2/10/2023,5:00PM,St. Isidore
+2/10/2023,6:00PM,St. Isidore
+2/10/2023,7:00PM,St. Isidore
+2/10/2023,8:00PM,St. Isidore
+2/10/2023,6:00PM,SJE
+2/10/2023,7:00PM,SJE
+2/10/2023,6:30PM,St. Philip
+2/10/2023,7:30PM,St. Philip
+2/10/2023,8:30PM,St. Philip
+2/10/2023,6:00PM,Holy Trinity
+2/10/2023,7:00PM,Holy Trinity
+2/10/2023,8:00PM,Holy Trinity
+2/11/2023,10:00AM,St. Matthew
+2/11/2023,11:00AM,St. Matthew
+2/11/2023,12:00PM,St. Matthew
+2/11/2023,8:00AM,St. Isidore
+2/11/2023,9:00AM,St. Isidore
+2/11/2023,10:00AM,St. Isidore
+2/11/2023,11:00AM,St. Isidore
+2/11/2023,12:30PM,Queen of the Rosary
+2/11/2023,1:30PM,Queen of the Rosary
+2/11/2023,2:30PM,Queen of the Rosary
+2/11/2023,9:30AM,St. Philip
+2/11/2023,10:30AM,St. Philip
+2/11/2023,11:30AM,St. Philip
+2/11/2023,8:30AM,St. Walter
+2/11/2023,9:30AM,St. Walter
+2/11/2023,10:30AM,St. Walter
+2/11/2023,11:30AM,St. Walter
+2/11/2023,12:30AM,St. Walter
+2/11/2023,9:00AM,Holy Trinity
+2/11/2023,10:00AM,Holy Trinity
+2/11/2023,11:00AM,Holy Trinity
+2/15/2023,6:00PM,St. John Vianney
+2/15/2023,7:00PM,St. John Vianney
+2/15/2023,8:00PM,St. John Vianney
+2/16/2023,6:00PM,St. Matthew
+2/16/2023,7:00PM,St. Matthew
+2/16/2023,8:00PM,St. Matthew
+2/17/2023,6:00PM,St. Matthew
+2/17/2023,7:00PM,St. Matthew
+2/17/2023,8:00PM,St. Matthew
+2/17/2023,6:00PM,St. James
+2/17/2023,7:00PM,St. James
+2/17/2023,8:00PM,St. James
+2/17/2023,5:00PM,St. Isidore
+2/17/2023,6:00PM,St. Isidore
+2/17/2023,7:00PM,St. Isidore
+2/17/2023,8:00PM,St. Isidore
+2/17/2023,6:00PM,SJE
+2/17/2023,7:00PM,SJE
+2/17/2023,6:15PM,St. Walter
+2/17/2023,7:15PM,St. Walter
+2/17/2023,8:15PM,St. Walter
+2/17/2023,6:00PM,Holy Trinity
+2/17/2023,7:00PM,Holy Trinity
+2/17/2023,8:00PM,Holy Trinity
+2/18/2023,10:00AM,St. Matthew
+2/18/2023,11:00AM,St. Matthew
+2/18/2023,12:00PM,St. Matthew
+2/18/2023,8:00AM,St. James
+2/18/2023,9:00AM,St. James
+2/18/2023,10:00AM,St. James
+2/18/2023,11:00AM,St. James
+2/18/2023,12:00PM,St. James
+2/18/2023,8:00AM,St. Isidore
+2/18/2023,9:00AM,St. Isidore
+2/18/2023,10:00AM,St. Isidore
+2/18/2023,11:00AM,St. Isidore
+2/18/2023,9:30AM,St. Philip
+2/18/2023,10:30AM,St. Philip
+2/18/2023,11:30AM,St. Philip
+2/18/2023,8:30AM,St. Walter
+2/18/2023,9:30AM,St. Walter
+2/18/2023,10:30AM,St. Walter
+2/18/2023,11:30AM,St. Walter
+2/18/2023,12:30AM,St. Walter
+2/21/2023,6:00PM,St. Walter
+2/21/2023,7:00PM,St. Walter
+2/21/2023,8:00PM,St. Walter
+2/23/2023,6:00PM,St. Matthew
+2/23/2023,7:00PM,St. Matthew
+2/23/2023,8:00PM,St. Matthew
+2/23/2023,6:00PM,St. John Vianney
+2/23/2023,7:00PM,St. John Vianney
+2/23/2023,8:00PM,St. John Vianney
+2/24/2023,6:00PM,St. Matthew
+2/24/2023,7:00PM,St. Matthew
+2/24/2023,8:00PM,St. Matthew
+2/24/2023,6:00PM,St. James
+2/24/2023,7:00PM,St. James
+2/24/2023,8:00PM,St. James
+2/24/2023,5:00PM,St. Isidore
+2/24/2023,6:00PM,St. Isidore
+2/24/2023,7:00PM,St. Isidore
+2/24/2023,8:00PM,St. Isidore
+2/24/2023,6:00PM,SJE
+2/24/2023,7:00PM,SJE
+2/24/2023,6:15PM,St. Walter
+2/24/2023,7:15PM,St. Walter
+2/24/2023,8:15PM,St. Walter
+2/25/2023,10:00AM,St. Matthew
+2/25/2023,11:00AM,St. Matthew
+2/25/2023,12:00PM,St. Matthew
+2/25/2023,8:00AM,St. James
+2/25/2023,9:00AM,St. James
+2/25/2023,10:00AM,St. James
+2/25/2023,11:00AM,St. James
+2/25/2023,12:00PM,St. James
+2/25/2023,8:00AM,St. Isidore
+2/25/2023,9:00AM,St. Isidore
+2/25/2023,10:00AM,St. Isidore
+2/25/2023,11:00AM,St. Isidore
+2/25/2023,12:30PM,Queen of the Rosary
+2/25/2023,1:30PM,Queen of the Rosary
+2/25/2023,2:30PM,Queen of the Rosary
+2/25/2023,9:30AM,St. Philip
+2/25/2023,10:30AM,St. Philip
+2/25/2023,11:30AM,St. Philip
+2/25/2023,9:00AM,Holy Trinity
+2/25/2023,10:00AM,Holy Trinity
+2/25/2023,11:00AM,Holy Trinity
+2/27/2023,6:00PM,St. John Vianney
+2/27/2023,7:00PM,St. John Vianney
+2/27/2023,8:00PM,St. John Vianney
+2/28/2023,6:00PM,St. Walter
+2/28/2023,7:00PM,St. Walter
+2/28/2023,8:00PM,St. Walter
+3/2/2023,6:00PM,St. Matthew
+3/2/2023,7:00PM,St. Matthew
+3/2/2023,8:00PM,St. Matthew
+3/2/2023,6:00PM,St. John Vianney
+3/2/2023,7:00PM,St. John Vianney
+3/2/2023,8:00PM,St. John Vianney
+3/3/2023,6:00PM,St. Matthew
+3/3/2023,7:00PM,St. Matthew
+3/3/2023,8:00PM,St. Matthew
+3/3/2023,6:00PM,St. James
+3/3/2023,7:00PM,St. James
+3/3/2023,8:00PM,St. James
+3/3/2023,5:00PM,St. Isidore
+3/3/2023,6:00PM,St. Isidore
+3/3/2023,7:00PM,St. Isidore
+3/3/2023,8:00PM,St. Isidore
+3/3/2023,6:00PM,SJE
+3/3/2023,7:00PM,SJE
+3/3/2023,6:15PM,St. Walter
+3/3/2023,7:15PM,St. Walter
+3/3/2023,8:15PM,St. Walter
+3/4/2023,10:00AM,St. Matthew
+3/4/2023,11:00AM,St. Matthew
+3/4/2023,12:00PM,St. Matthew
+3/4/2023,8:00AM,St. James
+3/4/2023,9:00AM,St. James
+3/4/2023,10:00AM,St. James
+3/4/2023,11:00AM,St. James
+3/4/2023,12:00PM,St. James
+3/4/2023,8:00AM,St. Isidore
+3/4/2023,9:00AM,St. Isidore
+3/4/2023,10:00AM,St. Isidore
+3/4/2023,11:00AM,St. Isidore
+3/4/2023,8:30AM,St. Walter
+3/4/2023,9:30AM,St. Walter
+3/4/2023,10:30AM,St. Walter
+3/4/2023,11:30AM,St. Walter
+3/4/2023,12:30AM,St. Walter
+3/8/2023,6:15PM,Queen of the Rosary
+3/8/2023,7:15PM,Queen of the Rosary
+3/8/2023,8:15PM,Queen of the Rosary
+3/9/2023,6:00PM,St. Matthew
+3/9/2023,7:00PM,St. Matthew
+3/9/2023,8:00PM,St. Matthew
+3/9/2023,6:00PM,St. Walter
+3/9/2023,7:00PM,St. Walter
+3/9/2023,8:00PM,St. Walter
+3/10/2023,6:00PM,St. Matthew
+3/10/2023,7:00PM,St. Matthew
+3/10/2023,8:00PM,St. Matthew
+3/10/2023,5:00PM,St. Isidore
+3/10/2023,6:00PM,St. Isidore
+3/10/2023,7:00PM,St. Isidore
+3/10/2023,8:00PM,St. Isidore
+3/10/2023,6:00PM,SJE
+3/10/2023,7:00PM,SJE
+3/10/2023,6:30PM,St. Philip
+3/10/2023,7:30PM,St. Philip
+3/10/2023,8:30PM,St. Philip
+3/11/2023,10:00AM,St. Matthew
+3/11/2023,11:00AM,St. Matthew
+3/11/2023,12:00PM,St. Matthew
+3/11/2023,8:00AM,St. Isidore
+3/11/2023,9:00AM,St. Isidore
+3/11/2023,10:00AM,St. Isidore
+3/11/2023,11:00AM,St. Isidore
+3/11/2023,12:30PM,Queen of the Rosary
+3/11/2023,1:30PM,Queen of the Rosary
+3/11/2023,2:30PM,Queen of the Rosary

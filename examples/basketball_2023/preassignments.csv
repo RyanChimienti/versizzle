@@ -1,0 +1,25 @@
+date,time,location,division,team a,team b
+1/9/2023,6:00PM,St. John Vianney,5/6G,St. John Vianney,SJE
+1/14/2023,10:30AM,St. Walter,5/6G,St. Walter A,St. John Vianney
+1/16/2023,7:00PM,St. John Vianney,5/6G,St. Isidore B,St. John Vianney
+1/23/2023,6:00PM,St. John Vianney,5/6G,St. John Vianney,St. Isidore A
+1/28/2023,9:00AM,St. Isidore,5/6G,St. Isidore B,St. John Vianney
+2/2/2023,6:00PM,St. John Vianney,5/6G,St. John Vianney,St. Walter C
+2/6/2023,7:00PM,St. John Vianney,5/6G,St. John Vianney,St. James
+2/17/2023,7:15PM,St. Walter,5/6G,St. Walter B,St. John Vianney
+2/23/2023,6:00PM,St. John Vianney,5/6G,St. Philip,St. John Vianney
+2/25/2023,11:30AM,St. Philip,5/6G,St. John Vianney,St. Philip
+3/3/2023,7:15PM,St. Walter,5/6G,St. Walter C,St. John Vianney
+3/4/2023,8:30AM,St. Walter,5/6G,St. John Vianney,St. Walter A
+1/9/2023,7:00PM,St. John Vianney,7/8B South,St. John Vianney,St. Isidore
+1/14/2023,9:30AM,St. Walter,7/8B South,St. Walter A,St. John Vianney
+1/16/2023,8:00PM,St. John Vianney,7/8B South,SJE A,St. John Vianney
+1/23/2023,7:00PM,St. John Vianney,7/8B South,SJE A,St. John Vianney
+1/28/2023,8:00AM,St. Isidore,7/8B South,St. John Vianney,St. Isidore
+2/2/2023,7:00PM,St. John Vianney,7/8B South,St. Walter B,St. John Vianney
+2/6/2023,6:00PM,St. John Vianney,7/8B South,St. Philip A,St. John Vianney
+2/17/2023,6:15PM,St. Walter,7/8B South,St. Walter B,St. John Vianney
+2/23/2023,7:00PM,St. John Vianney,7/8B South,St. Walter A,St. John Vianney
+2/25/2023,10:30AM,St. Philip,7/8B South,St. Philip A,St. John Vianney
+3/3/2023,6:15PM,St. Walter,7/8B South,St. Walter A,St. John Vianney
+3/4/2023,9:30AM,St. Walter,7/8B South,St. Walter B,St. John Vianney
