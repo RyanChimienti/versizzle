@@ -48,7 +48,6 @@ class PostProcessor:
             if not success:
                 failed_blocks.append((date, location))
 
-        print("Removing awkward gaps complete.")
         if failed_blocks:
             print(
                 "Removing awkward gaps FAILED in some cases! "
