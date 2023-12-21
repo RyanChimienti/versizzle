@@ -1,0 +1,412 @@
+date,time,location
+1/10/2024,5:00PM,St. John Vianney
+1/10/2024,6:00PM,St. John Vianney
+1/10/2024,7:00PM,St. John Vianney
+1/10/2024,8:00PM,St. John Vianney
+1/10/2024,6:00PM,St. Walter
+1/10/2024,7:00PM,St. Walter
+1/10/2024,8:00PM,St. Walter
+1/11/2024,6:00PM,St. James
+1/11/2024,7:00PM,St. James
+1/11/2024,8:00PM,St. James
+1/12/2024,6:00PM,Eastview Middle School
+1/12/2024,7:00PM,Eastview Middle School
+1/12/2024,8:00PM,Eastview Middle School
+1/12/2024,5:00PM,St. Isidore
+1/12/2024,6:00PM,St. Isidore
+1/12/2024,7:00PM,St. Isidore
+1/12/2024,8:00PM,St. Isidore
+1/12/2024,6:00PM,St. James
+1/12/2024,7:00PM,St. James
+1/12/2024,8:00PM,St. James
+1/12/2024,6:30PM,St. Matthew
+1/12/2024,7:30PM,St. Matthew
+1/12/2024,8:30PM,St. Matthew
+1/12/2024,6:00PM,St. Walter
+1/12/2024,7:00PM,St. Walter
+1/12/2024,8:00PM,St. Walter
+1/13/2024,8:00AM,St. John Vianney
+1/13/2024,9:00AM,St. John Vianney
+1/13/2024,10:00AM,St. John Vianney
+1/13/2024,11:00AM,St. John Vianney
+1/13/2024,12:00PM,St. John Vianney
+1/13/2024,1:00PM,St. John Vianney
+1/13/2024,12:00PM,St. Matthew
+1/13/2024,1:00PM,St. Matthew
+1/13/2024,2:00PM,St. Matthew
+1/13/2024,3:00PM,St. Matthew
+1/16/2024,5:30PM,St. Isidore
+1/16/2024,6:30PM,St. Isidore
+1/16/2024,7:30PM,St. Isidore
+1/17/2024,5:00PM,St. John Vianney
+1/17/2024,6:00PM,St. John Vianney
+1/17/2024,7:00PM,St. John Vianney
+1/17/2024,8:00PM,St. John Vianney
+1/19/2024,6:30PM,Christ the King
+1/19/2024,7:30PM,Christ the King
+1/19/2024,6:00PM,Eastview Middle School
+1/19/2024,7:00PM,Eastview Middle School
+1/19/2024,8:00PM,Eastview Middle School
+1/19/2024,5:00PM,St. Isidore
+1/19/2024,6:00PM,St. Isidore
+1/19/2024,7:00PM,St. Isidore
+1/19/2024,8:00PM,St. Isidore
+1/19/2024,6:00PM,St. James
+1/19/2024,7:00PM,St. James
+1/19/2024,8:00PM,St. James
+1/19/2024,6:30PM,St. Matthew
+1/19/2024,7:30PM,St. Matthew
+1/19/2024,8:30PM,St. Matthew
+1/19/2024,6:00PM,St. Philip
+1/19/2024,7:00PM,St. Philip
+1/19/2024,8:00PM,St. Philip
+1/20/2024,9:00AM,Christ the King
+1/20/2024,10:00AM,Christ the King
+1/20/2024,8:00AM,St. John Vianney
+1/20/2024,9:00AM,St. John Vianney
+1/20/2024,10:00AM,St. John Vianney
+1/20/2024,11:00AM,St. John Vianney
+1/20/2024,12:00PM,St. John Vianney
+1/20/2024,1:00PM,St. John Vianney
+1/20/2024,8:00AM,St. Isidore
+1/20/2024,9:00AM,St. Isidore
+1/20/2024,10:00AM,St. Isidore
+1/20/2024,11:00AM,St. Isidore
+1/20/2024,9:00AM,St. James
+1/20/2024,10:00AM,St. James
+1/20/2024,11:00AM,St. James
+1/20/2024,9:00AM,St. Philip
+1/20/2024,10:00AM,St. Philip
+1/20/2024,11:00AM,St. Philip
+1/20/2024,9:00AM,St. Walter
+1/20/2024,10:00AM,St. Walter
+1/20/2024,11:00AM,St. Walter
+1/20/2024,12:00PM,St. Walter
+1/22/2024,5:00PM,St. John Vianney
+1/22/2024,6:00PM,St. John Vianney
+1/22/2024,7:00PM,St. John Vianney
+1/22/2024,8:00PM,St. John Vianney
+1/23/2024,6:00PM,St. Walter
+1/23/2024,7:00PM,St. Walter
+1/23/2024,8:00PM,St. Walter
+1/25/2024,6:00PM,Eastview Middle School
+1/25/2024,7:00PM,Eastview Middle School
+1/25/2024,8:00PM,Eastview Middle School
+1/25/2024,6:00PM,St. James
+1/25/2024,7:00PM,St. James
+1/25/2024,8:00PM,St. James
+1/26/2024,5:00PM,St. Isidore
+1/26/2024,6:00PM,St. Isidore
+1/26/2024,7:00PM,St. Isidore
+1/26/2024,8:00PM,St. Isidore
+1/26/2024,6:00PM,St. James
+1/26/2024,7:00PM,St. James
+1/26/2024,8:00PM,St. James
+1/26/2024,6:30PM,St. Matthew
+1/26/2024,7:30PM,St. Matthew
+1/26/2024,8:30PM,St. Matthew
+1/26/2024,6:00PM,St. Walter
+1/26/2024,7:00PM,St. Walter
+1/26/2024,8:00PM,St. Walter
+1/27/2024,8:00AM,St. John Vianney
+1/27/2024,9:00AM,St. John Vianney
+1/27/2024,10:00AM,St. John Vianney
+1/27/2024,11:00AM,St. John Vianney
+1/27/2024,12:00PM,St. John Vianney
+1/27/2024,1:00PM,St. John Vianney
+1/27/2024,12:00PM,St. Matthew
+1/27/2024,1:00PM,St. Matthew
+1/27/2024,2:00PM,St. Matthew
+1/27/2024,3:00PM,St. Matthew
+1/27/2024,9:00AM,St. Walter
+1/27/2024,10:00AM,St. Walter
+1/27/2024,11:00AM,St. Walter
+1/27/2024,12:00PM,St. Walter
+1/29/2024,5:00PM,St. John Vianney
+1/29/2024,6:00PM,St. John Vianney
+1/29/2024,7:00PM,St. John Vianney
+1/29/2024,8:00PM,St. John Vianney
+1/30/2024,5:30PM,St. Isidore
+1/30/2024,6:30PM,St. Isidore
+1/30/2024,7:30PM,St. Isidore
+1/30/2024,6:00PM,St. Walter
+1/30/2024,7:00PM,St. Walter
+1/30/2024,8:00PM,St. Walter
+2/1/2024,5:00PM,St. John Vianney
+2/1/2024,6:00PM,St. John Vianney
+2/1/2024,7:00PM,St. John Vianney
+2/1/2024,8:00PM,St. John Vianney
+2/1/2024,6:00PM,St. Walter
+2/1/2024,7:00PM,St. Walter
+2/1/2024,8:00PM,St. Walter
+2/2/2024,6:00PM,Eastview Middle School
+2/2/2024,7:00PM,Eastview Middle School
+2/2/2024,8:00PM,Eastview Middle School
+2/2/2024,5:00PM,St. Isidore
+2/2/2024,6:00PM,St. Isidore
+2/2/2024,7:00PM,St. Isidore
+2/2/2024,8:00PM,St. Isidore
+2/2/2024,6:00PM,St. James
+2/2/2024,7:00PM,St. James
+2/2/2024,8:00PM,St. James
+2/2/2024,6:30PM,St. Matthew
+2/2/2024,7:30PM,St. Matthew
+2/2/2024,8:30PM,St. Matthew
+2/3/2024,8:00AM,St. Isidore
+2/3/2024,9:00AM,St. Isidore
+2/3/2024,10:00AM,St. Isidore
+2/3/2024,11:00AM,St. Isidore
+2/3/2024,12:00PM,St. Matthew
+2/3/2024,1:00PM,St. Matthew
+2/3/2024,2:00PM,St. Matthew
+2/3/2024,3:00PM,St. Matthew
+2/5/2024,5:00PM,St. John Vianney
+2/5/2024,6:00PM,St. John Vianney
+2/5/2024,7:00PM,St. John Vianney
+2/5/2024,8:00PM,St. John Vianney
+2/7/2024,5:00PM,St. John Vianney
+2/7/2024,6:00PM,St. John Vianney
+2/7/2024,7:00PM,St. John Vianney
+2/7/2024,8:00PM,St. John Vianney
+2/8/2024,5:00PM,St. John Vianney
+2/8/2024,6:00PM,St. John Vianney
+2/8/2024,7:00PM,St. John Vianney
+2/8/2024,8:00PM,St. John Vianney
+2/8/2024,6:00PM,St. James
+2/8/2024,7:00PM,St. James
+2/8/2024,8:00PM,St. James
+2/9/2024,6:30PM,Christ the King
+2/9/2024,7:30PM,Christ the King
+2/9/2024,6:00PM,Eastview Middle School
+2/9/2024,7:00PM,Eastview Middle School
+2/9/2024,8:00PM,Eastview Middle School
+2/9/2024,5:00PM,St. John Vianney
+2/9/2024,6:00PM,St. John Vianney
+2/9/2024,7:00PM,St. John Vianney
+2/9/2024,8:00PM,St. John Vianney
+2/9/2024,5:00PM,St. Isidore
+2/9/2024,6:00PM,St. Isidore
+2/9/2024,7:00PM,St. Isidore
+2/9/2024,8:00PM,St. Isidore
+2/9/2024,6:00PM,St. James
+2/9/2024,7:00PM,St. James
+2/9/2024,8:00PM,St. James
+2/9/2024,6:00PM,St. Philip
+2/9/2024,7:00PM,St. Philip
+2/9/2024,8:00PM,St. Philip
+2/10/2024,9:00AM,Christ the King
+2/10/2024,10:00AM,Christ the King
+2/10/2024,8:00AM,St. John Vianney
+2/10/2024,9:00AM,St. John Vianney
+2/10/2024,10:00AM,St. John Vianney
+2/10/2024,11:00AM,St. John Vianney
+2/10/2024,12:00PM,St. John Vianney
+2/10/2024,1:00PM,St. John Vianney
+2/10/2024,9:00AM,St. Philip
+2/10/2024,10:00AM,St. Philip
+2/10/2024,11:00AM,St. Philip
+2/10/2024,9:00AM,St. Walter
+2/10/2024,10:00AM,St. Walter
+2/10/2024,11:00AM,St. Walter
+2/10/2024,12:00PM,St. Walter
+2/12/2024,5:00PM,St. John Vianney
+2/12/2024,6:00PM,St. John Vianney
+2/12/2024,7:00PM,St. John Vianney
+2/12/2024,8:00PM,St. John Vianney
+2/13/2024,5:30PM,St. Isidore
+2/13/2024,6:30PM,St. Isidore
+2/13/2024,7:30PM,St. Isidore
+2/13/2024,6:00PM,St. Walter
+2/13/2024,7:00PM,St. Walter
+2/13/2024,8:00PM,St. Walter
+2/14/2024,5:00PM,St. John Vianney
+2/14/2024,6:00PM,St. John Vianney
+2/14/2024,7:00PM,St. John Vianney
+2/14/2024,8:00PM,St. John Vianney
+2/15/2024,6:00PM,St. Walter
+2/15/2024,7:00PM,St. Walter
+2/15/2024,8:00PM,St. Walter
+2/16/2024,6:00PM,Eastview Middle School
+2/16/2024,7:00PM,Eastview Middle School
+2/16/2024,8:00PM,Eastview Middle School
+2/16/2024,5:00PM,St. John Vianney
+2/16/2024,6:00PM,St. John Vianney
+2/16/2024,7:00PM,St. John Vianney
+2/16/2024,8:00PM,St. John Vianney
+2/16/2024,5:00PM,St. Isidore
+2/16/2024,6:00PM,St. Isidore
+2/16/2024,7:00PM,St. Isidore
+2/16/2024,8:00PM,St. Isidore
+2/16/2024,6:30PM,St. Matthew
+2/16/2024,7:30PM,St. Matthew
+2/16/2024,8:30PM,St. Matthew
+2/16/2024,6:00PM,St. Philip
+2/16/2024,7:00PM,St. Philip
+2/16/2024,8:00PM,St. Philip
+2/17/2024,8:00AM,St. John Vianney
+2/17/2024,9:00AM,St. John Vianney
+2/17/2024,10:00AM,St. John Vianney
+2/17/2024,11:00AM,St. John Vianney
+2/17/2024,12:00PM,St. John Vianney
+2/17/2024,1:00PM,St. John Vianney
+2/17/2024,8:00AM,St. Isidore
+2/17/2024,9:00AM,St. Isidore
+2/17/2024,10:00AM,St. Isidore
+2/17/2024,11:00AM,St. Isidore
+2/17/2024,9:00AM,St. Philip
+2/17/2024,10:00AM,St. Philip
+2/17/2024,11:00AM,St. Philip
+2/20/2024,5:00PM,St. John Vianney
+2/20/2024,6:00PM,St. John Vianney
+2/20/2024,7:00PM,St. John Vianney
+2/20/2024,8:00PM,St. John Vianney
+2/20/2024,6:00PM,St. Walter
+2/20/2024,7:00PM,St. Walter
+2/20/2024,8:00PM,St. Walter
+2/21/2024,5:00PM,St. John Vianney
+2/21/2024,6:00PM,St. John Vianney
+2/21/2024,7:00PM,St. John Vianney
+2/21/2024,8:00PM,St. John Vianney
+2/22/2024,5:00PM,St. John Vianney
+2/22/2024,6:00PM,St. John Vianney
+2/22/2024,7:00PM,St. John Vianney
+2/22/2024,8:00PM,St. John Vianney
+2/23/2024,6:30PM,Christ the King
+2/23/2024,7:30PM,Christ the King
+2/23/2024,6:00PM,Eastview Middle School
+2/23/2024,7:00PM,Eastview Middle School
+2/23/2024,8:00PM,Eastview Middle School
+2/23/2024,5:00PM,St. John Vianney
+2/23/2024,6:00PM,St. John Vianney
+2/23/2024,7:00PM,St. John Vianney
+2/23/2024,8:00PM,St. John Vianney
+2/23/2024,5:00PM,St. Isidore
+2/23/2024,6:00PM,St. Isidore
+2/23/2024,7:00PM,St. Isidore
+2/23/2024,8:00PM,St. Isidore
+2/23/2024,6:30PM,St. Matthew
+2/23/2024,7:30PM,St. Matthew
+2/23/2024,8:30PM,St. Matthew
+2/23/2024,6:00PM,St. Philip
+2/23/2024,7:00PM,St. Philip
+2/23/2024,8:00PM,St. Philip
+2/23/2024,6:00PM,St. Walter
+2/23/2024,7:00PM,St. Walter
+2/23/2024,8:00PM,St. Walter
+2/24/2024,9:00AM,Christ the King
+2/24/2024,10:00AM,Christ the King
+2/24/2024,8:00AM,St. John Vianney
+2/24/2024,9:00AM,St. John Vianney
+2/24/2024,10:00AM,St. John Vianney
+2/24/2024,11:00AM,St. John Vianney
+2/24/2024,12:00PM,St. John Vianney
+2/24/2024,1:00PM,St. John Vianney
+2/24/2024,9:00AM,St. James
+2/24/2024,10:00AM,St. James
+2/24/2024,11:00AM,St. James
+2/24/2024,12:00PM,St. James
+2/24/2024,12:00PM,St. Matthew
+2/24/2024,1:00PM,St. Matthew
+2/24/2024,2:00PM,St. Matthew
+2/24/2024,3:00PM,St. Matthew
+2/24/2024,9:00AM,St. Philip
+2/24/2024,10:00AM,St. Philip
+2/24/2024,11:00AM,St. Philip
+2/26/2024,5:00PM,St. John Vianney
+2/26/2024,6:00PM,St. John Vianney
+2/26/2024,7:00PM,St. John Vianney
+2/26/2024,8:00PM,St. John Vianney
+2/27/2024,5:30PM,St. Isidore
+2/27/2024,6:30PM,St. Isidore
+2/27/2024,7:30PM,St. Isidore
+2/27/2024,6:00PM,St. Walter
+2/27/2024,7:00PM,St. Walter
+2/27/2024,8:00PM,St. Walter
+2/29/2024,6:00PM,Eastview Middle School
+2/29/2024,7:00PM,Eastview Middle School
+2/29/2024,8:00PM,Eastview Middle School
+2/29/2024,5:00PM,St. John Vianney
+2/29/2024,6:00PM,St. John Vianney
+2/29/2024,7:00PM,St. John Vianney
+2/29/2024,8:00PM,St. John Vianney
+2/29/2024,6:00PM,St. James
+2/29/2024,7:00PM,St. James
+2/29/2024,8:00PM,St. James
+3/1/2024,5:00PM,St. John Vianney
+3/1/2024,6:00PM,St. John Vianney
+3/1/2024,7:00PM,St. John Vianney
+3/1/2024,8:00PM,St. John Vianney
+3/1/2024,5:00PM,St. Isidore
+3/1/2024,6:00PM,St. Isidore
+3/1/2024,7:00PM,St. Isidore
+3/1/2024,8:00PM,St. Isidore
+3/1/2024,6:30PM,St. Matthew
+3/1/2024,7:30PM,St. Matthew
+3/1/2024,8:30PM,St. Matthew
+3/1/2024,6:00PM,St. Walter
+3/1/2024,7:00PM,St. Walter
+3/1/2024,8:00PM,St. Walter
+3/2/2024,11:00AM,St. Walter
+3/2/2024,12:15PM,St. Walter
+3/4/2024,5:00PM,St. John Vianney
+3/4/2024,6:00PM,St. John Vianney
+3/4/2024,7:00PM,St. John Vianney
+3/4/2024,8:00PM,St. John Vianney
+3/4/2024,6:00PM,St. Walter
+3/4/2024,7:00PM,St. Walter
+3/4/2024,8:00PM,St. Walter
+3/5/2024,5:00PM,St. John Vianney
+3/5/2024,6:00PM,St. John Vianney
+3/5/2024,7:00PM,St. John Vianney
+3/5/2024,8:00PM,St. John Vianney
+3/5/2024,6:00PM,St. Walter
+3/5/2024,7:00PM,St. Walter
+3/5/2024,8:00PM,St. Walter
+3/6/2024,5:00PM,St. John Vianney
+3/6/2024,6:00PM,St. John Vianney
+3/6/2024,7:00PM,St. John Vianney
+3/6/2024,8:00PM,St. John Vianney
+3/6/2024,6:00PM,St. Walter
+3/6/2024,7:00PM,St. Walter
+3/6/2024,8:00PM,St. Walter
+3/7/2024,5:00PM,St. John Vianney
+3/7/2024,6:00PM,St. John Vianney
+3/7/2024,7:00PM,St. John Vianney
+3/7/2024,8:00PM,St. John Vianney
+3/7/2024,6:00PM,St. Walter
+3/7/2024,7:00PM,St. Walter
+3/7/2024,8:00PM,St. Walter
+3/8/2024,5:00PM,St. John Vianney
+3/8/2024,6:00PM,St. John Vianney
+3/8/2024,7:00PM,St. John Vianney
+3/8/2024,8:00PM,St. John Vianney
+3/8/2024,5:00PM,St. Isidore
+3/8/2024,6:00PM,St. Isidore
+3/8/2024,7:00PM,St. Isidore
+3/8/2024,8:00PM,St. Isidore
+3/8/2024,6:30PM,St. Matthew
+3/8/2024,7:30PM,St. Matthew
+3/8/2024,8:30PM,St. Matthew
+3/8/2024,6:00PM,St. Philip
+3/8/2024,7:00PM,St. Philip
+3/8/2024,8:00PM,St. Philip
+3/8/2024,6:00PM,St. Walter
+3/8/2024,7:00PM,St. Walter
+3/8/2024,8:00PM,St. Walter
+3/9/2024,8:00AM,St. John Vianney
+3/9/2024,9:00AM,St. John Vianney
+3/9/2024,10:00AM,St. John Vianney
+3/9/2024,11:00AM,St. John Vianney
+3/9/2024,12:00PM,St. John Vianney
+3/9/2024,1:00PM,St. John Vianney
+3/9/2024,9:00AM,St. James
+3/9/2024,10:00AM,St. James
+3/9/2024,11:00AM,St. James
+3/9/2024,12:00PM,St. James
+3/9/2024,9:00AM,St. Philip
+3/9/2024,10:00AM,St. Philip
+3/9/2024,11:00AM,St. Philip
+3/9/2024,9:00AM,St. Walter
+3/9/2024,10:00AM,St. Walter
+3/9/2024,11:00AM,St. Walter
+3/9/2024,12:00PM,St. Walter

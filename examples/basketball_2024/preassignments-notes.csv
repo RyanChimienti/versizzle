@@ -1,0 +1,79 @@
+Goals:
+
+All these are back-to-back:
+    - St. John Vianney 5/6B
+    - St. John Vianney 7/8G
+    - St. John Vianney 7/8B
+These are back-to-back:
+    - St. Walter A 5/6G
+    - St. Walter A 7/8B
+
+========================================
+
+date,time,location,division,team a,team b
+
+1/10/2024,5:00PM,St. John Vianney,5/6B,St. John Vianney,St. Isidore
+1/13/2024,9:00AM,St. John Vianney,5/6B,St. John Vianney,St. Philip A
+1/19/2024,6:00PM,St. James,5/6B,St. John Vianney,St. James
+1/26/2024,6:00PM,St. Walter,5/6B,St. John Vianney,St. Walter B
+1/27/2024,12:00PM,St. John Vianney,5/6B,St. John Vianney,St. Walter A
+2/2/2024,6:00PM,Eastview Middle School,5/6B,St. John Vianney,SJE B
+2/5/2024,5:00PM,St. John Vianney,5/6B,St. John Vianney,SJE A
+2/9/2024,5:00PM,St. Isidore,5/6B,St. John Vianney,St. Isidore
+2/10/2024,10:00AM,St. John Vianney,5/6B,St. John Vianney,St. Philip B
+2/15/2024,6:00PM,St. Walter,5/6B,St. John Vianney,St. Walter A
+2/24/2024,11:00AM,St. Philip,5/6B,St. John Vianney,St. Philip B
+3/1/2024,5:00PM,St. John Vianney,5/6B,St. John Vianney,St. Philip A
+
+1/10/2024,6:00PM,St. John Vianney,7/8G,St. John Vianney,St. Isidore
+1/13/2024,10:00AM,St. John Vianney,7/8G,St. John Vianney,SJE A
+1/19/2024,8:00PM,St. James,7/8G,St. John Vianney,St. James
+1/26/2024,7:00PM,St. Walter,7/8G,St. John Vianney,St. Walter B
+1/27/2024,11:00AM,St. John Vianney,7/8G,St. John Vianney,St. Walter A
+2/2/2024,7:00PM,Eastview Middle School,7/8G,St. John Vianney,SJE A
+2/5/2024,7:00PM,St. John Vianney,7/8G,St. John Vianney,SJE B
+2/9/2024,7:00PM,St. Isidore,7/8G,St. John Vianney,St. Isidore
+2/10/2024,11:00AM,St. John Vianney,7/8G,St. John Vianney,St. James
+2/15/2024,7:00PM,St. Walter,7/8G,St. John Vianney,St. Walter A
+2/24/2024,9:00AM,St. Philip,7/8G,St. John Vianney,St. Philip
+3/1/2024,6:00PM,St. John Vianney,7/8G,St. John Vianney,St. Philip
+
+1/10/2024,7:00PM,St. John Vianney,7/8B,St. John Vianney,St. Philip B
+1/13/2024,8:00AM,St. John Vianney,7/8B,St. John Vianney,St. Isidore A
+1/19/2024,7:00PM,St. James,7/8B,St. John Vianney,St. James
+1/26/2024,8:00PM,St. Walter,7/8B,St. John Vianney,St. Walter B
+1/27/2024,10:00AM,St. John Vianney,7/8B,St. John Vianney,St. Walter A
+2/2/2024,8:00PM,Eastview Middle School,7/8B,St. John Vianney,SJE
+2/5/2024,6:00PM,St. John Vianney,7/8B,St. John Vianney,St. Matthew
+2/9/2024,6:00PM,St. Isidore,7/8B,St. John Vianney,St. Isidore B
+2/10/2024,12:00PM,St. John Vianney,7/8B,St. John Vianney,St. Philip A
+2/13/2024,6:30PM,St. Isidore,7/8B,St. John Vianney,St. Isidore A
+2/24/2024,10:00AM,St. Philip,7/8B,St. John Vianney,St. Philip A
+3/1/2024,7:00PM,St. John Vianney,7/8B,St. John Vianney,St. Isidore B
+
+
+1/10/2024,6:00PM,St. Walter,5/6G,St. Walter A,St. Walter B
+1/19/2024,6:00PM,Eastview Middle School,5/6G,St. Walter A,SJE
+1/23/2024,6:00PM,St. Walter,5/6G,St. Walter A,St. Isidore
+1/27/2024,9:00AM,St. John Vianney,5/6G,St. Walter A,St. John Vianney
+2/1/2024,6:00PM,St. Walter,5/6G,St. Walter A,SJE
+2/9/2024,6:00PM,St. James,5/6G,St. Walter A,St. James
+2/10/2024,10:00AM,Christ the King,5/6G,St. Walter A,Holy Trinity
+2/13/2024,6:00PM,St. Walter,5/6G,St. Walter A,Holy Trinity
+2/20/2024,6:00PM,St. Walter,5/6G,St. Walter A,St. James
+2/23/2024,6:00PM,St. Walter,5/6G,St. Walter A,St. Walter B
+2/27/2024,5:30PM,St. Isidore,5/6G,St. Walter A,St. Isidore
+3/1/2024,6:00PM,St. Walter,5/6G,St. Walter A,St. John Vianney
+
+1/10/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Walter B
+1/13/2024,1:00PM,St. Matthew,7/8B,St. Walter A,St. Matthew
+1/19/2024,7:00PM,Eastview Middle School,7/8B,St. Walter A,SJE
+1/23/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Isidore A
+# vs John Vianney on 1/27 10:00AM at Vianney - see above
+2/1/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. James
+2/9/2024,7:00PM,St. James,7/8B,St. Walter A,St. James
+2/13/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Isidore B
+2/20/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Philip B
+2/23/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Walter B
+2/27/2024,6:30PM,St. Isidore,7/8B,St. Walter A,St. Isidore B
+3/1/2024,7:00PM,St. Walter,7/8B,St. Walter A,St. Philip A

@@ -1,0 +1,205 @@
+division,team a,team b
+5/6G,Holy Trinity,St. Isidore
+5/6G,Holy Trinity,St. James
+5/6G,Holy Trinity,St. John Vianney
+5/6G,Holy Trinity,SJE
+5/6G,Holy Trinity,St. Walter A
+5/6G,Holy Trinity,St. Walter B
+5/6G,St. Isidore,St. James
+5/6G,St. Isidore,St. John Vianney
+5/6G,St. Isidore,SJE
+5/6G,St. Isidore,St. Walter A
+5/6G,St. Isidore,St. Walter B
+5/6G,St. James,St. John Vianney
+5/6G,St. James,SJE
+5/6G,St. James,St. Walter A
+5/6G,St. James,St. Walter B
+5/6G,St. John Vianney,SJE
+5/6G,St. John Vianney,St. Walter A
+5/6G,St. John Vianney,St. Walter B
+5/6G,SJE,St. Walter A
+5/6G,SJE,St. Walter B
+5/6G,St. Walter A,St. Walter B
+5/6G,Holy Trinity,St. Isidore
+5/6G,Holy Trinity,St. James
+5/6G,Holy Trinity,St. John Vianney
+5/6G,Holy Trinity,SJE
+5/6G,Holy Trinity,St. Walter A
+5/6G,Holy Trinity,St. Walter B
+5/6G,St. Isidore,St. James
+5/6G,St. Isidore,St. John Vianney
+5/6G,St. Isidore,SJE
+5/6G,St. Isidore,St. Walter A
+5/6G,St. Isidore,St. Walter B
+5/6G,St. James,St. John Vianney
+5/6G,St. James,SJE
+5/6G,St. James,St. Walter A
+5/6G,St. James,St. Walter B
+5/6G,St. John Vianney,SJE
+5/6G,St. John Vianney,St. Walter A
+5/6G,St. John Vianney,St. Walter B
+5/6G,SJE,St. Walter A
+5/6G,SJE,St. Walter B
+5/6G,St. Walter A,St. Walter B
+5/6B,St. Isidore,St. James
+5/6B,St. Isidore,St. John Vianney
+5/6B,St. Isidore,SJE A
+5/6B,St. Isidore,SJE B
+5/6B,St. Isidore,St. Philip A
+5/6B,St. Isidore,St. Philip B
+5/6B,St. Isidore,St. Walter A
+5/6B,St. Isidore,St. Walter B
+5/6B,St. James,St. John Vianney
+5/6B,St. James,SJE A
+5/6B,St. James,SJE B
+5/6B,St. James,St. Philip A
+5/6B,St. James,St. Philip B
+5/6B,St. James,St. Walter A
+5/6B,St. James,St. Walter B
+5/6B,St. John Vianney,SJE A
+5/6B,St. John Vianney,SJE B
+5/6B,St. John Vianney,St. Philip A
+5/6B,St. John Vianney,St. Philip B
+5/6B,St. John Vianney,St. Walter A
+5/6B,St. John Vianney,St. Walter B
+5/6B,SJE A,SJE B
+5/6B,SJE A,St. Philip A
+5/6B,SJE A,St. Philip B
+5/6B,SJE A,St. Walter A
+5/6B,SJE A,St. Walter B
+5/6B,SJE B,St. Philip A
+5/6B,SJE B,St. Philip B
+5/6B,SJE B,St. Walter A
+5/6B,SJE B,St. Walter B
+5/6B,St. Philip A,St. Philip B
+5/6B,St. Philip A,St. Walter A
+5/6B,St. Philip A,St. Walter B
+5/6B,St. Philip B,St. Walter A
+5/6B,St. Philip B,St. Walter B
+5/6B,St. Walter A,St. Walter B
+5/6B,St. Isidore,St. Walter B
+5/6B,St. James,St. Walter A
+5/6B,St. John Vianney,St. Philip B
+5/6B,SJE A,St. Philip A
+5/6B,SJE B,St. Philip A
+5/6B,St. Isidore,St. John Vianney
+5/6B,St. James,St. Philip B
+5/6B,SJE A,St. Walter B
+5/6B,SJE B,St. Walter A
+5/6B,St. Isidore,SJE B
+5/6B,St. James,St. Philip A
+5/6B,St. John Vianney,St. Philip A
+5/6B,SJE A,St. Philip B
+5/6B,SJE A,St. James
+5/6B,SJE B,St. Walter B
+5/6B,St. Walter A,St. Walter B
+5/6B,St. Isidore,St. Philip B
+5/6B,St. John Vianney,St. Walter A
+7/8G,St. Isidore,St. James
+7/8G,St. Isidore,St. John Vianney
+7/8G,St. Isidore,SJE A
+7/8G,St. Isidore,SJE B
+7/8G,St. Isidore,St. Philip
+7/8G,St. Isidore,St. Walter A
+7/8G,St. Isidore,St. Walter B
+7/8G,St. James,St. John Vianney
+7/8G,St. James,SJE A
+7/8G,St. James,SJE B
+7/8G,St. James,St. Philip
+7/8G,St. James,St. Walter A
+7/8G,St. James,St. Walter B
+7/8G,St. John Vianney,SJE A
+7/8G,St. John Vianney,SJE B
+7/8G,St. John Vianney,St. Philip
+7/8G,St. John Vianney,St. Walter A
+7/8G,St. John Vianney,St. Walter B
+7/8G,SJE A,SJE B
+7/8G,SJE A,St. Philip
+7/8G,SJE A,St. Walter A
+7/8G,SJE A,St. Walter B
+7/8G,SJE B,St. Philip
+7/8G,SJE B,St. Walter A
+7/8G,SJE B,St. Walter B
+7/8G,St. Philip,St. Walter A
+7/8G,St. Philip,St. Walter B
+7/8G,St. Walter A,St. Walter B
+7/8G,St. Isidore,St. Walter B
+7/8G,St. James,St. Walter A
+7/8G,St. John Vianney,St. Philip
+7/8G,SJE A,SJE B
+7/8G,St. Isidore,SJE A
+7/8G,St. James,St. John Vianney
+7/8G,SJE B,St. Walter B
+7/8G,St. Philip,St. Walter A
+7/8G,St. Isidore,St. James
+7/8G,St. John Vianney,SJE A
+7/8G,SJE B,St. Philip
+7/8G,St. Walter A,St. Walter B
+7/8G,St. Isidore,St. John Vianney
+7/8G,SJE B,St. Walter A
+7/8G,St. James,SJE A
+7/8G,St. Philip,St. Walter B
+7/8G,St. Isidore,SJE B
+7/8G,St. James,St. Philip
+7/8G,St. John Vianney,St. Walter A
+7/8G,SJE A,St. Walter B
+7/8B,St. Isidore A,St. Isidore B
+7/8B,St. Isidore A,St. James
+7/8B,St. Isidore A,St. John Vianney
+7/8B,St. Isidore A,SJE
+7/8B,St. Isidore A,St. Matthew
+7/8B,St. Isidore A,St. Philip A
+7/8B,St. Isidore A,St. Philip B
+7/8B,St. Isidore A,St. Walter A
+7/8B,St. Isidore A,St. Walter B
+7/8B,St. Isidore B,St. James
+7/8B,St. Isidore B,St. John Vianney
+7/8B,St. Isidore B,SJE
+7/8B,St. Isidore B,St. Matthew
+7/8B,St. Isidore B,St. Philip A
+7/8B,St. Isidore B,St. Philip B
+7/8B,St. Isidore B,St. Walter A
+7/8B,St. Isidore B,St. Walter B
+7/8B,St. James,St. John Vianney
+7/8B,St. James,SJE
+7/8B,St. James,St. Matthew
+7/8B,St. James,St. Philip A
+7/8B,St. James,St. Philip B
+7/8B,St. James,St. Walter A
+7/8B,St. James,St. Walter B
+7/8B,St. John Vianney,SJE
+7/8B,St. John Vianney,St. Matthew
+7/8B,St. John Vianney,St. Philip A
+7/8B,St. John Vianney,St. Philip B
+7/8B,St. John Vianney,St. Walter A
+7/8B,St. John Vianney,St. Walter B
+7/8B,SJE,St. Matthew
+7/8B,SJE,St. Philip A
+7/8B,SJE,St. Philip B
+7/8B,SJE,St. Walter A
+7/8B,SJE,St. Walter B
+7/8B,St. Matthew,St. Philip A
+7/8B,St. Matthew,St. Philip B
+7/8B,St. Matthew,St. Walter A
+7/8B,St. Matthew,St. Walter B
+7/8B,St. Philip A,St. Philip B
+7/8B,St. Philip A,St. Walter A
+7/8B,St. Philip A,St. Walter B
+7/8B,St. Philip B,St. Walter A
+7/8B,St. Philip B,St. Walter B
+7/8B,St. Walter A,St. Walter B
+7/8B,St. Isidore A,St. Walter B
+7/8B,St. Isidore B,St. Walter A
+7/8B,St. James,St. Philip B
+7/8B,St. John Vianney,St. Philip A
+7/8B,SJE,St. Matthew
+7/8B,St. Isidore A,SJE
+7/8B,St. Isidore B,St. John Vianney
+7/8B,St. Matthew,St. Walter B
+7/8B,St. Philip A,St. Philip B
+7/8B,St. James,St. Walter A
+7/8B,St. Isidore A,St. John Vianney
+7/8B,St. Isidore B,St. James
+7/8B,SJE,St. Philip B
+7/8B,St. Matthew,St. Philip A
+7/8B,St. Walter A,St. Walter B
