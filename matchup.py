@@ -95,6 +95,20 @@ class Matchup:
         away_team = self.team_b if self.team_a == home_team else self.team_a
         return home_team, away_team
 
+    def is_isolated(self):
+        """
+        A matchup is called isolated if it's the only matchup at its location and on its
+        day.
+        """
+
+        if self.selected_gameslot is None:
+            raise Exception(
+                "Can't check whether matchup is isolated without a selected gameslot"
+            )
+
+        gameslot = self.selected_gameslot
+        return gameslot.location.num_games_by_date[gameslot.date] == 1
+
     def __str__(self):
         return f"< {self.division} - {self.team_a.name} vs {self.team_b.name} >"
 
