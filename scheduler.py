@@ -1,9 +1,9 @@
+from config import config
 import calendar
 from collections import defaultdict
 import csv
 from datetime import datetime, timedelta
-import os
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 from blackout import Blackout
 from gameslot import Gameslot
 from location import Location
@@ -62,13 +62,7 @@ def generate_schedule(
         log_seed_info_from_test_run(output_dir_path, random_seed)
         return
 
-    # print_master_schedule()
-    # print_breakout_schedules()
-    create_pasteable_schedule_file(output_dir_path)
-    print_non_preferred_gameslot_metrics()
-    print_block_size_metrics()
-    print_weekday_metrics()
-    print_consecutive_game_day_metrics()
+    write_output_files(output_dir_path)
 
 
 def clear_globals():
@@ -589,8 +583,6 @@ def assign_preferred_home_teams_to_matchups():
                     )
                     matchup.select_preferred_home_team(home_team)
 
-    print_home_preference_metrics()
-
 
 def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
     team_1_home_ratio = (
@@ -609,24 +601,6 @@ def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
         return random.choice([team_1, team_2])
 
     return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
-
-
-def print_home_preference_metrics():
-    table = [
-        ["# of Preferred Home Games", "# of Teams With That Many"],
-        ["-------------------------", "-------------------------"],
-    ]
-
-    num_preferred_home_games_to_num_teams = defaultdict(int)
-
-    for t in teams.values():
-        num_preferred_home_games_to_num_teams[t.num_preferred_home_games] += 1
-
-    for num_games, num_teams in sorted(num_preferred_home_games_to_num_teams.items()):
-        table.append([num_games, num_teams])
-
-    utils.pretty_print_table(table)
-    print()
 
 
 def ingest_files(
@@ -875,7 +849,33 @@ def ingest_preassignments_file(directory_path):
             )
 
 
-def print_master_schedule():
+def write_output_files(output_dir_path: str):
+    with open(f"{output_dir_path}/master.txt", "w") as f:
+        print_master_schedule(f)
+
+    with open(f"{output_dir_path}/pasteable.txt", "w") as f:
+        print_pasteable_schedule(f)
+
+    with open(f"{output_dir_path}/breakout.txt", "w") as f:
+        print_breakout_schedule(f)
+
+    metrics_file_path = f"{output_dir_path}/metrics.txt"
+    with open(metrics_file_path, "w"):
+        # Empty the file if it already exists
+        pass
+    with open(metrics_file_path, "a") as f:
+        print_home_preference_metrics(f)
+        print(file=f)
+        print_non_preferred_gameslot_metrics(f)
+        print(file=f)
+        print_block_size_metrics(f)
+        print(file=f)
+        print_weekday_metrics(f)
+        print(file=f)
+        print_consecutive_game_day_metrics(f)
+
+
+def print_master_schedule(file=None):
     gameslots_by_day = defaultdict(list)
     blackouts_by_day = defaultdict(list)
 
@@ -913,39 +913,37 @@ def print_master_schedule():
 
         schedule_table.append(["", "", ""])
 
-    utils.pretty_print_table(schedule_table)
+    utils.pretty_print_table(schedule_table, file=file)
 
 
-def create_pasteable_schedule_file(output_dir_path: str):
+def print_pasteable_schedule(file=None):
     gameslots_by_day = defaultdict(list)
 
     for g in gameslots:
         gameslots_by_day[g.date].append(g)
 
-    pasteable_file_path = output_dir_path + "/pasteable.txt"
-    with open(pasteable_file_path, "w") as f:
-        for day in sorted(gameslots_by_day.keys()):
-            gameslots_on_day = gameslots_by_day[day]
+    for day in sorted(gameslots_by_day.keys()):
+        gameslots_on_day = gameslots_by_day[day]
 
-            for gameslot in gameslots_on_day:
-                if gameslot.selected_matchup is None:
-                    matchup_str = "\t\tOPEN"
-                else:
-                    matchup = gameslot.selected_matchup
-                    division = matchup.division
-                    division_str = (
-                        "7/8B" if division in ["7/8B South", "7/8B North"] else division
-                    )
-                    home_team, away_team = matchup.get_teams_in_home_away_order()
+        for gameslot in gameslots_on_day:
+            if gameslot.selected_matchup is None:
+                matchup_str = "\t\tOPEN"
+            else:
+                matchup = gameslot.selected_matchup
+                division = matchup.division
+                division_str = (
+                    "7/8B" if division in ["7/8B South", "7/8B North"] else division
+                )
+                home_team, away_team = matchup.get_teams_in_home_away_order()
 
-                    matchup_str = f"{division_str}\t{home_team.name}\t{away_team.name}"
+                matchup_str = f"{division_str}\t{home_team.name}\t{away_team.name}"
 
-                print(matchup_str, file=f)
+            print(matchup_str, file=file)
 
-            print(file=f)
+        print(file=file)
 
 
-def print_breakout_schedules():
+def print_breakout_schedule(file=None):
     for team in teams.values():
         table = []
         table.append(["", "Date", "Day", "Time", "Home Team", "Away Team", "Location"])
@@ -973,13 +971,30 @@ def print_breakout_schedules():
                 ]
             )
 
-        print(str(team))
-        print("-" * len(str(team)))
-        utils.pretty_print_table(table)
-        print()
+        print(str(team), file=file)
+        print("-" * len(str(team)), file=file)
+        utils.pretty_print_table(table, file=file)
+        print(file=file)
 
 
-def print_consecutive_game_day_metrics():
+def print_home_preference_metrics(file=None):
+    table = [
+        ["# of Preferred Home Games", "# of Teams With That Many"],
+        ["-------------------------", "-------------------------"],
+    ]
+
+    num_preferred_home_games_to_num_teams = defaultdict(int)
+
+    for t in teams.values():
+        num_preferred_home_games_to_num_teams[t.num_preferred_home_games] += 1
+
+    for num_games, num_teams in sorted(num_preferred_home_games_to_num_teams.items()):
+        table.append([num_games, num_teams])
+
+    utils.pretty_print_table(table, file=file)
+
+
+def print_consecutive_game_day_metrics(file=None):
     table = [
         ["# of Consecutive Game Day Pairs", "# of Teams With That Many Pairs"],
         ["-------------------------------", "-------------------------------"],
@@ -995,8 +1010,7 @@ def print_consecutive_game_day_metrics():
     total_pairs = sum(p * t for p, t in num_pairs_to_num_teams.items())
     table.append(["TOTAL PAIRS", total_pairs])
 
-    utils.pretty_print_table(table)
-    print()
+    utils.pretty_print_table(table, file=file)
 
 
 def get_num_consecutive_pairs_to_num_teams():
@@ -1014,7 +1028,7 @@ def get_num_consecutive_pairs_to_num_teams():
     return num_pairs_to_num_teams
 
 
-def print_non_preferred_gameslot_metrics():
+def print_non_preferred_gameslot_metrics(file=None):
     non_preferred_matchups = list(
         filter(lambda m: not m.selected_gameslot_is_preferred, matchups)
     )
@@ -1023,9 +1037,10 @@ def print_non_preferred_gameslot_metrics():
 
     print(
         f"{len(non_preferred_matchups)} out of {len(matchups)} matchups received "
-        + "non-preferred locations. Non-preferred assignments (if any) are listed below."
+        + "non-preferred locations. Non-preferred assignments (if any) are listed below.",
+        file=file,
     )
-    print()
+    print(file=file)
     if non_preferred_matchups:
         table = [
             ["", "Matchup", "Preferred Home Team", "Assigned Location"],
@@ -1042,8 +1057,8 @@ def print_non_preferred_gameslot_metrics():
                     matchup.selected_gameslot.location,
                 ]
             )
-        utils.pretty_print_table(table)
-        print()
+        utils.pretty_print_table(table, file=file)
+        print(file=file)
 
     num_games_at_neither_home = 0
     for m in matchups:
@@ -1054,12 +1069,12 @@ def print_non_preferred_gameslot_metrics():
             num_games_at_neither_home += 1
     print(
         f"{num_games_at_neither_home} games were at *neither* team's home location "
-        + "(you can find them in the table above)."
+        + "(you can find them in the table above).",
+        file=file,
     )
-    print()
 
 
-def print_block_size_metrics():
+def print_block_size_metrics(file=None):
     table = [
         ["# of Games in Block", "# of Occurrences"],
         ["-------------------", "----------------"],
@@ -1074,8 +1089,7 @@ def print_block_size_metrics():
     table.append(["", ""])
     table.append(["TOTAL BLOCKS", total_blocks])
 
-    utils.pretty_print_table(table)
-    print()
+    utils.pretty_print_table(table, file=file)
 
 
 def get_block_sizes_to_counts() -> Dict[int, int]:
@@ -1088,7 +1102,7 @@ def get_block_sizes_to_counts() -> Dict[int, int]:
     return block_sizes_to_counts
 
 
-def print_weekday_metrics():
+def print_weekday_metrics(file=None):
     table = [
         ["# of Weekday Games", "# of Teams With That Many Weekday Games"],
         ["------------------", "---------------------------------------"],
@@ -1106,11 +1120,7 @@ def print_weekday_metrics():
         ]
     )
 
-    print("In the next table, weekdays are any day other than Friday or Saturday.")
-    print("(We try to avoid weekday games.)")
-    print()
-    utils.pretty_print_table(table)
-    print()
+    utils.pretty_print_table(table, file=file)
 
 
 def get_num_weekday_games_to_num_teams():
@@ -1209,19 +1219,29 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         f.write(file_line + "\n")
 
 
-generate_schedule(
-    input_dir_path="in",
-    output_dir_path="out",
-    random_seed=22,
-    window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-    scarce_location_names=["SJE"],
-)
+print(f"Found config: {config}")
 
-# do_test_run_for_seeds(
-#     1,
-#     1000,
-#     input_dir_path="in",
-#     output_dir_path="out",
-#     window_constraints=[WindowConstraint(1, 1), WindowConstraint(5, 2)],
-#     scarce_location_names=["SJE"],
-# )
+window_constraints = [
+    WindowConstraint(w["days"], w["max_games"]) for w in config["window_constraints"]
+]
+scarce_location_names = config["scarce_locations"]
+input_dir_path = config["input_dir"]
+output_dir_path = config["output_dir"]
+
+if "seed_search" in config:
+    do_test_run_for_seeds(
+        config["seed_search"]["first_seed"],
+        config["seed_search"]["last_seed"],
+        input_dir_path,
+        output_dir_path,
+        window_constraints,
+        scarce_location_names,
+    )
+else:
+    generate_schedule(
+        input_dir_path,
+        output_dir_path,
+        config["seed"],
+        window_constraints,
+        scarce_location_names,
+    )

@@ -1,0 +1,33 @@
+input_dir: ./in
+output_dir: ./out
+
+# Set a seed so your schedule is reproducible. This field is ignored if the `seed_search` field is 
+# provided.
+seed: 14
+
+# Constraints to ensure that teams don't have too many games in short succession. For example,
+# `days=5` and `max_games=2` means that teams can have at most 2 games in any 5-day window.
+window_constraints:
+  -
+    days: 1
+    max_games: 1
+  -
+    days: 4
+    max_games: 2
+
+# Use this field to inform the scheduler of any locations that have few gameslots relative to the 
+# number of games that need to be played there. Generally, you should leave this empty at first and 
+# observe which teams (if any) are struggling to get enough games at their home location. Then add 
+# those locations to this list, and you should see an improvement.
+scarce_locations:
+  - "Eastview Middle School"
+  - "St. Philip"
+  - "Christ the King"
+  - "St. Matthew"
+
+# If the `seed_serach` field is provided, the scheduler will try out many seeds instead of 
+# outputting a single schedule. It will write the metrics for the various schedules to a file called 
+# `seeds.txt`.
+# seed_search:
+#   first_seed: 10
+#   last_seed: 20
