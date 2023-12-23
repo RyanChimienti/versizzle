@@ -1,13 +1,14 @@
 from collections import defaultdict
 from typing import Dict, List, Tuple
-from location import Location
-from matchup import Matchup
-from gameslot import Gameslot
 import datetime
-from window_constraint import WindowConstraint
 from itertools import permutations
 from more_itertools import first_true
-import utils
+
+from versizzle.location import Location
+from versizzle.matchup import Matchup
+from versizzle.gameslot import Gameslot
+from versizzle.window_constraint import WindowConstraint
+import versizzle.utils as utils
 
 
 # Takes an already valid schedule and tries to make it better with small adjustments.

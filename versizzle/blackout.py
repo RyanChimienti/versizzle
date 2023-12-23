@@ -1,8 +1,9 @@
-from gameslot import Gameslot
-from matchup import Matchup
-from team import Team
 from datetime import date, time
-import utils
+
+from versizzle.gameslot import Gameslot
+from versizzle.matchup import Matchup
+from versizzle.team import Team
+import versizzle.utils as utils
 
 
 class Blackout:

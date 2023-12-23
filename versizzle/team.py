@@ -1,18 +1,21 @@
 from collections import defaultdict
 from datetime import date
 from typing import Dict, List
-from location import Location
-import matchup
+
+from versizzle.location import Location
 
 
 class Team:
     def __init__(self, division: str, name: str, home_location: Location):
+        # Declaring import here to prevent circular import.
+        from versizzle.matchup import Matchup
+
         self.division: str = division
         self.name: str = name
         self.home_location: Location = home_location
 
         # All of the matchups (scheduled or not) that include this team
-        self.matchups: List[matchup.Matchup] = []
+        self.matchups: List[Matchup] = []
 
         # The number of matchups that include this team and have chosen a preferred
         # home team
@@ -24,7 +27,7 @@ class Team:
 
         # A map from dates to all of the games (AKA *scheduled* matchups) that this team
         # is playing on that date
-        self.games_by_date: Dict[date, List[matchup.Matchup]] = defaultdict(list)
+        self.games_by_date: Dict[date, List[Matchup]] = defaultdict(list)
 
     # Returns the ratio of currently scheduled home games to total games in season
     def get_home_percentage(self) -> float:

@@ -1,7 +1,7 @@
 from typing import List, Tuple
-from team import *
-import location
-import gameslot
+
+from versizzle.team import Team
+from versizzle.gameslot import Gameslot
 
 
 class Matchup:
@@ -21,10 +21,10 @@ class Matchup:
 
         self.preferred_home_team: Team = None
 
-        self.preferred_gameslots: List[gameslot.Gameslot] = None
-        self.backup_gameslots: List[gameslot.Gameslot] = None
+        self.preferred_gameslots: List[Gameslot] = None
+        self.backup_gameslots: List[Gameslot] = None
 
-        self.selected_gameslot: gameslot.Gameslot = None
+        self.selected_gameslot: Gameslot = None
         self.selected_gameslot_is_preferred: bool = False
 
     def select_preferred_home_team(self, team: Team):
@@ -47,7 +47,7 @@ class Matchup:
         self.team_a.num_matchups_with_home_preference_chosen += 1
         self.team_b.num_matchups_with_home_preference_chosen += 1
 
-    def select_gameslot(self, gameslot: gameslot.Gameslot):
+    def select_gameslot(self, gameslot: Gameslot):
         if self.selected_gameslot is not None:
             raise Exception("Must deselect gameslot before selecting a new one")
         if gameslot.selected_matchup is not None:

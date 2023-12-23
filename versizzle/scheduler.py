@@ -1,19 +1,19 @@
-from config import config
 import calendar
 from collections import defaultdict
 import csv
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
-from blackout import Blackout
-from gameslot import Gameslot
-from location import Location
-from matchup import Matchup
-from preassignment import Preassignment
-from postprocessor import PostProcessor
-from window_constraint import WindowConstraint
-from team import Team
-import utils
 import random
+
+from versizzle.blackout import Blackout
+from versizzle.gameslot import Gameslot
+from versizzle.location import Location
+from versizzle.matchup import Matchup
+from versizzle.preassignment import Preassignment
+from versizzle.postprocessor import PostProcessor
+from versizzle.window_constraint import WindowConstraint
+from versizzle.team import Team
+import versizzle.utils as utils
 
 
 divisions_to_counts: Dict[str, int] = defaultdict(
@@ -1217,31 +1217,3 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
             + f" - {get_longest_gap_between_games()}"
         )
         f.write(file_line + "\n")
-
-
-print(f"Found config: {config}")
-
-window_constraints = [
-    WindowConstraint(w["days"], w["max_games"]) for w in config["window_constraints"]
-]
-scarce_location_names = config["scarce_locations"]
-input_dir_path = config["input_dir"]
-output_dir_path = config["output_dir"]
-
-if "seed_search" in config:
-    do_test_run_for_seeds(
-        config["seed_search"]["first_seed"],
-        config["seed_search"]["last_seed"],
-        input_dir_path,
-        output_dir_path,
-        window_constraints,
-        scarce_location_names,
-    )
-else:
-    generate_schedule(
-        input_dir_path,
-        output_dir_path,
-        config["seed"],
-        window_constraints,
-        scarce_location_names,
-    )

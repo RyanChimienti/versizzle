@@ -1,6 +1,7 @@
 from datetime import timedelta
-from gameslot import Gameslot
-from matchup import Matchup
+
+from versizzle.gameslot import Gameslot
+from versizzle.matchup import Matchup
 
 
 class WindowConstraint:

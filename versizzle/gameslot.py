@@ -1,14 +1,14 @@
 from datetime import date, time
-from typing import List, Set
-import utils
-import location
+from typing import Set
+
+import versizzle.utils as utils
+from versizzle.location import Location
 
 
 class Gameslot:
-    def __init__(self, date: date, time: time, location: location.Location):
-        # Declaring import here to prevent Python from complaining about circular
-        # import. In future think about combining classes into one file to solve this.
-        from matchup import Matchup
+    def __init__(self, date: date, time: time, location: Location):
+        # Declaring import here to prevent circular import.
+        from versizzle.matchup import Matchup
 
         self.date = date
         self.time = time

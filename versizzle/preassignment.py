@@ -1,11 +1,12 @@
 from typing import List
-from blackout import Blackout
-from gameslot import Gameslot
-from location import Location
-from matchup import Matchup
-from team import Team
 from datetime import date, time
-import utils
+
+from versizzle.blackout import Blackout
+from versizzle.gameslot import Gameslot
+from versizzle.location import Location
+from versizzle.matchup import Matchup
+from versizzle.team import Team
+import versizzle.utils as utils
 
 
 class Preassignment:
