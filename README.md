@@ -38,7 +38,7 @@ It assigns each matchup to a gameslot. These assignments constitute a schedule.
     python3 -m versizzle
     ```
 
-5. Verify that all of the expected files appeared in `out`:
+5. Verify that the expected files appeared in `out`:
     - `breakout.txt`
     - `master.txt`
     - `metrics.txt`
