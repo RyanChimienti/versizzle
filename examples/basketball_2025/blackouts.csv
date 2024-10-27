@@ -1,0 +1,103 @@
+date,start time,end time,division,team
+1/8/2025,6:31PM,-,7/8G,St. Isidore
+1/8/2025,-,-,7/8B,St. Isidore A
+1/8/2025,-,-,ALL,St. Walter A
+1/8/2025,-,-,ALL,St. Walter B
+1/9/2025,-,-,7/8B,St. Isidore A
+1/9/2025,-,-,ALL,St. Walter A
+1/9/2025,-,-,ALL,St. Walter B
+1/10/2025,-,-,5/6B,St. Isidore
+1/10/2025,-,-,5/6B,St. Walter A
+1/10/2025,-,-,5/6B,St. Walter B
+1/10/2025,-,-,5/6G,St. Walter A
+1/10/2025,-,-,5/6G,St. Walter B
+1/10/2025,-,-,7/8B,St. Walter B
+1/11/2025,-,-,7/8G,St. Isidore
+1/13/2025,6:31PM,-,7/8G,St. Isidore
+1/13/2025,-,-,7/8B,St. Isidore A
+1/15/2025,6:31PM,-,7/8G,St. Isidore
+1/16/2025,-,-,7/8B,St. Isidore A
+1/17/2025,-,-,5/6G,St. Walter A
+1/17/2025,-,-,5/6B,St. Walter A
+1/17/2025,-,-,7/8G,St. Walter A
+1/17/2025,-,-,7/8G,St. Walter B
+1/17/2025,-,-,7/8B,St. Walter A
+1/17/2025,-,-,7/8B,St. Walter B
+1/18/2025,-,-,7/8G,St. Isidore
+1/18/2025,-,-,7/8B,St. Isidore A
+1/21/2025,-,-,7/8B,St. Isidore A
+1/25/2025,-,-,ALL,St. Isidore
+1/25/2025,-,-,ALL,St. Isidore A
+1/25/2025,-,-,ALL,St. Isidore B
+1/25/2025,-,-,5/6B,St. Philip A
+1/25/2025,-,-,7/8B,St. Philip A
+1/25/2025,-,-,7/8B,St. Philip B
+1/25/2025,-,-,5/6G,St. Walter A
+1/25/2025,-,-,7/8G,St. Walter A
+1/25/2025,-,-,7/8G,St. Walter B
+1/25/2025,-,-,5/6B,St. Walter A
+1/25/2025,-,-,7/8B,St. Walter A
+1/25/2025,-,-,7/8B,St. Walter B
+1/30/2025,-,-,7/8B,St. Isidore A
+1/30/2025,-,-,ALL,SJE
+1/30/2025,-,-,ALL,SJE A
+1/30/2025,-,-,ALL,SJE B
+2/1/2025,-,-,7/8G,St. Isidore
+2/1/2025,-,-,7/8B,St. Isidore A
+2/3/2025,6:31PM,-,7/8G,St. Isidore
+2/3/2025,-,-,7/8B,St. Isidore A
+2/5/2025,6:31PM,-,7/8G,St. Isidore
+2/5/2025,-,-,7/8B,St. Isidore A
+2/6/2025,-,-,7/8B,St. Isidore A
+2/7/2025,-,-,5/6B,St. Isidore
+2/7/2025,-,-,ALL,St. Walter A
+2/7/2025,-,-,ALL,St. Walter B
+2/8/2025,-,-,7/8G,St. Isidore
+2/8/2025,-,10:01AM,5/6G,St. Walter A
+2/8/2025,-,10:01AM,5/6G,St. Walter B
+2/8/2025,-,10:01AM,5/6B,St. Walter A
+2/8/2025,-,10:01AM,5/6B,St. Walter B
+2/10/2025,6:31PM,-,7/8G,St. Isidore
+2/10/2025,-,-,7/8B,St. Isidore A
+2/12/2025,6:31PM,-,7/8G,St. Isidore
+2/13/2025,-,-,7/8B,St. Isidore A
+2/14/2025,-,-,ALL,ALL
+2/15/2025,-,-,ALL,ALL
+2/18/2025,-,-,7/8B,St. Isidore A
+2/19/2025,6:31PM,-,7/8G,St. Isidore
+2/19/2025,-,-,ALL,St. Walter A
+2/19/2025,-,-,ALL,St. Walter B
+2/20/2025,-,-,7/8B,St. Isidore A
+2/21/2025,-,-,ALL,St. Philip
+2/21/2025,-,-,ALL,St. Philip A
+2/21/2025,-,-,ALL,St. Philip B
+2/21/2025,-,-,5/6B,St. Isidore
+2/22/2025,-,-,ALL,St. Philip
+2/22/2025,-,-,ALL,St. Philip A
+2/22/2025,-,-,ALL,St. Philip B
+2/22/2025,-,-,7/8G,St. Isidore
+2/24/2025,6:31PM,-,7/8G,St. Isidore
+2/24/2025,-,-,7/8B,St. Isidore A
+2/25/2025,-,-,7/8B,St. Isidore A
+2/26/2025,6:31PM,-,7/8G,St. Isidore
+2/27/2025,-,-,7/8B,St. Isidore A
+2/28/2025,-,-,ALL,Holy Trinity
+3/1/2025,-,-,7/8B,St. Philip A
+3/1/2025,-,-,7/8B,St. Philip B
+3/1/2025,-,-,7/8G,St. Isidore
+3/2/2025,-,-,ALL,ALL
+3/3/2025,-,-,7/8B,ALL
+3/3/2025,-,-,7/8G,ALL
+3/4/2025,-,-,7/8B,ALL
+3/4/2025,-,-,7/8G,ALL
+3/4/2025,-,-,5/6B,St. Isidore
+3/5/2025,-,-,7/8B,ALL
+3/5/2025,-,-,7/8G,ALL
+3/5/2025,-,-,5/6B,St. Isidore
+3/6/2025,-,-,7/8B,ALL
+3/6/2025,-,-,7/8G,ALL
+3/7/2025,-,-,7/8B,ALL
+3/7/2025,-,-,7/8G,ALL
+3/7/2025,-,-,5/6B,St. Isidore
+3/8/2025,-,-,7/8B,ALL
+3/8/2025,-,-,7/8G,ALL

@@ -1,0 +1,359 @@
+date,time,location
+1/8/2025,5:00PM,St. John Vianney
+1/8/2025,6:00PM,St. John Vianney
+1/8/2025,7:00PM,St. John Vianney
+1/8/2025,8:00PM,St. John Vianney
+1/9/2025,5:00PM,St. John Vianney
+1/9/2025,6:00PM,St. John Vianney
+1/9/2025,7:00PM,St. John Vianney
+1/9/2025,8:00PM,St. John Vianney
+1/9/2025,5:30PM,St. Isidore
+1/9/2025,6:30PM,St. Isidore
+1/9/2025,7:30PM,St. Isidore
+1/10/2025,6:00PM,St. Walter
+1/10/2025,7:00PM,St. Walter
+1/10/2025,8:00PM,St. Walter
+1/10/2025,5:30PM,Christ the King
+1/10/2025,6:30PM,Christ the King
+1/10/2025,6:00PM,Eastview Middle School
+1/10/2025,7:00PM,Eastview Middle School
+1/10/2025,8:00PM,Eastview Middle School
+1/10/2025,6:00PM,St. Philip
+1/10/2025,7:00PM,St. Philip
+1/10/2025,8:00PM,St. Philip
+1/10/2025,5:30PM,St. Isidore
+1/10/2025,6:30PM,St. Isidore
+1/10/2025,7:30PM,St. Isidore
+1/10/2025,8:30PM,St. Isidore
+1/11/2025,8:00AM,St. John Vianney
+1/11/2025,9:00AM,St. John Vianney
+1/11/2025,10:00AM,St. John Vianney
+1/11/2025,11:00AM,St. John Vianney
+1/11/2025,12:00PM,St. John Vianney
+1/11/2025,1:00PM,St. John Vianney
+1/11/2025,2:00PM,St. John Vianney
+1/11/2025,10:00AM,Christ the King
+1/11/2025,11:00AM,Christ the King
+1/11/2025,12:00PM,Christ the King
+1/11/2025,9:00AM,St. Philip
+1/11/2025,10:00AM,St. Philip
+1/11/2025,11:00AM,St. Philip
+1/13/2025,5:00PM,St. John Vianney
+1/13/2025,6:00PM,St. John Vianney
+1/13/2025,7:00PM,St. John Vianney
+1/13/2025,8:00PM,St. John Vianney
+1/15/2025,5:00PM,St. John Vianney
+1/15/2025,6:00PM,St. John Vianney
+1/15/2025,7:00PM,St. John Vianney
+1/15/2025,8:00PM,St. John Vianney
+1/16/2025,5:00PM,St. John Vianney
+1/16/2025,6:00PM,St. John Vianney
+1/16/2025,7:00PM,St. John Vianney
+1/16/2025,8:00PM,St. John Vianney
+1/16/2025,5:30PM,St. Isidore
+1/16/2025,6:30PM,St. Isidore
+1/16/2025,7:30PM,St. Isidore
+1/17/2025,5:00PM,St. John Vianney
+1/17/2025,6:00PM,St. John Vianney
+1/17/2025,7:00PM,St. John Vianney
+1/17/2025,8:00PM,St. John Vianney
+1/17/2025,5:30PM,Christ the King
+1/17/2025,6:30PM,Christ the King
+1/17/2025,6:00PM,Eastview Middle School
+1/17/2025,7:00PM,Eastview Middle School
+1/17/2025,8:00PM,Eastview Middle School
+1/17/2025,5:30PM,St. Isidore
+1/17/2025,6:30PM,St. Isidore
+1/17/2025,7:30PM,St. Isidore
+1/17/2025,8:30PM,St. Isidore
+1/17/2025,6:00PM,St. Philip
+1/17/2025,7:00PM,St. Philip
+1/17/2025,8:00PM,St. Philip
+1/18/2025,8:00AM,St. John Vianney
+1/18/2025,9:00AM,St. John Vianney
+1/18/2025,10:00AM,St. John Vianney
+1/18/2025,11:00AM,St. John Vianney
+1/18/2025,12:00PM,St. John Vianney
+1/18/2025,1:00PM,St. John Vianney
+1/18/2025,2:00PM,St. John Vianney
+1/18/2025,8:30AM,St. Walter
+1/18/2025,9:30AM,St. Walter
+1/18/2025,10:30AM,St. Walter
+1/18/2025,11:30AM,St. Walter
+1/18/2025,10:00AM,Christ the King
+1/18/2025,11:00AM,Christ the King
+1/18/2025,12:00PM,Christ the King
+1/18/2025,9:00AM,St. Philip
+1/18/2025,10:00AM,St. Philip
+1/18/2025,11:00AM,St. Philip
+1/21/2025,6:00PM,St. Walter
+1/21/2025,7:00PM,St. Walter
+1/21/2025,8:00PM,St. Walter
+1/21/2025,5:30PM,Christ the King
+1/21/2025,6:30PM,Christ the King
+1/23/2025,5:00PM,St. John Vianney
+1/23/2025,6:00PM,St. John Vianney
+1/23/2025,7:00PM,St. John Vianney
+1/23/2025,8:00PM,St. John Vianney
+1/23/2025,5:30PM,St. Isidore
+1/23/2025,6:30PM,St. Isidore
+1/23/2025,7:30PM,St. Isidore
+1/24/2025,5:00PM,St. John Vianney
+1/24/2025,6:00PM,St. John Vianney
+1/24/2025,7:00PM,St. John Vianney
+1/24/2025,8:00PM,St. John Vianney
+1/24/2025,6:00PM,St. Walter
+1/24/2025,7:00PM,St. Walter
+1/24/2025,8:00PM,St. Walter
+1/24/2025,5:30PM,Christ the King
+1/24/2025,6:30PM,Christ the King
+1/24/2025,6:00PM,Eastview Middle School
+1/24/2025,7:00PM,Eastview Middle School
+1/24/2025,8:00PM,Eastview Middle School
+1/24/2025,5:30PM,St. Isidore
+1/24/2025,6:30PM,St. Isidore
+1/24/2025,7:30PM,St. Isidore
+1/24/2025,8:30PM,St. Isidore
+1/24/2025,6:00PM,St. Philip
+1/24/2025,7:00PM,St. Philip
+1/24/2025,8:00PM,St. Philip
+1/25/2025,8:30AM,St. Walter
+1/25/2025,9:30AM,St. Walter
+1/25/2025,10:30AM,St. Walter
+1/25/2025,11:30AM,St. Walter
+1/25/2025,8:00AM,St. John Vianney
+1/25/2025,9:00AM,St. John Vianney
+1/25/2025,10:00AM,St. John Vianney
+1/25/2025,11:00AM,St. John Vianney
+1/25/2025,12:00PM,St. John Vianney
+1/25/2025,1:00PM,St. John Vianney
+1/25/2025,2:00PM,St. John Vianney
+1/25/2025,10:00AM,Christ the King
+1/25/2025,11:00AM,Christ the King
+1/25/2025,12:00PM,Christ the King
+1/25/2025,9:00AM,St. Philip
+1/25/2025,10:00AM,St. Philip
+1/25/2025,11:00AM,St. Philip
+1/28/2025,6:00PM,St. Walter
+1/28/2025,7:00PM,St. Walter
+1/28/2025,8:00PM,St. Walter
+1/30/2025,5:00PM,St. John Vianney
+1/30/2025,6:00PM,St. John Vianney
+1/30/2025,7:00PM,St. John Vianney
+1/30/2025,8:00PM,St. John Vianney
+1/30/2025,6:00PM,St. Walter
+1/30/2025,7:00PM,St. Walter
+1/30/2025,8:00PM,St. Walter
+1/31/2025,5:00PM,St. John Vianney
+1/31/2025,6:00PM,St. John Vianney
+1/31/2025,7:00PM,St. John Vianney
+1/31/2025,8:00PM,St. John Vianney
+1/31/2025,6:00PM,St. Walter
+1/31/2025,7:00PM,St. Walter
+1/31/2025,8:00PM,St. Walter
+1/31/2025,5:30PM,Christ the King
+1/31/2025,6:30PM,Christ the King
+1/31/2025,5:30PM,St. Isidore
+1/31/2025,6:30PM,St. Isidore
+1/31/2025,7:30PM,St. Isidore
+1/31/2025,8:30PM,St. Isidore
+2/1/2025,10:00AM,Christ the King
+2/1/2025,11:00AM,Christ the King
+2/1/2025,12:00PM,Christ the King
+2/3/2025,5:00PM,St. John Vianney
+2/3/2025,6:00PM,St. John Vianney
+2/3/2025,7:00PM,St. John Vianney
+2/3/2025,8:00PM,St. John Vianney
+2/4/2025,5:30PM,Christ the King
+2/4/2025,6:30PM,Christ the King
+2/5/2025,5:00PM,St. John Vianney
+2/5/2025,6:00PM,St. John Vianney
+2/5/2025,7:00PM,St. John Vianney
+2/5/2025,8:00PM,St. John Vianney
+2/6/2025,5:00PM,St. John Vianney
+2/6/2025,6:00PM,St. John Vianney
+2/6/2025,7:00PM,St. John Vianney
+2/6/2025,8:00PM,St. John Vianney
+2/6/2025,5:30PM,St. Isidore
+2/6/2025,6:30PM,St. Isidore
+2/6/2025,7:30PM,St. Isidore
+2/7/2025,5:00PM,St. John Vianney
+2/7/2025,6:00PM,St. John Vianney
+2/7/2025,7:00PM,St. John Vianney
+2/7/2025,8:00PM,St. John Vianney
+2/7/2025,5:30PM,Christ the King
+2/7/2025,6:30PM,Christ the King
+2/7/2025,6:00PM,Eastview Middle School
+2/7/2025,7:00PM,Eastview Middle School
+2/7/2025,8:00PM,Eastview Middle School
+2/7/2025,5:30PM,St. Isidore
+2/7/2025,6:30PM,St. Isidore
+2/7/2025,7:30PM,St. Isidore
+2/7/2025,8:30PM,St. Isidore
+2/8/2025,8:00AM,St. John Vianney
+2/8/2025,9:00AM,St. John Vianney
+2/8/2025,10:00AM,St. John Vianney
+2/8/2025,11:00AM,St. John Vianney
+2/8/2025,12:00PM,St. John Vianney
+2/8/2025,1:00PM,St. John Vianney
+2/8/2025,2:00PM,St. John Vianney
+2/8/2025,8:30AM,St. Walter
+2/8/2025,9:30AM,St. Walter
+2/8/2025,10:30AM,St. Walter
+2/8/2025,11:30AM,St. Walter
+2/8/2025,10:00AM,Christ the King
+2/8/2025,11:00AM,Christ the King
+2/8/2025,12:00PM,Christ the King
+2/10/2025,5:00PM,St. John Vianney
+2/10/2025,6:00PM,St. John Vianney
+2/10/2025,7:00PM,St. John Vianney
+2/10/2025,8:00PM,St. John Vianney
+2/11/2025,6:00PM,St. Walter
+2/11/2025,7:00PM,St. Walter
+2/11/2025,8:00PM,St. Walter
+2/11/2025,5:30PM,Christ the King
+2/11/2025,6:30PM,Christ the King
+2/12/2025,5:00PM,St. John Vianney
+2/12/2025,6:00PM,St. John Vianney
+2/12/2025,7:00PM,St. John Vianney
+2/12/2025,8:00PM,St. John Vianney
+2/13/2025,5:00PM,St. John Vianney
+2/13/2025,6:00PM,St. John Vianney
+2/13/2025,7:00PM,St. John Vianney
+2/13/2025,8:00PM,St. John Vianney
+2/13/2025,6:00PM,St. Walter
+2/13/2025,7:00PM,St. Walter
+2/13/2025,8:00PM,St. Walter
+2/14/2025,5:30PM,Christ the King
+2/14/2025,6:30PM,Christ the King
+2/14/2025,6:00PM,Eastview Middle School
+2/14/2025,7:00PM,Eastview Middle School
+2/14/2025,8:00PM,Eastview Middle School
+2/14/2025,5:30PM,St. Isidore
+2/14/2025,6:30PM,St. Isidore
+2/14/2025,7:30PM,St. Isidore
+2/14/2025,8:30PM,St. Isidore
+2/14/2025,6:00PM,St. Philip
+2/14/2025,7:00PM,St. Philip
+2/14/2025,8:00PM,St. Philip
+2/15/2025,10:00AM,Christ the King
+2/15/2025,11:00AM,Christ the King
+2/15/2025,12:00PM,Christ the King
+2/15/2025,9:00AM,St. Philip
+2/15/2025,10:00AM,St. Philip
+2/15/2025,11:00AM,St. Philip
+2/18/2025,6:00PM,St. Walter
+2/18/2025,7:00PM,St. Walter
+2/18/2025,8:00PM,St. Walter
+2/18/2025,5:30PM,Christ the King
+2/18/2025,6:30PM,Christ the King
+2/19/2025,5:00PM,St. John Vianney
+2/19/2025,6:00PM,St. John Vianney
+2/19/2025,7:00PM,St. John Vianney
+2/19/2025,8:00PM,St. John Vianney
+2/20/2025,5:00PM,St. John Vianney
+2/20/2025,6:00PM,St. John Vianney
+2/20/2025,7:00PM,St. John Vianney
+2/20/2025,8:00PM,St. John Vianney
+2/21/2025,6:00PM,St. Walter
+2/21/2025,7:00PM,St. Walter
+2/21/2025,8:00PM,St. Walter
+2/21/2025,5:30PM,Christ the King
+2/21/2025,6:30PM,Christ the King
+2/21/2025,6:00PM,Eastview Middle School
+2/21/2025,7:00PM,Eastview Middle School
+2/21/2025,8:00PM,Eastview Middle School
+2/21/2025,5:30PM,St. Isidore
+2/21/2025,6:30PM,St. Isidore
+2/21/2025,7:30PM,St. Isidore
+2/21/2025,8:30PM,St. Isidore
+2/22/2025,8:30AM,St. Walter
+2/22/2025,9:30AM,St. Walter
+2/22/2025,10:30AM,St. Walter
+2/22/2025,11:30AM,St. Walter
+2/22/2025,10:00AM,Christ the King
+2/22/2025,11:00AM,Christ the King
+2/22/2025,12:00PM,Christ the King
+2/24/2025,5:00PM,St. John Vianney
+2/24/2025,6:00PM,St. John Vianney
+2/24/2025,7:00PM,St. John Vianney
+2/24/2025,8:00PM,St. John Vianney
+2/25/2025,6:00PM,St. Walter
+2/25/2025,7:00PM,St. Walter
+2/25/2025,8:00PM,St. Walter
+2/26/2025,5:00PM,St. John Vianney
+2/26/2025,6:00PM,St. John Vianney
+2/26/2025,7:00PM,St. John Vianney
+2/26/2025,8:00PM,St. John Vianney
+2/27/2025,6:00PM,St. Walter
+2/27/2025,7:00PM,St. Walter
+2/27/2025,8:00PM,St. Walter
+2/28/2025,5:00PM,St. John Vianney
+2/28/2025,6:00PM,St. John Vianney
+2/28/2025,7:00PM,St. John Vianney
+2/28/2025,8:00PM,St. John Vianney
+2/28/2025,5:30PM,St. Isidore
+2/28/2025,6:30PM,St. Isidore
+2/28/2025,7:30PM,St. Isidore
+2/28/2025,8:30PM,St. Isidore
+3/1/2025,8:30AM,St. Walter
+3/1/2025,9:30AM,St. Walter
+3/1/2025,10:30AM,St. Walter
+3/1/2025,11:30AM,St. Walter
+3/1/2025,10:00AM,Christ the King
+3/1/2025,11:00AM,Christ the King
+3/1/2025,12:00PM,Christ the King
+3/2/2025,1:00PM,St. Walter
+3/2/2025,2:30PM,St. Walter
+3/3/2025,5:00PM,St. John Vianney
+3/3/2025,6:00PM,St. John Vianney
+3/3/2025,7:00PM,St. John Vianney
+3/3/2025,8:00PM,St. John Vianney
+3/3/2025,6:00PM,St. Walter
+3/3/2025,7:00PM,St. Walter
+3/3/2025,8:00PM,St. Walter
+3/4/2025,5:00PM,St. John Vianney
+3/4/2025,6:00PM,St. John Vianney
+3/4/2025,7:00PM,St. John Vianney
+3/4/2025,8:00PM,St. John Vianney
+3/4/2025,6:00PM,St. Walter
+3/4/2025,7:00PM,St. Walter
+3/4/2025,8:00PM,St. Walter
+3/5/2025,6:00PM,St. Walter
+3/5/2025,7:00PM,St. Walter
+3/5/2025,8:00PM,St. Walter
+3/6/2025,5:00PM,St. John Vianney
+3/6/2025,6:00PM,St. John Vianney
+3/6/2025,7:00PM,St. John Vianney
+3/6/2025,8:00PM,St. John Vianney
+3/6/2025,6:00PM,St. Walter
+3/6/2025,7:00PM,St. Walter
+3/6/2025,8:00PM,St. Walter
+3/6/2025,5:30PM,St. Isidore
+3/6/2025,6:30PM,St. Isidore
+3/6/2025,7:30PM,St. Isidore
+3/7/2025,5:00PM,St. John Vianney
+3/7/2025,6:00PM,St. John Vianney
+3/7/2025,7:00PM,St. John Vianney
+3/7/2025,8:00PM,St. John Vianney
+3/7/2025,6:00PM,St. Walter
+3/7/2025,7:00PM,St. Walter
+3/7/2025,8:00PM,St. Walter
+3/7/2025,6:00PM,Eastview Middle School
+3/7/2025,7:00PM,Eastview Middle School
+3/7/2025,8:00PM,Eastview Middle School
+3/7/2025,5:30PM,St. Isidore
+3/7/2025,6:30PM,St. Isidore
+3/7/2025,7:30PM,St. Isidore
+3/7/2025,8:30PM,St. Isidore
+3/8/2025,8:00AM,St. John Vianney
+3/8/2025,9:00AM,St. John Vianney
+3/8/2025,10:00AM,St. John Vianney
+3/8/2025,11:00AM,St. John Vianney
+3/8/2025,12:00PM,St. John Vianney
+3/8/2025,1:00PM,St. John Vianney
+3/8/2025,2:00PM,St. John Vianney
+3/8/2025,10:00AM,St. Walter
+3/8/2025,11:30AM,St. Walter
+3/8/2025,1:00PM,St. Walter
+3/8/2025,2:30PM,St. Walter
