@@ -6,6 +6,7 @@ from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
 from versizzle.team import Team
+from versizzle.window_constraint import WindowConstraint
 import versizzle.utils as utils
 
 
@@ -29,6 +30,7 @@ class Preassignment:
         matchups: List[Matchup],
         gameslots: List[Gameslot],
         blackouts: List[Blackout],
+        window_constraints: List[WindowConstraint],
     ):
         matchup_to_use = None
         for matchup in matchups:
@@ -55,6 +57,14 @@ class Preassignment:
             for b in blackouts
         ):
             raise Exception(f"Preassignment {self} is prohibited by a blackout")
+
+        if any(
+            not w.is_satisfied_by_selection(matchup_to_use, gameslot_to_use)
+            for w in window_constraints
+        ):
+            raise Exception(
+                f"Preassignment {self} is prohibited by a window constraint"
+            )
 
         matchup_to_use.is_preassigned = True
         matchup_to_use.preferred_gameslots = [gameslot_to_use]

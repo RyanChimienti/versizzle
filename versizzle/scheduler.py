@@ -44,7 +44,7 @@ def generate_schedule(
 
     ingest_files(input_dir_path, scarce_location_names)
 
-    do_preassignments()
+    do_preassignments(window_constraints)
     assign_preferred_home_teams_to_matchups()
     assign_candidate_gameslots_to_matchups()
 
@@ -88,11 +88,11 @@ def clear_globals():
     backup_selection_depth = 0
 
 
-def do_preassignments():
+def do_preassignments(window_constraints: List[WindowConstraint]):
     print(f"Performing {len(preassignments)} preassignments")
 
     for preassignment in preassignments:
-        preassignment.assign(matchups, gameslots, blackouts)
+        preassignment.assign(matchups, gameslots, blackouts, window_constraints)
 
     print("Preassignments complete.")
     print()
@@ -940,7 +940,7 @@ def print_pasteable_schedule(file=None):
 
             print(matchup_str, file=file)
 
-        print(file=file)
+        # print(file=file)
 
 
 def print_breakout_schedule(file=None):
