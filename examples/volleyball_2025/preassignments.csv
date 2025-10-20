@@ -1,0 +1,43 @@
+date,time,location,division,team a,team b
+9/3/2025,5:45PM,St. John Vianney,5/6G,Holy Trinity,St. John Vianney A
+9/3/2025,6:30PM,St. John Vianney,5/6G,Holy Trinity,St. John Vianney B
+9/5/2025,6:00PM,St. Philip the Apostle,5/6G,St. John Vianney B,St. Philip B
+9/5/2025,6:45PM,St. Philip the Apostle,5/6G,St. John Vianney A,St. Philip A
+9/12/2025,6:00PM,St. Walter,5/6G,St. John Vianney A,St. Walter B
+9/12/2025,6:45PM,St. Walter,5/6G,St. John Vianney B,St. Walter C
+9/17/2025,5:45PM,St. John Vianney,5/6G,SJE,St. John Vianney A
+9/17/2025,6:30PM,St. John Vianney,5/6G,St. John Vianney B,St. Walter A
+9/22/2025,5:45PM,St. John Vianney,5/6G,St. John Vianney B,St. Philip A
+9/22/2025,6:30PM,St. John Vianney,5/6G,St. John Vianney A,St. Philip B
+10/2/2025,5:45PM,St. John Vianney,5/6G,St. John Vianney A,St. Walter B
+10/2/2025,6:30PM,St. John Vianney,5/6G,St. John Vianney B,St. Philip B
+10/16/2025,6:00PM,St. Walter,5/6G,St. John Vianney B,St. Walter A
+10/16/2025,6:45PM,St. Walter,5/6G,St. John Vianney A,St. Walter C
+10/22/2025,5:45PM,St. John Vianney,5/6G,St. John Vianney A,St. Philip B
+10/22/2025,6:30PM,St. John Vianney,5/6G,SJE,St. John Vianney B
+10/27/2025,5:45PM,St. John Vianney,5/6G,St. John Vianney A,St. Walter A
+10/27/2025,6:30PM,St. John Vianney,5/6G,St. John Vianney B,St. Walter C
+11/4/2025,6:45PM,St. Walter,5/6G,St. John Vianney A,St. Walter A
+11/4/2025,7:30PM,St. Walter,5/6G,St. John Vianney B,St. Walter B
+11/6/2025,6:45PM,St. John Vianney,5/6G,St. John Vianney B,SJE
+11/6/2025,7:30PM,St. John Vianney,5/6G,Holy Trinity,St. John Vianney A
+9/3/2025,7:15PM,St. John Vianney,7/8G,St. John Vianney A,St. Walter B
+9/3/2025,8:00PM,St. John Vianney,7/8G,St. John Vianney B,St. Philip
+9/12/2025,6:45PM,Eastview Middle School,7/8G,SJE B,St. John Vianney A
+9/12/2025,7:30PM,Eastview Middle School,7/8G,SJE A,St. John Vianney B
+9/17/2025,7:15PM,St. John Vianney,7/8G,SJE A,St. John Vianney B
+9/17/2025,8:00PM,St. John Vianney,7/8G,SJE B,St. John Vianney A
+9/22/2025,7:15PM,St. John Vianney,7/8G,St. John Vianney A,St. Walter A
+9/22/2025,8:00PM,St. John Vianney,7/8G,St. John Vianney B,St. Walter B
+9/26/2025,7:30PM,St. Walter,7/8G,St. John Vianney A,St. Walter A
+9/26/2025,8:15PM,St. Walter,7/8G,St. John Vianney B,St. Walter B
+10/2/2025,7:15PM,St. John Vianney,7/8G,SJE B,St. John Vianney B
+10/2/2025,8:00PM,St. John Vianney,7/8G,St. John Vianney A,St. Philip
+10/16/2025,7:15PM,St. John Vianney,7/8G,St. John Vianney A,St. Philip
+10/16/2025,8:00PM,St. John Vianney,7/8G,St. John Vianney B,St. Walter A
+10/24/2025,6:45PM,Eastview Middle School,7/8G,SJE B,St. John Vianney B
+10/24/2025,7:30PM,Eastview Middle School,7/8G,SJE A,St. John Vianney A
+10/27/2025,7:15PM,St. John Vianney,7/8G,St. John Vianney B,St. Philip
+10/27/2025,8:00PM,St. John Vianney,7/8G,SJE A,St. John Vianney A
+10/30/2025,7:30PM,St. Walter,7/8G,St. John Vianney A,St. Walter B
+10/30/2025,8:15PM,St. Walter,7/8G,St. John Vianney B,St. Walter A
