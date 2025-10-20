@@ -1165,7 +1165,7 @@ def do_test_run_for_seeds(
     cols = [
         "seed",
         "num weekday games",
-        "non preferred locs",
+        "non preferred locs / games at neither home",
         "smallest block size",
         "num smallest blocks",
         "most consec pairs",
@@ -1198,6 +1198,13 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         num_non_preferred_locs = len(
             list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
         )
+        num_games_at_neither_home = 0
+        for m in matchups:
+            if (
+                m.selected_gameslot.location != m.team_a.home_location
+                and m.selected_gameslot.location != m.team_b.home_location
+            ):
+                num_games_at_neither_home += 1
 
         block_sizes_to_counts = get_block_sizes_to_counts()
         smallest_block_size_to_count = sorted(block_sizes_to_counts.items())[0]
@@ -1211,7 +1218,8 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 
         file_line = (
             f"{random_seed}"
-            + f" - {total_weekday_games} - {num_non_preferred_locs}"
+            + f" - {total_weekday_games}"
+            + f" - {num_non_preferred_locs}/{num_games_at_neither_home}"
             + f" - {smallest_block_size} {num_smallest_blocks}"
             + f" - {most_consec_pairs} {teams_with_most_consec}"
             + f" - {get_longest_gap_between_games()}"
