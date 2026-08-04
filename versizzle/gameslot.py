@@ -1,7 +1,6 @@
 from datetime import date, time
-from typing import Set
 
-import versizzle.utils as utils
+from versizzle import utils
 from versizzle.location import Location
 
 
@@ -16,7 +15,7 @@ class Gameslot:
 
         self.is_preassigned = False
 
-        self.matchups_that_prefer_this_slot: Set[Matchup] = None
+        self.matchups_that_prefer_this_slot: set[Matchup] = None
         self.selected_matchup: Matchup = None
 
     def __str__(self):

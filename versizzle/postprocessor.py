@@ -1,14 +1,14 @@
-from collections import defaultdict
-from typing import Dict, List, Tuple
 import datetime
+from collections import defaultdict
 from itertools import permutations
+
 from more_itertools import first_true
 
+from versizzle import utils
+from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
-from versizzle.gameslot import Gameslot
 from versizzle.window_constraint import WindowConstraint
-import versizzle.utils as utils
 
 
 # Takes an already valid schedule and tries to make it better with small adjustments.
@@ -16,13 +16,13 @@ import versizzle.utils as utils
 class PostProcessor:
     def __init__(
         self,
-        matchups: List[Matchup],
-        gameslots: List[Gameslot],
-        window_constraints: List[WindowConstraint],
+        matchups: list[Matchup],
+        gameslots: list[Gameslot],
+        window_constraints: list[WindowConstraint],
     ):
-        self.matchups: List[Matchup] = matchups
-        self.gameslots: List[Gameslot] = gameslots
-        self.window_constraints: List[WindowConstraint] = window_constraints
+        self.matchups: list[Matchup] = matchups
+        self.gameslots: list[Gameslot] = gameslots
+        self.window_constraints: list[WindowConstraint] = window_constraints
 
     def post_process(self):
         print("Post-processing started.")
@@ -174,13 +174,13 @@ class PostProcessor:
     def remove_awkward_gaps(self):
         print("Removing awkward gaps between games.")
 
-        gameslots_by_block: Dict[Tuple[datetime.date, Location], List[Gameslot]]
+        gameslots_by_block: dict[tuple[datetime.date, Location], list[Gameslot]]
         gameslots_by_block = defaultdict(list)
 
         for g in self.gameslots:
             gameslots_by_block[g.date, g.location].append(g)
 
-        failed_blocks: List[Tuple[datetime.date, Location]] = []
+        failed_blocks: list[tuple[datetime.date, Location]] = []
 
         for date, location in sorted(gameslots_by_block.keys()):
             gameslots_in_block = gameslots_by_block[date, location]
@@ -206,13 +206,13 @@ class PostProcessor:
     # matchups among the gameslots such that all of the matchups are scheduled
     # consecutively. Returns True if such an assignment is found and performed.
     # Otherwise returns False and leaves the assignments unchanged.
-    def squeeze_matchups_in_block(self, gameslots_in_block: List[Gameslot]) -> bool:
+    def squeeze_matchups_in_block(self, gameslots_in_block: list[Gameslot]) -> bool:
         date, location = gameslots_in_block[0].date, gameslots_in_block[0].location
         pretty_date = utils.prettify_date(date)
 
         gameslots_in_block.sort(key=lambda g: g.time)
 
-        matchups_in_block: List[Matchup] = []
+        matchups_in_block: list[Matchup] = []
         for g in gameslots_in_block:
             if g.selected_matchup is not None:
                 matchups_in_block.append(g.selected_matchup)

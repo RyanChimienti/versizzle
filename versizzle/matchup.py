@@ -1,7 +1,5 @@
-from typing import List, Tuple
-
-from versizzle.team import Team
 from versizzle.gameslot import Gameslot
+from versizzle.team import Team
 
 
 class Matchup:
@@ -21,8 +19,8 @@ class Matchup:
 
         self.preferred_home_team: Team = None
 
-        self.preferred_gameslots: List[Gameslot] = None
-        self.backup_gameslots: List[Gameslot] = None
+        self.preferred_gameslots: list[Gameslot] = None
+        self.backup_gameslots: list[Gameslot] = None
 
         self.selected_gameslot: Gameslot = None
         self.selected_gameslot_is_preferred: bool = False

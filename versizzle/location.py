@@ -1,6 +1,5 @@
 from collections import defaultdict
 from datetime import date
-from typing import Dict
 
 
 class Location:
@@ -9,7 +8,7 @@ class Location:
         self.is_scarce: bool = is_scarce
 
         self.num_gameslots: int = 0
-        self.num_games_by_date: Dict[date, int] = defaultdict(int)
+        self.num_games_by_date: dict[date, int] = defaultdict(int)
 
     def __str__(self):
         return self.name

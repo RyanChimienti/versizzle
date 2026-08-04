@@ -1,13 +1,12 @@
-from typing import List
 from datetime import date, time
 
+from versizzle import utils
 from versizzle.blackout import Blackout
 from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
 from versizzle.team import Team
 from versizzle.window_constraint import WindowConstraint
-import versizzle.utils as utils
 
 
 class Preassignment:
@@ -27,10 +26,10 @@ class Preassignment:
 
     def assign(
         self,
-        matchups: List[Matchup],
-        gameslots: List[Gameslot],
-        blackouts: List[Blackout],
-        window_constraints: List[WindowConstraint],
+        matchups: list[Matchup],
+        gameslots: list[Gameslot],
+        blackouts: list[Blackout],
+        window_constraints: list[WindowConstraint],
     ):
         matchup_to_use = None
         for matchup in matchups:

@@ -1,6 +1,6 @@
+from versizzle import scheduler
 from versizzle.config import config
 from versizzle.window_constraint import WindowConstraint
-import versizzle.scheduler as scheduler
 
 print(f"Found config: {config}")
 

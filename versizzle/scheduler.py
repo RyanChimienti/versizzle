@@ -1,30 +1,29 @@
 import calendar
-from collections import defaultdict
 import csv
+import random
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
-import random
 
+from versizzle import utils
 from versizzle.blackout import Blackout
 from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
-from versizzle.preassignment import Preassignment
 from versizzle.postprocessor import PostProcessor
-from versizzle.window_constraint import WindowConstraint
+from versizzle.preassignment import Preassignment
 from versizzle.team import Team
-import versizzle.utils as utils
+from versizzle.window_constraint import WindowConstraint
 
-
-divisions_to_counts: Dict[str, int] = defaultdict(
+divisions_to_counts: dict[str, int] = defaultdict(
     int
 )  # maps division -> # of teams in division
-teams: Dict[Tuple[str, str], Team] = dict()  # maps (division, team name) -> team object
-matchups: List[Matchup] = []
-gameslots: List[Gameslot] = []
-locations: Dict[str, Location] = dict()  # maps location name -> location object
-blackouts: List[Blackout] = []
-preassignments: List[Preassignment] = []
+teams: dict[tuple[str, str], Team] = dict()  # maps (division, team name) -> team object
+matchups: list[Matchup] = []
+gameslots: list[Gameslot] = []
+locations: dict[str, Location] = dict()  # maps location name -> location object
+blackouts: list[Blackout] = []
+preassignments: list[Preassignment] = []
 
 backup_selection_dead_ends: int
 backup_selection_depth: int
@@ -34,8 +33,8 @@ def generate_schedule(
     input_dir_path: str,
     output_dir_path: str,
     random_seed: int,
-    window_constraints: List[WindowConstraint],
-    scarce_location_names: List[str],
+    window_constraints: list[WindowConstraint],
+    scarce_location_names: list[str],
     is_test_run_for_seed: bool = False,
 ):
     clear_globals()
@@ -88,7 +87,7 @@ def clear_globals():
     backup_selection_depth = 0
 
 
-def do_preassignments(window_constraints: List[WindowConstraint]):
+def do_preassignments(window_constraints: list[WindowConstraint]):
     print(f"Performing {len(preassignments)} preassignments")
 
     for preassignment in preassignments:
@@ -98,7 +97,7 @@ def do_preassignments(window_constraints: List[WindowConstraint]):
     print()
 
 
-def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
+def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
     print("Preferred selection phase started.")
 
     select_preferred_gameslots(window_constraints)
@@ -128,7 +127,7 @@ def select_gameslots_for_matchups(window_constraints: List[WindowConstraint]):
     return success
 
 
-def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
+def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
     # Randomize processing order for matchups. If we don't do this, matchups near the end
     # of matchups.csv get processed later, meaning their preferences are less likely to be
     # satisified.
@@ -209,7 +208,7 @@ def select_preferred_gameslots(window_constraints: List[WindowConstraint]):
 
 
 def get_most_constrained_matchup_in_list(
-    matchup_list: List[Matchup], window_constraints: List[WindowConstraint]
+    matchup_list: list[Matchup], window_constraints: list[WindowConstraint]
 ) -> Matchup:
     if not matchup_list:
         raise Exception("Called get_most_constrained_matchup_in_list on empty list")
@@ -235,7 +234,7 @@ def get_most_constrained_matchup_in_list(
 # matchup has few preferred slots, then it's in danger of losing its preferred slots, so
 # it should be considered early.
 def get_slot_availability_score(
-    matchup: Matchup, window_constraints: List[WindowConstraint]
+    matchup: Matchup, window_constraints: list[WindowConstraint]
 ) -> float:
     if matchup.selected_gameslot is not None:
         raise Exception(
@@ -257,7 +256,7 @@ def get_slot_availability_score(
 # selects the best preferred gameslot. Returns True if a gameslot was selected, False if
 # not.
 def select_preferred_gameslot_for_matchup(
-    matchup: Matchup, window_constraints: List[WindowConstraint]
+    matchup: Matchup, window_constraints: list[WindowConstraint]
 ) -> bool:
     for reuse_location in True, False:
         for use_weekend in True, False:
@@ -306,9 +305,9 @@ def select_preferred_gameslot_for_matchup(
 
 
 def select_backup_gameslots(
-    matchups_using_backup_slots: List[Matchup],
+    matchups_using_backup_slots: list[Matchup],
     start: int,
-    window_constraints: List[WindowConstraint],
+    window_constraints: list[WindowConstraint],
 ):
     global backup_selection_dead_ends
     global backup_selection_depth
@@ -605,7 +604,7 @@ def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
 
 def ingest_files(
     directory_path: str,
-    scarce_location_names: List[str],
+    scarce_location_names: list[str],
 ):
     ingest_teams_file(directory_path, scarce_location_names)
     ingest_matchups_file(directory_path)
@@ -616,9 +615,9 @@ def ingest_files(
 
 def ingest_teams_file(
     directory_path: str,
-    scarce_location_names: List[str],
+    scarce_location_names: list[str],
 ):
-    file_path = "{}/teams.csv".format(directory_path)
+    file_path = f"{directory_path}/teams.csv"
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
@@ -661,7 +660,7 @@ def ingest_teams_file(
 
 
 def ingest_matchups_file(directory_path):
-    file_path = "{}/matchups.csv".format(directory_path)
+    file_path = f"{directory_path}/matchups.csv"
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
@@ -696,14 +695,14 @@ def ingest_matchups_file(directory_path):
     else:
         for m in matchups[:10]:
             print(m)
-        print("...{} more...".format(len(matchups) - 20))
+        print(f"...{len(matchups) - 20} more...")
         for m in matchups[-10:]:
             print(m)
     print()
 
 
-def ingest_gameslots_file(directory_path: str, scarce_location_names: List[str]):
-    file_path = "{}/gameslots.csv".format(directory_path)
+def ingest_gameslots_file(directory_path: str, scarce_location_names: list[str]):
+    file_path = f"{directory_path}/gameslots.csv"
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
@@ -744,7 +743,7 @@ def ingest_gameslots_file(directory_path: str, scarce_location_names: List[str])
     else:
         for g in gameslots[:10]:
             print(g)
-        print("...{} more...".format(len(gameslots) - 20))
+        print(f"...{len(gameslots) - 20} more...")
         for g in gameslots[-10:]:
             print(g)
     print()
@@ -755,7 +754,7 @@ def ingest_gameslots_file(directory_path: str, scarce_location_names: List[str])
 
 
 def ingest_blackouts_file(directory_path):
-    file_path = "{}/blackouts.csv".format(directory_path)
+    file_path = f"{directory_path}/blackouts.csv"
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
@@ -805,14 +804,14 @@ def ingest_blackouts_file(directory_path):
     else:
         for b in blackouts[:10]:
             print(b)
-        print("...{} more...".format(len(blackouts) - 20))
+        print(f"...{len(blackouts) - 20} more...")
         for b in blackouts[-10:]:
             print(b)
     print()
 
 
 def ingest_preassignments_file(directory_path):
-    file_path = "{}/preassignments.csv".format(directory_path)
+    file_path = f"{directory_path}/preassignments.csv"
     with open(file_path, "r") as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
@@ -1207,13 +1206,11 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
                 num_games_at_neither_home += 1
 
         block_sizes_to_counts = get_block_sizes_to_counts()
-        smallest_block_size_to_count = sorted(block_sizes_to_counts.items())[0]
+        smallest_block_size_to_count = min(block_sizes_to_counts.items())
         smallest_block_size, num_smallest_blocks = smallest_block_size_to_count
 
         num_consec_pairs_to_num_teams = get_num_consecutive_pairs_to_num_teams()
-        largest_consec_pairs_to_num_teams = sorted(
-            num_consec_pairs_to_num_teams.items()
-        )[-1]
+        largest_consec_pairs_to_num_teams = max(num_consec_pairs_to_num_teams.items())
         most_consec_pairs, teams_with_most_consec = largest_consec_pairs_to_num_teams
 
         file_line = (

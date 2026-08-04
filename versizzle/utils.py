@@ -1,5 +1,4 @@
 from datetime import date, time
-from typing import List
 
 
 def prettify_time(time: time):
@@ -10,7 +9,7 @@ def prettify_date(date: date):
     return date.strftime("%#m/%#d/%#y")
 
 
-def pretty_print_table(table: List[List[str]], file=None):
+def pretty_print_table(table: list[list[str]], file=None):
     if not table:
         return
 
