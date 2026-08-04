@@ -78,7 +78,7 @@ class Matchup:
         prev_gameslot.selected_matchup = None
         prev_gameslot.location.num_games_by_date[prev_gameslot.date] -= 1
 
-    def get_teams_in_home_away_order(self) -> Tuple[Team]:
+    def get_teams_in_home_away_order(self) -> tuple[Team, Team]:
         location = self.selected_gameslot.location
         if (
             location == self.team_a.home_location
