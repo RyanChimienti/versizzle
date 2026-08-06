@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import date, time
 
 from versizzle import utils
@@ -26,9 +27,9 @@ class Preassignment:
 
     def assign(
         self,
-        matchups: list[Matchup],
+        matchups: Sequence[Matchup],
         gameslots: list[Gameslot],
-        blackouts: list[Blackout],
+        blackouts: Sequence[Blackout],
         window_constraints: list[WindowConstraint],
     ):
         matchup_to_use = None

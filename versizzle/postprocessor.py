@@ -1,5 +1,6 @@
 import datetime
 from collections import defaultdict
+from collections.abc import Sequence
 from itertools import permutations
 
 from more_itertools import first_true
@@ -17,11 +18,11 @@ from versizzle.window_constraint import WindowConstraint
 class PostProcessor:
     def __init__(
         self,
-        matchups: list[Matchup],
+        matchups: Sequence[Matchup],
         gameslots: list[Gameslot],
         window_constraints: list[WindowConstraint],
     ):
-        self.matchups: list[Matchup] = matchups
+        self.matchups: Sequence[Matchup] = matchups
         self.gameslots: list[Gameslot] = gameslots
         self.window_constraints: list[WindowConstraint] = window_constraints
 

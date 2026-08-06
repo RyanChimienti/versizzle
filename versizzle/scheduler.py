@@ -1,16 +1,14 @@
 import calendar
-import csv
 import random
 from collections import defaultdict
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from versizzle import utils
+from versizzle import ingestion, postprocessor, utils
 from versizzle.blackout import Blackout
 from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
-from versizzle.postprocessor import PostProcessor
 from versizzle.preassignment import Preassignment
 from versizzle.team import Team
 from versizzle.utils import unwrap
@@ -18,10 +16,10 @@ from versizzle.window_constraint import WindowConstraint
 
 divisions_to_counts: dict[str, int] = defaultdict(int)  # maps division -> # of teams in division
 teams: dict[tuple[str, str], Team] = dict()  # maps (division, team name) -> team object
-matchups: list[Matchup] = []
+matchups: Sequence[Matchup] = []
 gameslots: list[Gameslot] = []
 locations: dict[str, Location] = dict()  # maps location name -> location object
-blackouts: list[Blackout] = []
+blackouts: Sequence[Blackout] = []
 preassignments: list[Preassignment] = []
 
 backup_selection_dead_ends: int
@@ -36,11 +34,29 @@ def generate_schedule(
     scarce_location_names: list[str],
     is_test_run_for_seed: bool = False,
 ):
-    clear_globals()
+    global divisions_to_counts
+    global teams
+    global matchups
+    global gameslots
+    global locations
+    global blackouts
+    global preassignments
+    global backup_selection_dead_ends
+    global backup_selection_depth
+
+    backup_selection_dead_ends = 0
+    backup_selection_depth = 0
 
     random.seed(random_seed)
 
-    ingest_files(input_dir_path, scarce_location_names)
+    ingestion_result = ingestion.ingest_files(input_dir_path, scarce_location_names)
+    divisions_to_counts = ingestion_result.divisions_to_counts
+    teams = ingestion_result.teams
+    matchups = ingestion_result.matchups
+    gameslots = ingestion_result.gameslots
+    locations = ingestion_result.locations
+    blackouts = ingestion_result.blackouts
+    preassignments = ingestion_result.preassignments
 
     do_preassignments(window_constraints)
     assign_preferred_home_teams_to_matchups()
@@ -54,254 +70,13 @@ def generate_schedule(
 
     print("A valid schedule was found!")
 
-    PostProcessor(matchups, gameslots, window_constraints).post_process()
+    postprocessor.PostProcessor(matchups, gameslots, window_constraints).post_process()
 
     if is_test_run_for_seed:
         log_seed_info_from_test_run(output_dir_path, random_seed)
         return
 
     write_output_files(output_dir_path)
-
-
-def clear_globals():
-    global divisions_to_counts
-    global teams
-    global matchups
-    global gameslots
-    global locations
-    global blackouts
-    global preassignments
-    global backup_selection_dead_ends
-    global backup_selection_depth
-
-    divisions_to_counts = defaultdict(int)
-    teams = dict()
-    matchups = []
-    gameslots = []
-    locations = dict()  # maps location name -> location object
-    blackouts = []
-    preassignments = []
-
-    backup_selection_dead_ends = 0
-    backup_selection_depth = 0
-
-
-def ingest_files(
-    directory_path: str,
-    scarce_location_names: list[str],
-):
-    ingest_teams_file(directory_path, scarce_location_names)
-    ingest_matchups_file(directory_path)
-    ingest_gameslots_file(directory_path, scarce_location_names)
-    ingest_blackouts_file(directory_path)
-    ingest_preassignments_file(directory_path)
-
-
-def ingest_teams_file(
-    directory_path: str,
-    scarce_location_names: list[str],
-):
-    file_path = f"{directory_path}/teams.csv"
-    with open(file_path) as file:
-        lines = list(csv.reader(file))
-        if len(lines) == 0:
-            raise Exception("teams.csv must contain at least 1 line (a header)")
-
-        first_row = lines[0]
-        if not (
-            len(first_row) == 3
-            and first_row[0] == "division"
-            and first_row[1] == "team"
-            and first_row[2] == "home location"
-        ):
-            raise Exception("teams.csv should have 3 columns: 'division', 'team', and 'home location'")
-        for row in lines[1:]:
-            division, name, home_location_name = row
-            if home_location_name == "NONE":
-                home_location_obj = None
-            elif home_location_name in locations:
-                home_location_obj = locations[home_location_name]
-            else:
-                home_location_is_scarce = home_location_name in scarce_location_names
-                home_location_obj = Location(home_location_name, home_location_is_scarce)
-                locations[home_location_name] = home_location_obj
-
-            teams[(division, name)] = Team(division, name, home_location_obj)
-            divisions_to_counts[division] += 1
-
-    print("======================== ingested divisions: ========================")
-    for d, count in divisions_to_counts.items():
-        print(f"{d} ({count} teams)")
-    print()
-    print("======================== ingested teams: ========================")
-    for t in teams.values():
-        print(t)
-    print()
-
-
-def ingest_matchups_file(directory_path):
-    file_path = f"{directory_path}/matchups.csv"
-    with open(file_path) as file:
-        lines = list(csv.reader(file))
-        if len(lines) == 0:
-            raise Exception("matchups.csv must contain at least 1 line (a header)")
-
-        first_row = lines[0]
-        if not (
-            len(first_row) == 3 and first_row[0] == "division" and first_row[1] == "team a" and first_row[2] == "team b"
-        ):
-            raise Exception("matchups.csv should have 3 columns: 'division', 'team a', and 'team b'")
-        for row in lines[1:]:
-            division, team_a_name, team_b_name = row
-            team_a = teams[(division, team_a_name)]
-            team_b = teams[(division, team_b_name)]
-
-            matchup = Matchup(team_a, team_b)
-
-            matchups.append(matchup)
-
-            team_a.matchups.append(matchup)
-            team_b.matchups.append(matchup)
-
-    print("======================== ingested matchups: ========================")
-    if len(matchups) <= 20:
-        for m in matchups:
-            print(m)
-    else:
-        for m in matchups[:10]:
-            print(m)
-        print(f"...{len(matchups) - 20} more...")
-        for m in matchups[-10:]:
-            print(m)
-    print()
-
-
-def ingest_gameslots_file(directory_path: str, scarce_location_names: list[str]):
-    file_path = f"{directory_path}/gameslots.csv"
-    with open(file_path) as file:
-        lines = list(csv.reader(file))
-        if len(lines) == 0:
-            raise Exception("gameslots.csv must contain at least 1 lines (a header)")
-
-        first_row = lines[0]
-        if not (
-            len(first_row) == 3 and first_row[0] == "date" and first_row[1] == "time" and first_row[2] == "location"
-        ):
-            raise Exception("gameslots.csv should have 3 columns: 'date', 'time', and 'location'")
-        for row in lines[1:]:
-            date_string, time_string, location_name = row
-
-            if location_name in locations:
-                location_obj = locations[location_name]
-            else:
-                location_is_scarce = location_name in scarce_location_names
-                location_obj = Location(location_name, location_is_scarce)
-                locations[location_name] = location_obj
-
-            datetime_string = date_string + " " + time_string
-            datetime_obj = datetime.strptime(datetime_string, "%m/%d/%Y %I:%M%p")
-
-            gameslots.append(Gameslot(datetime_obj.date(), datetime_obj.time(), location_obj))
-            location_obj.num_gameslots += 1
-
-    print("======================== ingested gameslots: ========================")
-    if len(gameslots) <= 20:
-        for g in gameslots:
-            print(g)
-    else:
-        for g in gameslots[:10]:
-            print(g)
-        print(f"...{len(gameslots) - 20} more...")
-        for g in gameslots[-10:]:
-            print(g)
-    print()
-    print("======================== ingested locations: ========================")
-    for l in locations.values():
-        print(f"{l} ({l.num_gameslots} gameslots)")
-    print()
-
-
-def ingest_blackouts_file(directory_path):
-    file_path = f"{directory_path}/blackouts.csv"
-    with open(file_path) as file:
-        lines = list(csv.reader(file))
-        if len(lines) == 0:
-            raise Exception("blackouts.csv must contain at least 1 line (a header)")
-
-        first_row = lines[0]
-        if not (
-            len(first_row) == 5
-            and first_row[0] == "date"
-            and first_row[1] == "start time"
-            and first_row[2] == "end time"
-            and first_row[3] == "division"
-            and first_row[4] == "team"
-        ):
-            raise Exception(
-                "blackouts.csv should have 5 columns: 'date', 'start time', 'end time', 'division', and 'team'"
-            )
-        for row in lines[1:]:
-            date_string, start_time_string, end_time_string, division, team_name = row
-
-            date_obj = datetime.strptime(date_string, "%m/%d/%Y").date()
-
-            start_time_obj = (
-                None if start_time_string == "-" else datetime.strptime(start_time_string, "%I:%M%p").time()
-            )
-
-            end_time_obj = None if end_time_string == "-" else datetime.strptime(end_time_string, "%I:%M%p").time()
-
-            division_obj = None if division == "ALL" else division
-
-            team_name_obj = None if team_name == "ALL" else team_name
-
-            blackouts.append(Blackout(date_obj, start_time_obj, end_time_obj, division_obj, team_name_obj))
-
-    print("======================== ingested blackouts: ========================")
-    if len(blackouts) <= 20:
-        for b in blackouts:
-            print(b)
-    else:
-        for b in blackouts[:10]:
-            print(b)
-        print(f"...{len(blackouts) - 20} more...")
-        for b in blackouts[-10:]:
-            print(b)
-    print()
-
-
-def ingest_preassignments_file(directory_path):
-    file_path = f"{directory_path}/preassignments.csv"
-    with open(file_path) as file:
-        lines = list(csv.reader(file))
-        if len(lines) == 0:
-            raise Exception("preassignments.csv must contain at least 1 line (a header)")
-
-        first_row = lines[0]
-        if not (
-            len(first_row) == 6
-            and first_row[0] == "date"
-            and first_row[1] == "time"
-            and first_row[2] == "location"
-            and first_row[3] == "division"
-            and first_row[4] == "team a"
-            and first_row[5] == "team b"
-        ):
-            raise Exception(
-                "preassignments.csv should have 6 columns: 'date', 'time',"
-                + " 'location', 'division', 'team a', and 'team b'"
-            )
-
-        for row in lines[1:]:
-            date_str, time_str, location_str, division, team_a_name, team_b_name = row
-
-            date_obj = datetime.strptime(date_str, "%m/%d/%Y").date()
-            time_obj = datetime.strptime(time_str, "%I:%M%p").time()
-            location = locations[location_str]
-            team_a = teams[(division, team_a_name)]
-            team_b = teams[(division, team_b_name)]
-
-            preassignments.append(Preassignment(date_obj, time_obj, location, team_a, team_b))
 
 
 def do_preassignments(window_constraints: list[WindowConstraint]):
