@@ -16,7 +16,7 @@ line-length = 120
 select = [
     # pycodestyle
     "E",
-    # Pyflakes
+    # pyflakes
     "F",
     # pyupgrade
     "UP",
@@ -26,4 +26,8 @@ select = [
     "SIM",
     # isort
     "I",
+]
+ignore = [
+    # ambiguous variable name
+    "E741",
 ]

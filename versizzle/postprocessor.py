@@ -57,7 +57,7 @@ class PostProcessor:
                 # earlier isolated matchup. In that case, our work has been done for us.
                 continue
 
-            self.try_push_matchup(matchup) or self.try_pull_to_matchup(matchup)
+            self.try_push_matchup(matchup) or self.try_pull_to_matchup(matchup)  # pyright: ignore[reportUnusedExpression]
 
         final_num_isolated = len([m for m in self.matchups if m.is_isolated()])
 
@@ -211,11 +211,11 @@ class PostProcessor:
             for matchup_permutation in permutations(matchups_in_block):
                 if all(
                     g in m.preferred_gameslots or g in m.backup_gameslots
-                    for m, g in zip(matchup_permutation, gameslots_in_block[s:])
+                    for m, g in zip(matchup_permutation, gameslots_in_block[s:], strict=False)
                 ):
                     for matchup in matchup_permutation:
                         matchup.deselect_gameslot()
-                    for matchup, gameslot in zip(matchup_permutation, gameslots_in_block[s:]):
+                    for matchup, gameslot in zip(matchup_permutation, gameslots_in_block[s:], strict=False):
                         matchup.select_gameslot(gameslot)
 
                     if attempt_number > 1:

@@ -661,15 +661,11 @@ def ingest_blackouts_file(directory_path):
 
             date_obj = datetime.strptime(date_string, "%m/%d/%Y").date()
 
-            if start_time_string == "-":
-                start_time_obj = None
-            else:
-                start_time_obj = datetime.strptime(start_time_string, "%I:%M%p").time()
+            start_time_obj = (
+                None if start_time_string == "-" else datetime.strptime(start_time_string, "%I:%M%p").time()
+            )
 
-            if end_time_string == "-":
-                end_time_obj = None
-            else:
-                end_time_obj = datetime.strptime(end_time_string, "%I:%M%p").time()
+            end_time_obj = None if end_time_string == "-" else datetime.strptime(end_time_string, "%I:%M%p").time()
 
             division_obj = None if division == "ALL" else division
 
