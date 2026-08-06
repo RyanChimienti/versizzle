@@ -490,11 +490,10 @@ def assign_preferred_home_teams_to_matchups():
         # preassigned to a different location.
         for group in groups_of_identical_matchups:
             for matchup in group:
-                assert matchup.selected_gameslot is not None
                 if (
                     matchup.is_preassigned
-                    and matchup.selected_gameslot.location != matchup.team_a.home_location
-                    and matchup.selected_gameslot.location != matchup.team_b.home_location
+                    and unwrap(matchup.selected_gameslot).location != matchup.team_a.home_location
+                    and unwrap(matchup.selected_gameslot).location != matchup.team_b.home_location
                 ):
                     home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
                     matchup.select_preferred_home_team(home_team)
