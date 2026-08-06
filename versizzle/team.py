@@ -16,16 +16,16 @@ class Team:
         # All of the matchups (scheduled or not) that include this team
         self.matchups: list[Matchup] = []
 
-        # The number of matchups that include this team and have chosen a preferred
-        # home team
-        self.num_matchups_with_home_preference_chosen: int = 0
+        # The number of asymmetric matchups that include this team and have chosen a preferred home location. A matchup
+        # is asymmetric if the teams have different home locations. (In particular, a matchup where both teams lack a
+        # home location is symmetric, and a matchup where only one team has a home location is asymmetric.)
+        self.num_asymmetric_matchups_with_home_preference_chosen: int = 0
 
-        # The number of matchups that include this team and have chosen this team as
-        # their preferred home team
-        self.num_preferred_home_games: int = 0
+        # The number of asymmetric matchups that include this team and have chosen this team as their preferred home
+        # team.
+        self.num_asymmetric_matches_preferring_this_team_as_home: int = 0
 
-        # A map from dates to all of the games (AKA *scheduled* matchups) that this team
-        # is playing on that date
+        # A map from dates to all of the games (AKA *scheduled* matchups) that this team is playing on that date
         self.games_by_date: dict[date, list[Matchup]] = defaultdict(list)
 
     # Returns the ratio of currently scheduled home games to total games in season

@@ -31,13 +31,15 @@ class Matchup:
 
         self.preferred_home_team = team
 
-        if team == self.team_a:
-            self.team_a.num_preferred_home_games += 1
-        else:
-            self.team_b.num_preferred_home_games += 1
+        if self.team_a.home_location != self.team_b.home_location:
+            if team == self.team_a:
+                self.team_a.num_asymmetric_matches_preferring_this_team_as_home += 1
+            else:
+                assert team == self.team_b
+                self.team_b.num_asymmetric_matches_preferring_this_team_as_home += 1
 
-        self.team_a.num_matchups_with_home_preference_chosen += 1
-        self.team_b.num_matchups_with_home_preference_chosen += 1
+            self.team_a.num_asymmetric_matchups_with_home_preference_chosen += 1
+            self.team_b.num_asymmetric_matchups_with_home_preference_chosen += 1
 
     def select_gameslot(self, gameslot: Gameslot):
         if self.selected_gameslot is not None:

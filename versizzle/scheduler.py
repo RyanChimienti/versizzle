@@ -502,13 +502,15 @@ def assign_preferred_home_teams_to_matchups():
 def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
     team_1_home_ratio = (
         0.5
-        if team_1.num_matchups_with_home_preference_chosen == 0
-        else team_1.num_preferred_home_games / float(team_1.num_matchups_with_home_preference_chosen)
+        if team_1.num_asymmetric_matchups_with_home_preference_chosen == 0
+        else team_1.num_asymmetric_matches_preferring_this_team_as_home
+        / float(team_1.num_asymmetric_matchups_with_home_preference_chosen)
     )
     team_2_home_ratio = (
         0.5
-        if team_2.num_matchups_with_home_preference_chosen == 0
-        else team_2.num_preferred_home_games / float(team_2.num_matchups_with_home_preference_chosen)
+        if team_2.num_asymmetric_matchups_with_home_preference_chosen == 0
+        else team_2.num_asymmetric_matches_preferring_this_team_as_home
+        / float(team_2.num_asymmetric_matchups_with_home_preference_chosen)
     )
     if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
         return random.choice([team_1, team_2])
@@ -857,18 +859,48 @@ def print_breakout_schedule(file=None):
 
 
 def print_home_preference_metrics(file=None):
+
+    print("Teams with lowest preferred asymmetric home percentage:\n", file=file)
+
     table: list[Sequence[object]] = [
-        ["# of Preferred Home Games", "# of Teams With That Many"],
-        ["-------------------------", "-------------------------"],
+        ["Team", "Preferred asymmetric home percentage"],
+        ["----", "------------------------------------"],
     ]
 
-    num_preferred_home_games_to_num_teams = defaultdict(int)
+    team_metrics = []
+    for team in teams.values():
+        denominator = team.num_asymmetric_matchups_with_home_preference_chosen
+        numerator = team.num_asymmetric_matches_preferring_this_team_as_home
+        percentage = numerator / denominator
+        team_metrics.append((percentage, str(team), numerator, denominator))
 
-    for t in teams.values():
-        num_preferred_home_games_to_num_teams[t.num_preferred_home_games] += 1
+    for percentage, team_name, numerator, denominator in sorted(team_metrics)[:7]:
+        table.append([team_name, f"{percentage:.1%} ({numerator}/{denominator})"])
 
-    for num_games, num_teams in sorted(num_preferred_home_games_to_num_teams.items()):
-        table.append([num_games, num_teams])
+    utils.pretty_print_table(table, file=file)
+    print(file=file)
+
+    print("Teams with lowest actual asymmetric home percentage:\n", file=file)
+
+    table: list[Sequence[object]] = [
+        ["Team", "Actual asymmetric home percentage"],
+        ["----", "---------------------------------"],
+    ]
+
+    team_metrics = []
+    for team in teams.values():
+        asymmetric_matchups = [
+            matchup for matchup in team.matchups if matchup.team_a.home_location != matchup.team_b.home_location
+        ]
+        denominator = len(asymmetric_matchups)
+        numerator = sum(
+            unwrap(matchup.selected_gameslot).location == team.home_location for matchup in asymmetric_matchups
+        )
+        percentage = numerator / denominator
+        team_metrics.append((percentage, str(team), numerator, denominator))
+
+    for percentage, team_name, numerator, denominator in sorted(team_metrics)[:7]:
+        table.append([team_name, f"{percentage:.1%} ({numerator}/{denominator})"])
 
     utils.pretty_print_table(table, file=file)
 
@@ -1040,18 +1072,16 @@ def do_test_run_for_seeds(
 ):
     seed_file_path = output_dir_path + "/seeds.txt"
 
-    cols = [
-        "seed",
-        "num weekday games",
-        "non preferred locs / games at neither home",
-        "smallest block size",
-        "num smallest blocks",
-        "most consec pairs",
-        "teams with most consec",
-        "longest gap between games",
-    ]
+    header = (
+        "seed - "
+        "num weekday games - "
+        "bad asymmetric home percentages - "
+        "smallest block size, num smallest blocks - "
+        "most consec pairs, teams with most consec - "
+        "longest gap between games"
+    )
     with open(seed_file_path, "w") as f:
-        f.write(",".join(cols) + "\n")
+        f.write(header + "\n")
 
     for i in range(start_seed, end_seed + 1):
         generate_schedule(
@@ -1071,15 +1101,21 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         num_weekday_games_to_num_teams = get_num_weekday_games_to_num_teams()
         total_weekday_games = sum(g * t for g, t in num_weekday_games_to_num_teams.items())
 
-        num_non_preferred_locs = len(list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups)))
-        num_games_at_neither_home = 0
-        for m in matchups:
-            assert m.selected_gameslot is not None
-            if (
-                m.selected_gameslot.location != m.team_a.home_location
-                and m.selected_gameslot.location != m.team_b.home_location
-            ):
-                num_games_at_neither_home += 1
+        asymmetric_home_fractions = []
+        for team in teams.values():
+            asymmetric_matchups = [
+                matchup for matchup in team.matchups if matchup.team_a.home_location != matchup.team_b.home_location
+            ]
+            home_fraction = sum(
+                unwrap(matchup.selected_gameslot).location == team.home_location for matchup in asymmetric_matchups
+            ) / len(asymmetric_matchups)
+            asymmetric_home_fractions.append(home_fraction)
+
+        # List of all asymmetric home percentages less than 50% starting with the lowest
+        bad_asymmetric_home_percentages = [
+            f"{fraction:.1%}"[:-1] for fraction in sorted(asymmetric_home_fractions) if fraction < 0.5
+        ]
+        bad_asymmetric_home_percentages_str = ",".join(bad_asymmetric_home_percentages)
 
         block_sizes_to_counts = get_block_sizes_to_counts()
         smallest_block_size_to_count = min(block_sizes_to_counts.items())
@@ -1092,7 +1128,7 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         file_line = (
             f"{random_seed}"
             + f" - {total_weekday_games}"
-            + f" - {num_non_preferred_locs}/{num_games_at_neither_home}"
+            + f" - {bad_asymmetric_home_percentages_str}"
             + f" - {smallest_block_size} {num_smallest_blocks}"
             + f" - {most_consec_pairs} {teams_with_most_consec}"
             + f" - {get_longest_gap_between_games()}"
