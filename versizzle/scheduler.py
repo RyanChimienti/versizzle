@@ -86,438 +86,6 @@ def clear_globals():
     backup_selection_depth = 0
 
 
-def do_preassignments(window_constraints: list[WindowConstraint]):
-    print(f"Performing {len(preassignments)} preassignments")
-
-    for preassignment in preassignments:
-        preassignment.assign(matchups, gameslots, blackouts, window_constraints)
-
-    print("Preassignments complete.")
-    print()
-
-
-def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
-    print("Preferred selection phase started.")
-
-    select_preferred_gameslots(window_constraints)
-
-    print("Preferred selection phase complete.")
-
-    matchups_using_backup_slots = list(filter(lambda m: m.selected_gameslot is None, matchups))
-
-    print(f"Number of matchups that did not get preferred selection: {len(matchups_using_backup_slots)}")
-    print("Block sizes after preferred selection phase:")
-    print()
-    print_block_size_metrics()
-
-    print("Backup selection phase started.")
-
-    matchups_using_backup_slots.sort(key=lambda m: len(unwrap(m.backup_gameslots)))
-    success = select_backup_gameslots(matchups_using_backup_slots, 0, window_constraints)
-
-    print(f"Backup selection completed with {backup_selection_dead_ends} dead ends.")
-
-    return success
-
-
-def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
-    # Randomize processing order for matchups. If we don't do this, matchups near the end
-    # of matchups.csv get processed later, meaning their preferences are less likely to be
-    # satisified.
-    unprocessed_matchups = [m for m in matchups if m.selected_gameslot is None]
-    random.shuffle(unprocessed_matchups)
-
-    print("Starting step 1 of preferred selection phase (same home matchups)")
-
-    # If both teams in a matchup have the same home location, it would be egregious
-    # for them to have to travel elsewhere. So those matchups are processed early to
-    # make sure they get their preferred location.
-    same_home_matchups = [m for m in unprocessed_matchups if m.team_a.home_location == m.team_b.home_location]
-    print(f"{len(same_home_matchups)} same home matchups to process")
-    for matchup in same_home_matchups:
-        select_preferred_gameslot_for_matchup(matchup, window_constraints)
-        unprocessed_matchups.remove(matchup)
-
-    print("Starting step 2 of preferred selection phase (scarce home matchups)")
-
-    # Next we process the matchups with scarce home locations. A location is scarce if it
-    # does not have enough gameslots to comfortably give all the teams with that home
-    # location the desired number of home games. When a location is scarce, there is a
-    # risk that one team with that home location gets many more home games than another.
-    # We avoid this by always processing the matchup where the preferred home team has
-    # the smallest fraction of home games.
-    scarce_home_matchups = [
-        m
-        for m in unprocessed_matchups
-        if m.preferred_home_team is not None
-        and m.preferred_home_team.home_location is not None
-        and m.preferred_home_team.home_location.is_scarce
-    ]
-    print(f"Scarce location(s): {', '.join([str(l) for l in locations.values() if l.is_scarce])}")
-    print(f"{len(scarce_home_matchups)} scarce home matchups to process")
-    unprocessed_scarce_home_matchups = scarce_home_matchups.copy()
-    while unprocessed_scarce_home_matchups:
-        if len(unprocessed_scarce_home_matchups) % 10 == 0:
-            print(f"{len(unprocessed_scarce_home_matchups)} remaining")
-
-        smallest_home_percentage = min(
-            unwrap(m.preferred_home_team).get_home_percentage() for m in unprocessed_scarce_home_matchups
-        )
-        matchups_with_smallest_home_percentage = [
-            m
-            for m in unprocessed_scarce_home_matchups
-            if abs(unwrap(m.preferred_home_team).get_home_percentage() - smallest_home_percentage) < 0.0001
-        ]
-        matchup_to_process = get_most_constrained_matchup_in_list(
-            matchups_with_smallest_home_percentage, window_constraints
-        )
-        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
-        unprocessed_scarce_home_matchups.remove(matchup_to_process)
-        unprocessed_matchups.remove(matchup_to_process)
-
-    print("Starting step 3 of preferred selection phase (ordinary matchups)")
-
-    # Finally we process the matchups with no special properties.
-    print(f"{len(unprocessed_matchups)} ordinary matchups to process")
-    while unprocessed_matchups:
-        if len(unprocessed_matchups) % 10 == 0:
-            print(f"{len(unprocessed_matchups)} remaining")
-
-        matchup_to_process = get_most_constrained_matchup_in_list(unprocessed_matchups, window_constraints)
-        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
-        unprocessed_matchups.remove(matchup_to_process)
-
-
-def get_most_constrained_matchup_in_list(
-    matchup_list: list[Matchup], window_constraints: list[WindowConstraint]
-) -> Matchup:
-    if not matchup_list:
-        raise Exception("Called get_most_constrained_matchup_in_list on empty list")
-
-    most_constrained_matchup = None
-    min_slot_availability_score = float("inf")
-
-    for matchup in matchup_list:
-        score = get_slot_availability_score(matchup, window_constraints)
-        if score < min_slot_availability_score:
-            most_constrained_matchup = matchup
-            min_slot_availability_score = score
-
-    return unwrap(most_constrained_matchup)
-
-
-# Returns a score indicating how many preferred gameslots are still available for the given
-# matchup.
-#
-# This score helps us to decide the order in which to process matchups. The idea is that
-# if a matchup has many preferred slots, it's unlikely that an earlier matchup will take
-# all of them. Therefore it's safe to consider it at the end. On the other hand, if a
-# matchup has few preferred slots, then it's in danger of losing its preferred slots, so
-# it should be considered early.
-def get_slot_availability_score(matchup: Matchup, window_constraints: list[WindowConstraint]) -> float:
-    if matchup.selected_gameslot is not None:
-        raise Exception(
-            "Tried to calculate slot availability score for matchup " + "that has already selected a gameslot."
-        )
-    if matchup.preferred_gameslots is None:
-        raise Exception(
-            "Preferred gameslots must be initialized on a matchup before slot availability score can be calculated."
-        )
-
-    return len(
-        [
-            g
-            for g in matchup.preferred_gameslots
-            if g.selected_matchup is None and all(w.is_satisfied_by_selection(matchup, g) for w in window_constraints)
-        ]
-    )
-
-
-# If the given matchup has at least one preferred gameslot that can be selected,
-# selects the best preferred gameslot. Returns True if a gameslot was selected, False if
-# not.
-def select_preferred_gameslot_for_matchup(matchup: Matchup, window_constraints: list[WindowConstraint]) -> bool:
-    assert matchup.preferred_gameslots is not None
-
-    for reuse_location in True, False:
-        for use_weekend in True, False:
-            for avoid_consecutive_days in True, False:
-                for gameslot in matchup.preferred_gameslots:
-                    if gameslot.selected_matchup is not None:
-                        continue
-                    if reuse_location and gameslot.location.num_games_by_date[gameslot.date] == 0:
-                        continue
-                    if not reuse_location and gameslot.location.num_games_by_date[gameslot.date] != 0:
-                        continue
-                    if use_weekend and gameslot.date.weekday() not in [4, 5]:
-                        continue
-                    if not use_weekend and gameslot.date.weekday() in [4, 5]:
-                        continue
-                    if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
-                        continue
-                    if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
-                        matchup, gameslot
-                    ):
-                        continue
-                    if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
-                        continue
-
-                    matchup.select_gameslot(gameslot)
-                    return True
-
-    return False
-
-
-def select_backup_gameslots(
-    matchups_using_backup_slots: list[Matchup],
-    start: int,
-    window_constraints: list[WindowConstraint],
-):
-    global backup_selection_dead_ends
-    global backup_selection_depth
-    if start == 0:
-        backup_selection_dead_ends = 0
-        backup_selection_depth = 0
-
-    if start > backup_selection_depth:
-        backup_selection_depth = start
-        print(f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}")
-
-    if backup_selection_dead_ends >= 10000:
-        # It's taking too long. We assume it will not complete in a reasonable time.
-        return False
-
-    if start == len(matchups_using_backup_slots):
-        return True
-
-    matchup = matchups_using_backup_slots[start]
-    assert matchup.backup_gameslots is not None
-
-    for reuse_single_use_location, reuse_multi_use_location in (
-        (True, False),
-        (False, True),
-        (False, False),
-    ):
-        for give_nonpreferred_team_home in True, False:
-            for use_weekend in True, False:
-                for avoid_consecutive_days in True, False:
-                    for gameslot in matchup.backup_gameslots:
-                        if gameslot.selected_matchup is not None:
-                            continue
-                        if reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] != 1:
-                            continue
-                        if not reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] == 1:
-                            continue
-                        if reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] <= 1:
-                            continue
-                        if not reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] > 1:
-                            continue
-                        if give_nonpreferred_team_home and not selection_gives_either_team_home(matchup, gameslot):
-                            continue
-                        if not give_nonpreferred_team_home and selection_gives_either_team_home(matchup, gameslot):
-                            continue
-                        if use_weekend and gameslot.date.weekday() not in [4, 5]:
-                            continue
-                        if not use_weekend and gameslot.date.weekday() in [4, 5]:
-                            continue
-                        if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
-                            continue
-                        if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
-                            matchup, gameslot
-                        ):
-                            continue
-                        if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
-                            continue
-
-                        matchup.select_gameslot(gameslot)
-
-                        if select_backup_gameslots(matchups_using_backup_slots, start + 1, window_constraints):
-                            return True
-
-                        matchup.deselect_gameslot()
-
-    backup_selection_dead_ends += 1
-    if backup_selection_dead_ends % 1000 == 0:
-        print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
-
-    return False
-
-
-def selection_gives_either_team_home(matchup: Matchup, gameslot: Gameslot):
-    return gameslot.location == matchup.team_a.home_location or gameslot.location == matchup.team_b.home_location
-
-
-def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Gameslot):
-    team_a, team_b = matchup.team_a, matchup.team_b
-
-    prev_day = gameslot.date - timedelta(days=1)
-    next_day = gameslot.date + timedelta(days=1)
-
-    return (
-        team_a.games_by_date[prev_day]
-        or team_a.games_by_date[next_day]
-        or team_b.games_by_date[prev_day]
-        or team_b.games_by_date[next_day]
-    )
-
-
-def assign_candidate_gameslots_to_matchups():
-    for g in gameslots:
-        if g.is_preassigned:
-            continue
-
-        g.matchups_that_prefer_this_slot = set()
-
-    for m in matchups:
-        if m.is_preassigned:
-            continue
-
-        assert m.preferred_home_team is not None
-
-        m.preferred_gameslots = []
-        m.backup_gameslots = []
-
-        for g in gameslots:
-            if g.is_preassigned:
-                continue
-            if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
-                continue
-
-            assert g.matchups_that_prefer_this_slot is not None
-
-            if m.preferred_home_team.home_location == g.location:
-                m.preferred_gameslots.append(g)
-                g.matchups_that_prefer_this_slot.add(m)
-            else:
-                m.backup_gameslots.append(g)
-
-        random.shuffle(m.preferred_gameslots)
-        random.shuffle(m.backup_gameslots)
-
-
-def assign_preferred_home_teams_to_matchups():
-    for d in divisions_to_counts:
-        division_matchups = [m for m in matchups if m.division == d]
-
-        team_pairs_to_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
-        for m in division_matchups:
-            first_team_name, second_team_name = sorted([m.team_a.name, m.team_b.name])
-            team_pairs_to_matchups[(first_team_name, second_team_name)].append(m)
-
-        groups_of_identical_matchups = team_pairs_to_matchups.values()
-
-        for group in groups_of_identical_matchups:
-            first_team, second_team = group[0].team_a, group[0].team_b
-
-            num_preassigned_home_games_for_first_team = 0
-            num_preassigned_home_games_for_second_team = 0
-
-            # First we process preassigned matchups that have been assigned to either
-            # team's home. If the teams have different home locations this is easy; the
-            # preferred home team is the one whose location was preassigned. If the teams
-            # have the same home location, then we distribute the home games evenly between
-            # them, giving the last game (if there are an odd number) to whichever team
-            # has fewer home games so far.
-            preassigned_matchups = [m for m in group if m.is_preassigned]
-            if first_team.home_location == second_team.home_location:
-                matchups_preassigned_to_home_location = [
-                    m for m in preassigned_matchups if unwrap(m.selected_gameslot).location == first_team.home_location
-                ]
-
-                for i in range(len(matchups_preassigned_to_home_location) // 2):
-                    matchup_1 = matchups_preassigned_to_home_location[i]
-                    matchup_1.select_preferred_home_team(first_team)
-                    num_preassigned_home_games_for_first_team += 1
-
-                    matchup_2 = matchups_preassigned_to_home_location[i + 1]
-                    matchup_2.select_preferred_home_team(second_team)
-                    num_preassigned_home_games_for_second_team += 1
-
-                if len(matchups_preassigned_to_home_location) % 2 == 1:
-                    leftover_matchup = matchups_preassigned_to_home_location[-1]
-                    home_team = get_team_with_lower_preferred_home_ratio(first_team, second_team)
-                    leftover_matchup.select_preferred_home_team(home_team)
-                    if home_team == first_team:
-                        num_preassigned_home_games_for_first_team += 1
-                    else:
-                        num_preassigned_home_games_for_second_team += 1
-            else:
-                for matchup in preassigned_matchups:
-                    assert matchup.selected_gameslot is not None
-                    if matchup.selected_gameslot.location == first_team.home_location:
-                        matchup.select_preferred_home_team(first_team)
-                        num_preassigned_home_games_for_first_team += 1
-                    elif matchup.selected_gameslot.location == second_team.home_location:
-                        matchup.select_preferred_home_team(second_team)
-                        num_preassigned_home_games_for_second_team += 1
-
-            team_with_fewer_preassigned_home_games = (
-                first_team
-                if num_preassigned_home_games_for_first_team < num_preassigned_home_games_for_second_team
-                else second_team
-            )
-            difference_in_preassigned_home = abs(
-                num_preassigned_home_games_for_first_team - num_preassigned_home_games_for_second_team
-            )
-
-            remaining_nonpreassigned_matchups = [m for m in group if not m.is_preassigned]
-            while remaining_nonpreassigned_matchups and difference_in_preassigned_home:
-                matchup = remaining_nonpreassigned_matchups.pop()
-                matchup.select_preferred_home_team(team_with_fewer_preassigned_home_games)
-                difference_in_preassigned_home -= 1
-
-            for _ in range(len(remaining_nonpreassigned_matchups) // 2):
-                matchup_1 = remaining_nonpreassigned_matchups.pop()
-                matchup_1.select_preferred_home_team(first_team)
-
-                matchup_2 = remaining_nonpreassigned_matchups.pop()
-                matchup_2.select_preferred_home_team(second_team)
-
-        # In each matchup group, there may be 1 nonpreassigned matchup that hasn't
-        # received a home team. These matchups are special because, unlike the matchups
-        # processed so far, they have no natural home team. Therefore we can assign them
-        # home teams in whatever way best balances the number of home games for each team.
-        for group in groups_of_identical_matchups:
-            for matchup in group:
-                if not matchup.is_preassigned and matchup.preferred_home_team is None:
-                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
-                    matchup.select_preferred_home_team(home_team)
-                    break
-
-        # Finally, we address the matchups that are preassigned, but to a location that
-        # is neither team's home. We give them preferred home teams so that all matchups
-        # have preferred home teams, but really it's futile because they have already been
-        # preassigned to a different location.
-        for group in groups_of_identical_matchups:
-            for matchup in group:
-                if (
-                    matchup.is_preassigned
-                    and unwrap(matchup.selected_gameslot).location != matchup.team_a.home_location
-                    and unwrap(matchup.selected_gameslot).location != matchup.team_b.home_location
-                ):
-                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
-                    matchup.select_preferred_home_team(home_team)
-
-
-def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
-    team_1_home_ratio = (
-        0.5
-        if team_1.num_asymmetric_matchups_with_home_preference_chosen == 0
-        else team_1.num_asymmetric_matches_preferring_this_team_as_home
-        / float(team_1.num_asymmetric_matchups_with_home_preference_chosen)
-    )
-    team_2_home_ratio = (
-        0.5
-        if team_2.num_asymmetric_matchups_with_home_preference_chosen == 0
-        else team_2.num_asymmetric_matches_preferring_this_team_as_home
-        / float(team_2.num_asymmetric_matchups_with_home_preference_chosen)
-    )
-    if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
-        return random.choice([team_1, team_2])
-
-    return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
-
-
 def ingest_files(
     directory_path: str,
     scarce_location_names: list[str],
@@ -734,6 +302,438 @@ def ingest_preassignments_file(directory_path):
             team_b = teams[(division, team_b_name)]
 
             preassignments.append(Preassignment(date_obj, time_obj, location, team_a, team_b))
+
+
+def do_preassignments(window_constraints: list[WindowConstraint]):
+    print(f"Performing {len(preassignments)} preassignments")
+
+    for preassignment in preassignments:
+        preassignment.assign(matchups, gameslots, blackouts, window_constraints)
+
+    print("Preassignments complete.")
+    print()
+
+
+def assign_preferred_home_teams_to_matchups():
+    for d in divisions_to_counts:
+        division_matchups = [m for m in matchups if m.division == d]
+
+        team_pairs_to_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
+        for m in division_matchups:
+            first_team_name, second_team_name = sorted([m.team_a.name, m.team_b.name])
+            team_pairs_to_matchups[(first_team_name, second_team_name)].append(m)
+
+        groups_of_identical_matchups = team_pairs_to_matchups.values()
+
+        for group in groups_of_identical_matchups:
+            first_team, second_team = group[0].team_a, group[0].team_b
+
+            num_preassigned_home_games_for_first_team = 0
+            num_preassigned_home_games_for_second_team = 0
+
+            # First we process preassigned matchups that have been assigned to either
+            # team's home. If the teams have different home locations this is easy; the
+            # preferred home team is the one whose location was preassigned. If the teams
+            # have the same home location, then we distribute the home games evenly between
+            # them, giving the last game (if there are an odd number) to whichever team
+            # has fewer home games so far.
+            preassigned_matchups = [m for m in group if m.is_preassigned]
+            if first_team.home_location == second_team.home_location:
+                matchups_preassigned_to_home_location = [
+                    m for m in preassigned_matchups if unwrap(m.selected_gameslot).location == first_team.home_location
+                ]
+
+                for i in range(len(matchups_preassigned_to_home_location) // 2):
+                    matchup_1 = matchups_preassigned_to_home_location[i]
+                    matchup_1.select_preferred_home_team(first_team)
+                    num_preassigned_home_games_for_first_team += 1
+
+                    matchup_2 = matchups_preassigned_to_home_location[i + 1]
+                    matchup_2.select_preferred_home_team(second_team)
+                    num_preassigned_home_games_for_second_team += 1
+
+                if len(matchups_preassigned_to_home_location) % 2 == 1:
+                    leftover_matchup = matchups_preassigned_to_home_location[-1]
+                    home_team = get_team_with_lower_preferred_home_ratio(first_team, second_team)
+                    leftover_matchup.select_preferred_home_team(home_team)
+                    if home_team == first_team:
+                        num_preassigned_home_games_for_first_team += 1
+                    else:
+                        num_preassigned_home_games_for_second_team += 1
+            else:
+                for matchup in preassigned_matchups:
+                    assert matchup.selected_gameslot is not None
+                    if matchup.selected_gameslot.location == first_team.home_location:
+                        matchup.select_preferred_home_team(first_team)
+                        num_preassigned_home_games_for_first_team += 1
+                    elif matchup.selected_gameslot.location == second_team.home_location:
+                        matchup.select_preferred_home_team(second_team)
+                        num_preassigned_home_games_for_second_team += 1
+
+            team_with_fewer_preassigned_home_games = (
+                first_team
+                if num_preassigned_home_games_for_first_team < num_preassigned_home_games_for_second_team
+                else second_team
+            )
+            difference_in_preassigned_home = abs(
+                num_preassigned_home_games_for_first_team - num_preassigned_home_games_for_second_team
+            )
+
+            remaining_nonpreassigned_matchups = [m for m in group if not m.is_preassigned]
+            while remaining_nonpreassigned_matchups and difference_in_preassigned_home:
+                matchup = remaining_nonpreassigned_matchups.pop()
+                matchup.select_preferred_home_team(team_with_fewer_preassigned_home_games)
+                difference_in_preassigned_home -= 1
+
+            for _ in range(len(remaining_nonpreassigned_matchups) // 2):
+                matchup_1 = remaining_nonpreassigned_matchups.pop()
+                matchup_1.select_preferred_home_team(first_team)
+
+                matchup_2 = remaining_nonpreassigned_matchups.pop()
+                matchup_2.select_preferred_home_team(second_team)
+
+        # In each matchup group, there may be 1 nonpreassigned matchup that hasn't
+        # received a home team. These matchups are special because, unlike the matchups
+        # processed so far, they have no natural home team. Therefore we can assign them
+        # home teams in whatever way best balances the number of home games for each team.
+        for group in groups_of_identical_matchups:
+            for matchup in group:
+                if not matchup.is_preassigned and matchup.preferred_home_team is None:
+                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
+                    matchup.select_preferred_home_team(home_team)
+                    break
+
+        # Finally, we address the matchups that are preassigned, but to a location that
+        # is neither team's home. We give them preferred home teams so that all matchups
+        # have preferred home teams, but really it's futile because they have already been
+        # preassigned to a different location.
+        for group in groups_of_identical_matchups:
+            for matchup in group:
+                if (
+                    matchup.is_preassigned
+                    and unwrap(matchup.selected_gameslot).location != matchup.team_a.home_location
+                    and unwrap(matchup.selected_gameslot).location != matchup.team_b.home_location
+                ):
+                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
+                    matchup.select_preferred_home_team(home_team)
+
+
+def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
+    team_1_home_ratio = (
+        0.5
+        if team_1.num_asymmetric_matchups_with_home_preference_chosen == 0
+        else team_1.num_asymmetric_matches_preferring_this_team_as_home
+        / float(team_1.num_asymmetric_matchups_with_home_preference_chosen)
+    )
+    team_2_home_ratio = (
+        0.5
+        if team_2.num_asymmetric_matchups_with_home_preference_chosen == 0
+        else team_2.num_asymmetric_matches_preferring_this_team_as_home
+        / float(team_2.num_asymmetric_matchups_with_home_preference_chosen)
+    )
+    if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
+        return random.choice([team_1, team_2])
+
+    return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
+
+
+def assign_candidate_gameslots_to_matchups():
+    for g in gameslots:
+        if g.is_preassigned:
+            continue
+
+        g.matchups_that_prefer_this_slot = set()
+
+    for m in matchups:
+        if m.is_preassigned:
+            continue
+
+        assert m.preferred_home_team is not None
+
+        m.preferred_gameslots = []
+        m.backup_gameslots = []
+
+        for g in gameslots:
+            if g.is_preassigned:
+                continue
+            if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
+                continue
+
+            assert g.matchups_that_prefer_this_slot is not None
+
+            if m.preferred_home_team.home_location == g.location:
+                m.preferred_gameslots.append(g)
+                g.matchups_that_prefer_this_slot.add(m)
+            else:
+                m.backup_gameslots.append(g)
+
+        random.shuffle(m.preferred_gameslots)
+        random.shuffle(m.backup_gameslots)
+
+
+def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
+    print("Preferred selection phase started.")
+
+    select_preferred_gameslots(window_constraints)
+
+    print("Preferred selection phase complete.")
+
+    matchups_using_backup_slots = list(filter(lambda m: m.selected_gameslot is None, matchups))
+
+    print(f"Number of matchups that did not get preferred selection: {len(matchups_using_backup_slots)}")
+    print("Block sizes after preferred selection phase:")
+    print()
+    print_block_size_metrics()
+
+    print("Backup selection phase started.")
+
+    matchups_using_backup_slots.sort(key=lambda m: len(unwrap(m.backup_gameslots)))
+    success = select_backup_gameslots(matchups_using_backup_slots, 0, window_constraints)
+
+    print(f"Backup selection completed with {backup_selection_dead_ends} dead ends.")
+
+    return success
+
+
+def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
+    # Randomize processing order for matchups. If we don't do this, matchups near the end
+    # of matchups.csv get processed later, meaning their preferences are less likely to be
+    # satisified.
+    unprocessed_matchups = [m for m in matchups if m.selected_gameslot is None]
+    random.shuffle(unprocessed_matchups)
+
+    print("Starting step 1 of preferred selection phase (same home matchups)")
+
+    # If both teams in a matchup have the same home location, it would be egregious
+    # for them to have to travel elsewhere. So those matchups are processed early to
+    # make sure they get their preferred location.
+    same_home_matchups = [m for m in unprocessed_matchups if m.team_a.home_location == m.team_b.home_location]
+    print(f"{len(same_home_matchups)} same home matchups to process")
+    for matchup in same_home_matchups:
+        select_preferred_gameslot_for_matchup(matchup, window_constraints)
+        unprocessed_matchups.remove(matchup)
+
+    print("Starting step 2 of preferred selection phase (scarce home matchups)")
+
+    # Next we process the matchups with scarce home locations. A location is scarce if it
+    # does not have enough gameslots to comfortably give all the teams with that home
+    # location the desired number of home games. When a location is scarce, there is a
+    # risk that one team with that home location gets many more home games than another.
+    # We avoid this by always processing the matchup where the preferred home team has
+    # the smallest fraction of home games.
+    scarce_home_matchups = [
+        m
+        for m in unprocessed_matchups
+        if m.preferred_home_team is not None
+        and m.preferred_home_team.home_location is not None
+        and m.preferred_home_team.home_location.is_scarce
+    ]
+    print(f"Scarce location(s): {', '.join([str(l) for l in locations.values() if l.is_scarce])}")
+    print(f"{len(scarce_home_matchups)} scarce home matchups to process")
+    unprocessed_scarce_home_matchups = scarce_home_matchups.copy()
+    while unprocessed_scarce_home_matchups:
+        if len(unprocessed_scarce_home_matchups) % 10 == 0:
+            print(f"{len(unprocessed_scarce_home_matchups)} remaining")
+
+        smallest_home_percentage = min(
+            unwrap(m.preferred_home_team).get_home_percentage() for m in unprocessed_scarce_home_matchups
+        )
+        matchups_with_smallest_home_percentage = [
+            m
+            for m in unprocessed_scarce_home_matchups
+            if abs(unwrap(m.preferred_home_team).get_home_percentage() - smallest_home_percentage) < 0.0001
+        ]
+        matchup_to_process = get_most_constrained_matchup_in_list(
+            matchups_with_smallest_home_percentage, window_constraints
+        )
+        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
+        unprocessed_scarce_home_matchups.remove(matchup_to_process)
+        unprocessed_matchups.remove(matchup_to_process)
+
+    print("Starting step 3 of preferred selection phase (ordinary matchups)")
+
+    # Finally we process the matchups with no special properties.
+    print(f"{len(unprocessed_matchups)} ordinary matchups to process")
+    while unprocessed_matchups:
+        if len(unprocessed_matchups) % 10 == 0:
+            print(f"{len(unprocessed_matchups)} remaining")
+
+        matchup_to_process = get_most_constrained_matchup_in_list(unprocessed_matchups, window_constraints)
+        select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
+        unprocessed_matchups.remove(matchup_to_process)
+
+
+# If the given matchup has at least one preferred gameslot that can be selected,
+# selects the best preferred gameslot. Returns True if a gameslot was selected, False if
+# not.
+def select_preferred_gameslot_for_matchup(matchup: Matchup, window_constraints: list[WindowConstraint]) -> bool:
+    assert matchup.preferred_gameslots is not None
+
+    for reuse_location in True, False:
+        for use_weekend in True, False:
+            for avoid_consecutive_days in True, False:
+                for gameslot in matchup.preferred_gameslots:
+                    if gameslot.selected_matchup is not None:
+                        continue
+                    if reuse_location and gameslot.location.num_games_by_date[gameslot.date] == 0:
+                        continue
+                    if not reuse_location and gameslot.location.num_games_by_date[gameslot.date] != 0:
+                        continue
+                    if use_weekend and gameslot.date.weekday() not in [4, 5]:
+                        continue
+                    if not use_weekend and gameslot.date.weekday() in [4, 5]:
+                        continue
+                    if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
+                        continue
+                    if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
+                        matchup, gameslot
+                    ):
+                        continue
+                    if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
+                        continue
+
+                    matchup.select_gameslot(gameslot)
+                    return True
+
+    return False
+
+
+def get_most_constrained_matchup_in_list(
+    matchup_list: list[Matchup], window_constraints: list[WindowConstraint]
+) -> Matchup:
+    if not matchup_list:
+        raise Exception("Called get_most_constrained_matchup_in_list on empty list")
+
+    most_constrained_matchup = None
+    min_slot_availability_score = float("inf")
+
+    for matchup in matchup_list:
+        score = get_slot_availability_score(matchup, window_constraints)
+        if score < min_slot_availability_score:
+            most_constrained_matchup = matchup
+            min_slot_availability_score = score
+
+    return unwrap(most_constrained_matchup)
+
+
+# Returns a score indicating how many preferred gameslots are still available for the given
+# matchup.
+#
+# This score helps us to decide the order in which to process matchups. The idea is that
+# if a matchup has many preferred slots, it's unlikely that an earlier matchup will take
+# all of them. Therefore it's safe to consider it at the end. On the other hand, if a
+# matchup has few preferred slots, then it's in danger of losing its preferred slots, so
+# it should be considered early.
+def get_slot_availability_score(matchup: Matchup, window_constraints: list[WindowConstraint]) -> float:
+    if matchup.selected_gameslot is not None:
+        raise Exception(
+            "Tried to calculate slot availability score for matchup " + "that has already selected a gameslot."
+        )
+    if matchup.preferred_gameslots is None:
+        raise Exception(
+            "Preferred gameslots must be initialized on a matchup before slot availability score can be calculated."
+        )
+
+    return len(
+        [
+            g
+            for g in matchup.preferred_gameslots
+            if g.selected_matchup is None and all(w.is_satisfied_by_selection(matchup, g) for w in window_constraints)
+        ]
+    )
+
+
+def select_backup_gameslots(
+    matchups_using_backup_slots: list[Matchup],
+    start: int,
+    window_constraints: list[WindowConstraint],
+):
+    global backup_selection_dead_ends
+    global backup_selection_depth
+    if start == 0:
+        backup_selection_dead_ends = 0
+        backup_selection_depth = 0
+
+    if start > backup_selection_depth:
+        backup_selection_depth = start
+        print(f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}")
+
+    if backup_selection_dead_ends >= 10000:
+        # It's taking too long. We assume it will not complete in a reasonable time.
+        return False
+
+    if start == len(matchups_using_backup_slots):
+        return True
+
+    matchup = matchups_using_backup_slots[start]
+    assert matchup.backup_gameslots is not None
+
+    for reuse_single_use_location, reuse_multi_use_location in (
+        (True, False),
+        (False, True),
+        (False, False),
+    ):
+        for give_nonpreferred_team_home in True, False:
+            for use_weekend in True, False:
+                for avoid_consecutive_days in True, False:
+                    for gameslot in matchup.backup_gameslots:
+                        if gameslot.selected_matchup is not None:
+                            continue
+                        if reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] != 1:
+                            continue
+                        if not reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] == 1:
+                            continue
+                        if reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] <= 1:
+                            continue
+                        if not reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] > 1:
+                            continue
+                        if give_nonpreferred_team_home and not selection_gives_either_team_home(matchup, gameslot):
+                            continue
+                        if not give_nonpreferred_team_home and selection_gives_either_team_home(matchup, gameslot):
+                            continue
+                        if use_weekend and gameslot.date.weekday() not in [4, 5]:
+                            continue
+                        if not use_weekend and gameslot.date.weekday() in [4, 5]:
+                            continue
+                        if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
+                            continue
+                        if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
+                            matchup, gameslot
+                        ):
+                            continue
+                        if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
+                            continue
+
+                        matchup.select_gameslot(gameslot)
+
+                        if select_backup_gameslots(matchups_using_backup_slots, start + 1, window_constraints):
+                            return True
+
+                        matchup.deselect_gameslot()
+
+    backup_selection_dead_ends += 1
+    if backup_selection_dead_ends % 1000 == 0:
+        print(f"Backup selection has hit {backup_selection_dead_ends} dead ends")
+
+    return False
+
+
+def selection_gives_either_team_home(matchup: Matchup, gameslot: Gameslot):
+    return gameslot.location == matchup.team_a.home_location or gameslot.location == matchup.team_b.home_location
+
+
+def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Gameslot):
+    team_a, team_b = matchup.team_a, matchup.team_b
+
+    prev_day = gameslot.date - timedelta(days=1)
+    next_day = gameslot.date + timedelta(days=1)
+
+    return (
+        team_a.games_by_date[prev_day]
+        or team_a.games_by_date[next_day]
+        or team_b.games_by_date[prev_day]
+        or team_b.games_by_date[next_day]
+    )
 
 
 def write_output_files(output_dir_path: str):
