@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import date, time
 
 
@@ -9,7 +10,7 @@ def prettify_date(date: date):
     return date.strftime("%#m/%#d/%#y")
 
 
-def pretty_print_table(table: list[list[str]], file=None):
+def pretty_print_table(table: Sequence[Sequence[object]], file=None):
     if not table:
         return
 
@@ -31,3 +32,10 @@ def pretty_print_table(table: list[list[str]], file=None):
     for row in table:
         str_row = map(str, row)
         print(row_template.format(*str_row), file=file)
+
+
+def unwrap[T](value: T | None) -> T:
+    """Asserts that an optional value is not None for type checking purposes, then returns the value unchanged."""
+
+    assert value is not None
+    return value

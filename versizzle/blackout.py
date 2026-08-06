@@ -7,7 +7,7 @@ from versizzle.team import Team
 
 
 class Blackout:
-    def __init__(self, date: date, start: time, end: time, division: str, team_name: str):
+    def __init__(self, date: date, start: time | None, end: time | None, division: str | None, team_name: str | None):
         if start is not None and end is not None and start > end:
             raise Exception("Tried to create blackout with start time after end time")
 
@@ -34,7 +34,7 @@ class Blackout:
         if self.start is None and self.end is None:
             return True
         if self.start is None:
-            return time <= self.end
+            return time <= self.end  # pyright: ignore[reportOperatorIssue]
         if self.end is None:
             return time >= self.start
         return self.start <= time <= self.end

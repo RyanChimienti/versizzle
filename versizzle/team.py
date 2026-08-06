@@ -5,13 +5,13 @@ from versizzle.location import Location
 
 
 class Team:
-    def __init__(self, division: str, name: str, home_location: Location):
+    def __init__(self, division: str, name: str, home_location: Location | None):
         # Declaring import here to prevent circular import.
         from versizzle.matchup import Matchup
 
         self.division: str = division
         self.name: str = name
-        self.home_location: Location = home_location
+        self.home_location: Location | None = home_location
 
         # All of the matchups (scheduled or not) that include this team
         self.matchups: list[Matchup] = []

@@ -15,12 +15,12 @@ class Matchup:
 
         self.is_preassigned = False
 
-        self.preferred_home_team: Team = None
+        self.preferred_home_team: Team | None = None
 
-        self.preferred_gameslots: list[Gameslot] = None
-        self.backup_gameslots: list[Gameslot] = None
+        self.preferred_gameslots: list[Gameslot] | None = None
+        self.backup_gameslots: list[Gameslot] | None = None
 
-        self.selected_gameslot: Gameslot = None
+        self.selected_gameslot: Gameslot | None = None
         self.selected_gameslot_is_preferred: bool = False
 
     def select_preferred_home_team(self, team: Team):
@@ -44,6 +44,11 @@ class Matchup:
             raise Exception("Must deselect gameslot before selecting a new one")
         if gameslot.selected_matchup is not None:
             raise Exception("Tried to select gameslot that is selected by another matchup")
+        if gameslot.matchups_that_prefer_this_slot is None:
+            raise Exception(
+                "Matchup can only select a gameslot after that gameslot has initialized its "
+                "matchups_that_prefer_this_slot"
+            )
 
         self.selected_gameslot = gameslot
         self.selected_gameslot_is_preferred = self in gameslot.matchups_that_prefer_this_slot
@@ -67,11 +72,19 @@ class Matchup:
         prev_gameslot.location.num_games_by_date[prev_gameslot.date] -= 1
 
     def get_teams_in_home_away_order(self) -> tuple[Team, Team]:
+        if self.selected_gameslot is None:
+            raise Exception("Tried to check home and away teams for matchup without a selected gameslot")
+
         location = self.selected_gameslot.location
         if location == self.team_a.home_location and location != self.team_b.home_location:
             return self.team_a, self.team_b
         if location == self.team_b.home_location and location != self.team_a.home_location:
             return self.team_b, self.team_a
+
+        if self.preferred_home_team is None:
+            raise Exception(
+                "Matchup should have set a preferred home team by the time home and away teams are being checked."
+            )
 
         home_team = self.preferred_home_team
         away_team = self.team_b if self.team_a == home_team else self.team_a

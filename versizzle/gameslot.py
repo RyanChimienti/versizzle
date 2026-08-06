@@ -15,8 +15,8 @@ class Gameslot:
 
         self.is_preassigned = False
 
-        self.matchups_that_prefer_this_slot: set[Matchup] = None
-        self.selected_matchup: Matchup = None
+        self.matchups_that_prefer_this_slot: set[Matchup] | None = None
+        self.selected_matchup: Matchup | None = None
 
     def __str__(self):
         pretty_date = utils.prettify_date(self.date)

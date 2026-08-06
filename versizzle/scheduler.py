@@ -2,6 +2,7 @@ import calendar
 import csv
 import random
 from collections import defaultdict
+from collections.abc import Sequence
 from datetime import datetime, timedelta
 
 from versizzle import utils
@@ -12,6 +13,7 @@ from versizzle.matchup import Matchup
 from versizzle.postprocessor import PostProcessor
 from versizzle.preassignment import Preassignment
 from versizzle.team import Team
+from versizzle.utils import unwrap
 from versizzle.window_constraint import WindowConstraint
 
 divisions_to_counts: dict[str, int] = defaultdict(int)  # maps division -> # of teams in division
@@ -110,7 +112,7 @@ def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
 
     print("Backup selection phase started.")
 
-    matchups_using_backup_slots.sort(key=lambda m: len(m.backup_gameslots))
+    matchups_using_backup_slots.sort(key=lambda m: len(unwrap(m.backup_gameslots)))
     success = select_backup_gameslots(matchups_using_backup_slots, 0, window_constraints)
 
     print(f"Backup selection completed with {backup_selection_dead_ends} dead ends.")
@@ -159,12 +161,12 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
             print(f"{len(unprocessed_scarce_home_matchups)} remaining")
 
         smallest_home_percentage = min(
-            m.preferred_home_team.get_home_percentage() for m in unprocessed_scarce_home_matchups
+            unwrap(m.preferred_home_team).get_home_percentage() for m in unprocessed_scarce_home_matchups
         )
         matchups_with_smallest_home_percentage = [
             m
             for m in unprocessed_scarce_home_matchups
-            if abs(m.preferred_home_team.get_home_percentage() - smallest_home_percentage) < 0.0001
+            if abs(unwrap(m.preferred_home_team).get_home_percentage() - smallest_home_percentage) < 0.0001
         ]
         matchup_to_process = get_most_constrained_matchup_in_list(
             matchups_with_smallest_home_percentage, window_constraints
@@ -201,7 +203,7 @@ def get_most_constrained_matchup_in_list(
             most_constrained_matchup = matchup
             min_slot_availability_score = score
 
-    return most_constrained_matchup
+    return unwrap(most_constrained_matchup)
 
 
 # Returns a score indicating how many preferred gameslots are still available for the given
@@ -217,6 +219,10 @@ def get_slot_availability_score(matchup: Matchup, window_constraints: list[Windo
         raise Exception(
             "Tried to calculate slot availability score for matchup " + "that has already selected a gameslot."
         )
+    if matchup.preferred_gameslots is None:
+        raise Exception(
+            "Preferred gameslots must be initialized on a matchup before slot availability score can be calculated."
+        )
 
     return len(
         [
@@ -231,6 +237,8 @@ def get_slot_availability_score(matchup: Matchup, window_constraints: list[Windo
 # selects the best preferred gameslot. Returns True if a gameslot was selected, False if
 # not.
 def select_preferred_gameslot_for_matchup(matchup: Matchup, window_constraints: list[WindowConstraint]) -> bool:
+    assert matchup.preferred_gameslots is not None
+
     for reuse_location in True, False:
         for use_weekend in True, False:
             for avoid_consecutive_days in True, False:
@@ -283,6 +291,7 @@ def select_backup_gameslots(
         return True
 
     matchup = matchups_using_backup_slots[start]
+    assert matchup.backup_gameslots is not None
 
     for reuse_single_use_location, reuse_multi_use_location in (
         (True, False),
@@ -363,6 +372,8 @@ def assign_candidate_gameslots_to_matchups():
         if m.is_preassigned:
             continue
 
+        assert m.preferred_home_team is not None
+
         m.preferred_gameslots = []
         m.backup_gameslots = []
 
@@ -371,6 +382,8 @@ def assign_candidate_gameslots_to_matchups():
                 continue
             if any(b.prohibits_matchup_in_slot(m, g) for b in blackouts):
                 continue
+
+            assert g.matchups_that_prefer_this_slot is not None
 
             if m.preferred_home_team.home_location == g.location:
                 m.preferred_gameslots.append(g)
@@ -755,7 +768,7 @@ def print_master_schedule(file=None):
     for b in blackouts:
         blackouts_by_day[b.date].append(b)
 
-    schedule_table = [
+    schedule_table: Sequence[Sequence[object]] = [
         ["Schedule Slot", "Scheduled Matchup", "Blackouts"],
         ["-------------", "-----------------", "---------"],
     ]
@@ -812,9 +825,11 @@ def print_breakout_schedule(file=None):
         table.append(["", "Date", "Day", "Time", "Home Team", "Away Team", "Location"])
         table.append(["", "----", "---", "----", "---------", "---------", "--------"])
 
-        team.matchups.sort(key=lambda m: m.selected_gameslot.date)
+        team.matchups.sort(key=lambda m: unwrap(m.selected_gameslot).date)
 
         for i, matchup in enumerate(team.matchups):
+            assert matchup.selected_gameslot is not None
+
             game_num = i + 1
             date_str = utils.prettify_date(matchup.selected_gameslot.date)
             day = calendar.day_name[matchup.selected_gameslot.date.weekday()]
@@ -841,7 +856,7 @@ def print_breakout_schedule(file=None):
 
 
 def print_home_preference_metrics(file=None):
-    table = [
+    table: list[Sequence[object]] = [
         ["# of Preferred Home Games", "# of Teams With That Many"],
         ["-------------------------", "-------------------------"],
     ]
@@ -858,7 +873,7 @@ def print_home_preference_metrics(file=None):
 
 
 def print_consecutive_game_day_metrics(file=None):
-    table = [
+    table: list[Sequence[object]] = [
         ["# of Consecutive Game Day Pairs", "# of Teams With That Many Pairs"],
         ["-------------------------------", "-------------------------------"],
     ]
@@ -893,8 +908,8 @@ def get_num_consecutive_pairs_to_num_teams():
 
 def print_non_preferred_gameslot_metrics(file=None):
     non_preferred_matchups = list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
-    non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.name)
-    non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.division)
+    non_preferred_matchups.sort(key=lambda m: unwrap(m.preferred_home_team).name)
+    non_preferred_matchups.sort(key=lambda m: unwrap(m.preferred_home_team).division)
 
     print(
         f"{len(non_preferred_matchups)} out of {len(matchups)} matchups received "
@@ -903,7 +918,7 @@ def print_non_preferred_gameslot_metrics(file=None):
     )
     print(file=file)
     if non_preferred_matchups:
-        table = [
+        table: list[Sequence[object]] = [
             ["", "Matchup", "Preferred Home Team", "Assigned Location"],
             ["", "-------", "-------------------", "-----------------"],
         ]
@@ -914,8 +929,8 @@ def print_non_preferred_gameslot_metrics(file=None):
                 [
                     str(i + 1),
                     matchup,
-                    matchup.preferred_home_team.name,
-                    matchup.selected_gameslot.location,
+                    unwrap(matchup.preferred_home_team).name,
+                    unwrap(matchup.selected_gameslot).location,
                 ]
             )
         utils.pretty_print_table(table, file=file)
@@ -923,6 +938,7 @@ def print_non_preferred_gameslot_metrics(file=None):
 
     num_games_at_neither_home = 0
     for m in matchups:
+        assert m.selected_gameslot is not None
         if (
             m.selected_gameslot.location != m.team_a.home_location
             and m.selected_gameslot.location != m.team_b.home_location
@@ -936,7 +952,7 @@ def print_non_preferred_gameslot_metrics(file=None):
 
 
 def print_block_size_metrics(file=None):
-    table = [
+    table: list[Sequence[object]] = [
         ["# of Games in Block", "# of Occurrences"],
         ["-------------------", "----------------"],
     ]
@@ -964,7 +980,7 @@ def get_block_sizes_to_counts() -> dict[int, int]:
 
 
 def print_weekday_metrics(file=None):
-    table = [
+    table: list[Sequence[object]] = [
         ["# of Weekday Games", "# of Teams With That Many Weekday Games"],
         ["------------------", "---------------------------------------"],
     ]
@@ -991,7 +1007,7 @@ def get_num_weekday_games_to_num_teams():
         num_weekday_games = 0
 
         for matchup in team.matchups:
-            game_is_weekend = matchup.selected_gameslot.date.weekday() in [4, 5]
+            game_is_weekend = unwrap(matchup.selected_gameslot).date.weekday() in [4, 5]
             if not game_is_weekend:
                 num_weekday_games += 1
 
@@ -1003,10 +1019,10 @@ def get_num_weekday_games_to_num_teams():
 def get_longest_gap_between_games():
     longest_gap_in_days = 0
     for team in teams.values():
-        ordered_matchups = sorted(team.matchups, key=lambda m: m.selected_gameslot.date)
+        ordered_matchups = sorted(team.matchups, key=lambda m: unwrap(m.selected_gameslot).date)
         for i in range(len(ordered_matchups) - 1):
-            first_game_date = ordered_matchups[i].selected_gameslot.date
-            second_game_date = ordered_matchups[i + 1].selected_gameslot.date
+            first_game_date = unwrap(ordered_matchups[i].selected_gameslot).date
+            second_game_date = unwrap(ordered_matchups[i + 1].selected_gameslot).date
             gap_in_days = (second_game_date - first_game_date).days
             longest_gap_in_days = max(gap_in_days, longest_gap_in_days)
 
@@ -1057,6 +1073,7 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         num_non_preferred_locs = len(list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups)))
         num_games_at_neither_home = 0
         for m in matchups:
+            assert m.selected_gameslot is not None
             if (
                 m.selected_gameslot.location != m.team_a.home_location
                 and m.selected_gameslot.location != m.team_b.home_location

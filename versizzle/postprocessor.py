@@ -8,6 +8,7 @@ from versizzle import utils
 from versizzle.gameslot import Gameslot
 from versizzle.location import Location
 from versizzle.matchup import Matchup
+from versizzle.utils import unwrap
 from versizzle.window_constraint import WindowConstraint
 
 
@@ -77,6 +78,10 @@ class PostProcessor:
             # A preassigned matchup cannot be moved
             return False
 
+        assert matchup.selected_gameslot is not None
+        assert matchup.preferred_gameslots is not None
+        assert matchup.backup_gameslots is not None
+
         original_slot = matchup.selected_gameslot
 
         if matchup.selected_gameslot_is_preferred:
@@ -115,6 +120,8 @@ class PostProcessor:
         if not matchup.is_isolated():
             raise Exception("This method expects an isolated matchup")
 
+        matchup_selected_gameslot = unwrap(matchup.selected_gameslot)
+
         for candidate_matchup in self.matchups:
             if candidate_matchup == matchup:
                 continue
@@ -122,6 +129,10 @@ class PostProcessor:
             if candidate_matchup.is_preassigned:
                 # A preassigned matchup cannot be moved
                 continue
+
+            assert candidate_matchup.selected_gameslot is not None
+            assert candidate_matchup.preferred_gameslots is not None
+            assert candidate_matchup.backup_gameslots is not None
 
             original_slot = candidate_matchup.selected_gameslot
             if original_slot.location.num_games_by_date[original_slot.date] == 2:
@@ -137,8 +148,8 @@ class PostProcessor:
                 candidate_slots,
                 pred=lambda s: (
                     s.selected_matchup is None
-                    and s.location == matchup.selected_gameslot.location
-                    and s.date == matchup.selected_gameslot.date
+                    and s.location == matchup_selected_gameslot.location
+                    and s.date == matchup_selected_gameslot.date
                 ),
             )
 
@@ -210,7 +221,7 @@ class PostProcessor:
         for s in range(max_starting_slot_index + 1):
             for matchup_permutation in permutations(matchups_in_block):
                 if all(
-                    g in m.preferred_gameslots or g in m.backup_gameslots
+                    g in m.preferred_gameslots or g in m.backup_gameslots  # pyright: ignore[reportOperatorIssue]
                     for m, g in zip(matchup_permutation, gameslots_in_block[s:], strict=False)
                 ):
                     for matchup in matchup_permutation:
