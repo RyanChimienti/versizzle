@@ -399,10 +399,10 @@ def assign_preferred_home_teams_to_matchups():
     for d in divisions_to_counts:
         division_matchups = [m for m in matchups if m.division == d]
 
-        team_pairs_to_matchups = defaultdict(list)
+        team_pairs_to_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
         for m in division_matchups:
-            team_pair = tuple(sorted([m.team_a.name, m.team_b.name]))
-            team_pairs_to_matchups[team_pair].append(m)
+            first_team_name, second_team_name = sorted([m.team_a.name, m.team_b.name])
+            team_pairs_to_matchups[(first_team_name, second_team_name)].append(m)
 
         groups_of_identical_matchups = team_pairs_to_matchups.values()
 
@@ -421,7 +421,7 @@ def assign_preferred_home_teams_to_matchups():
             preassigned_matchups = [m for m in group if m.is_preassigned]
             if first_team.home_location == second_team.home_location:
                 matchups_preassigned_to_home_location = [
-                    m for m in preassigned_matchups if m.selected_gameslot.location == first_team.home_location
+                    m for m in preassigned_matchups if unwrap(m.selected_gameslot).location == first_team.home_location
                 ]
 
                 for i in range(len(matchups_preassigned_to_home_location) // 2):
@@ -443,6 +443,7 @@ def assign_preferred_home_teams_to_matchups():
                         num_preassigned_home_games_for_second_team += 1
             else:
                 for matchup in preassigned_matchups:
+                    assert matchup.selected_gameslot is not None
                     if matchup.selected_gameslot.location == first_team.home_location:
                         matchup.select_preferred_home_team(first_team)
                         num_preassigned_home_games_for_first_team += 1
@@ -489,6 +490,7 @@ def assign_preferred_home_teams_to_matchups():
         # preassigned to a different location.
         for group in groups_of_identical_matchups:
             for matchup in group:
+                assert matchup.selected_gameslot is not None
                 if (
                     matchup.is_preassigned
                     and matchup.selected_gameslot.location != matchup.team_a.home_location
