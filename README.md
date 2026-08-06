@@ -23,22 +23,14 @@ It assigns each matchup to a gameslot. These assignments constitute a schedule.
 ## Generate a schedule
 
 1. Clone the repository and `cd` into it.
-2. Install `requirements.txt` into a virtual environment. For example, on Ubuntu:
-    
-    ```
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
+2. Copy all of the `csv` files from `examples/basketball_2024` into the `in` folder.
+3. Run the scheduler:
+
+    ```sh
+    uv run -m versizzle
     ```
 
-3. Copy all of the `csv` files from `examples/basketball_2024` into the `in` folder.
-4. Run the scheduler:
-
-    ```
-    python3 -m versizzle
-    ```
-
-5. Verify that the expected files appeared in `out`:
+4. Verify that the expected files appeared in `out`:
     - `breakout.txt`
     - `master.txt`
     - `metrics.txt`
@@ -51,8 +43,8 @@ Instead of generating a single schedule, Versizzle can also be configured to run
 1. Uncomment the `seed_search` block in `config.yml`.
 2. Run the scheduler:
 
-    ```
-    python3 -m versizzle
+    ```sh
+    uv run -m versizzle
     ```
 
 3. Verify that `seeds.txt` appeared in `out`.

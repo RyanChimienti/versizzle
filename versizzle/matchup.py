@@ -5,9 +5,7 @@ from versizzle.team import Team
 class Matchup:
     def __init__(self, team_a: Team, team_b: Team):
         if team_a.division != team_b.division:
-            raise Exception(
-                "tried to create matchup between two teams of different divisions"
-            )
+            raise Exception("tried to create matchup between two teams of different divisions")
         if team_a.name == team_b.name:
             raise Exception(f"tried to create matchup of {team_a} against itself")
 
@@ -27,13 +25,9 @@ class Matchup:
 
     def select_preferred_home_team(self, team: Team):
         if self.preferred_home_team is not None:
-            raise Exception(
-                "Can't assign a preferred home team to a matchup that already has one"
-            )
+            raise Exception("Can't assign a preferred home team to a matchup that already has one")
         if team != self.team_a and team != self.team_b:
-            raise Exception(
-                "Preferred home team for a matchup must be one of the teams in the matchup"
-            )
+            raise Exception("Preferred home team for a matchup must be one of the teams in the matchup")
 
         self.preferred_home_team = team
 
@@ -49,14 +43,10 @@ class Matchup:
         if self.selected_gameslot is not None:
             raise Exception("Must deselect gameslot before selecting a new one")
         if gameslot.selected_matchup is not None:
-            raise Exception(
-                "Tried to select gameslot that is selected by another matchup"
-            )
+            raise Exception("Tried to select gameslot that is selected by another matchup")
 
         self.selected_gameslot = gameslot
-        self.selected_gameslot_is_preferred = (
-            self in gameslot.matchups_that_prefer_this_slot
-        )
+        self.selected_gameslot_is_preferred = self in gameslot.matchups_that_prefer_this_slot
 
         self.team_a.games_by_date[gameslot.date].append(self)
         self.team_b.games_by_date[gameslot.date].append(self)
@@ -78,15 +68,9 @@ class Matchup:
 
     def get_teams_in_home_away_order(self) -> tuple[Team, Team]:
         location = self.selected_gameslot.location
-        if (
-            location == self.team_a.home_location
-            and location != self.team_b.home_location
-        ):
+        if location == self.team_a.home_location and location != self.team_b.home_location:
             return self.team_a, self.team_b
-        if (
-            location == self.team_b.home_location
-            and location != self.team_a.home_location
-        ):
+        if location == self.team_b.home_location and location != self.team_a.home_location:
             return self.team_b, self.team_a
 
         home_team = self.preferred_home_team
@@ -100,9 +84,7 @@ class Matchup:
         """
 
         if self.selected_gameslot is None:
-            raise Exception(
-                "Can't check whether matchup is isolated without a selected gameslot"
-            )
+            raise Exception("Can't check whether matchup is isolated without a selected gameslot")
 
         gameslot = self.selected_gameslot
         return gameslot.location.num_games_by_date[gameslot.date] == 1

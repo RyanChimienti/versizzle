@@ -3,7 +3,6 @@ import csv
 import random
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
 
 from versizzle import utils
 from versizzle.blackout import Blackout
@@ -15,9 +14,7 @@ from versizzle.preassignment import Preassignment
 from versizzle.team import Team
 from versizzle.window_constraint import WindowConstraint
 
-divisions_to_counts: dict[str, int] = defaultdict(
-    int
-)  # maps division -> # of teams in division
+divisions_to_counts: dict[str, int] = defaultdict(int)  # maps division -> # of teams in division
 teams: dict[tuple[str, str], Team] = dict()  # maps (division, team name) -> team object
 matchups: list[Matchup] = []
 gameslots: list[Gameslot] = []
@@ -104,13 +101,9 @@ def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
 
     print("Preferred selection phase complete.")
 
-    matchups_using_backup_slots = list(
-        filter(lambda m: m.selected_gameslot is None, matchups)
-    )
+    matchups_using_backup_slots = list(filter(lambda m: m.selected_gameslot is None, matchups))
 
-    print(
-        f"Number of matchups that did not get preferred selection: {len(matchups_using_backup_slots)}"
-    )
+    print(f"Number of matchups that did not get preferred selection: {len(matchups_using_backup_slots)}")
     print("Block sizes after preferred selection phase:")
     print()
     print_block_size_metrics()
@@ -118,9 +111,7 @@ def select_gameslots_for_matchups(window_constraints: list[WindowConstraint]):
     print("Backup selection phase started.")
 
     matchups_using_backup_slots.sort(key=lambda m: len(m.backup_gameslots))
-    success = select_backup_gameslots(
-        matchups_using_backup_slots, 0, window_constraints
-    )
+    success = select_backup_gameslots(matchups_using_backup_slots, 0, window_constraints)
 
     print(f"Backup selection completed with {backup_selection_dead_ends} dead ends.")
 
@@ -139,11 +130,7 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
     # If both teams in a matchup have the same home location, it would be egregious
     # for them to have to travel elsewhere. So those matchups are processed early to
     # make sure they get their preferred location.
-    same_home_matchups = [
-        m
-        for m in unprocessed_matchups
-        if m.team_a.home_location == m.team_b.home_location
-    ]
+    same_home_matchups = [m for m in unprocessed_matchups if m.team_a.home_location == m.team_b.home_location]
     print(f"{len(same_home_matchups)} same home matchups to process")
     for matchup in same_home_matchups:
         select_preferred_gameslot_for_matchup(matchup, window_constraints)
@@ -164,9 +151,7 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
         and m.preferred_home_team.home_location is not None
         and m.preferred_home_team.home_location.is_scarce
     ]
-    print(
-        f"Scarce location(s): {', '.join([str(l) for l in locations.values() if l.is_scarce])}"
-    )
+    print(f"Scarce location(s): {', '.join([str(l) for l in locations.values() if l.is_scarce])}")
     print(f"{len(scarce_home_matchups)} scarce home matchups to process")
     unprocessed_scarce_home_matchups = scarce_home_matchups.copy()
     while unprocessed_scarce_home_matchups:
@@ -174,16 +159,12 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
             print(f"{len(unprocessed_scarce_home_matchups)} remaining")
 
         smallest_home_percentage = min(
-            m.preferred_home_team.get_home_percentage()
-            for m in unprocessed_scarce_home_matchups
+            m.preferred_home_team.get_home_percentage() for m in unprocessed_scarce_home_matchups
         )
         matchups_with_smallest_home_percentage = [
             m
             for m in unprocessed_scarce_home_matchups
-            if abs(
-                m.preferred_home_team.get_home_percentage() - smallest_home_percentage
-            )
-            < 0.0001
+            if abs(m.preferred_home_team.get_home_percentage() - smallest_home_percentage) < 0.0001
         ]
         matchup_to_process = get_most_constrained_matchup_in_list(
             matchups_with_smallest_home_percentage, window_constraints
@@ -200,9 +181,7 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
         if len(unprocessed_matchups) % 10 == 0:
             print(f"{len(unprocessed_matchups)} remaining")
 
-        matchup_to_process = get_most_constrained_matchup_in_list(
-            unprocessed_matchups, window_constraints
-        )
+        matchup_to_process = get_most_constrained_matchup_in_list(unprocessed_matchups, window_constraints)
         select_preferred_gameslot_for_matchup(matchup_to_process, window_constraints)
         unprocessed_matchups.remove(matchup_to_process)
 
@@ -233,21 +212,17 @@ def get_most_constrained_matchup_in_list(
 # all of them. Therefore it's safe to consider it at the end. On the other hand, if a
 # matchup has few preferred slots, then it's in danger of losing its preferred slots, so
 # it should be considered early.
-def get_slot_availability_score(
-    matchup: Matchup, window_constraints: list[WindowConstraint]
-) -> float:
+def get_slot_availability_score(matchup: Matchup, window_constraints: list[WindowConstraint]) -> float:
     if matchup.selected_gameslot is not None:
         raise Exception(
-            "Tried to calculate slot availability score for matchup "
-            + "that has already selected a gameslot."
+            "Tried to calculate slot availability score for matchup " + "that has already selected a gameslot."
         )
 
     return len(
         [
             g
             for g in matchup.preferred_gameslots
-            if g.selected_matchup is None
-            and all(w.is_satisfied_by_selection(matchup, g) for w in window_constraints)
+            if g.selected_matchup is None and all(w.is_satisfied_by_selection(matchup, g) for w in window_constraints)
         ]
     )
 
@@ -255,47 +230,28 @@ def get_slot_availability_score(
 # If the given matchup has at least one preferred gameslot that can be selected,
 # selects the best preferred gameslot. Returns True if a gameslot was selected, False if
 # not.
-def select_preferred_gameslot_for_matchup(
-    matchup: Matchup, window_constraints: list[WindowConstraint]
-) -> bool:
+def select_preferred_gameslot_for_matchup(matchup: Matchup, window_constraints: list[WindowConstraint]) -> bool:
     for reuse_location in True, False:
         for use_weekend in True, False:
             for avoid_consecutive_days in True, False:
                 for gameslot in matchup.preferred_gameslots:
                     if gameslot.selected_matchup is not None:
                         continue
-                    if (
-                        reuse_location
-                        and gameslot.location.num_games_by_date[gameslot.date] == 0
-                    ):
+                    if reuse_location and gameslot.location.num_games_by_date[gameslot.date] == 0:
                         continue
-                    if (
-                        not reuse_location
-                        and gameslot.location.num_games_by_date[gameslot.date] != 0
-                    ):
+                    if not reuse_location and gameslot.location.num_games_by_date[gameslot.date] != 0:
                         continue
                     if use_weekend and gameslot.date.weekday() not in [4, 5]:
                         continue
                     if not use_weekend and gameslot.date.weekday() in [4, 5]:
                         continue
-                    if (
-                        avoid_consecutive_days
-                        and selection_will_create_consecutive_game_days(
-                            matchup, gameslot
-                        )
+                    if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
+                        continue
+                    if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
+                        matchup, gameslot
                     ):
                         continue
-                    if (
-                        not avoid_consecutive_days
-                        and not selection_will_create_consecutive_game_days(
-                            matchup, gameslot
-                        )
-                    ):
-                        continue
-                    if not all(
-                        w.is_satisfied_by_selection(matchup, gameslot)
-                        for w in window_constraints
-                    ):
+                    if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
                         continue
 
                     matchup.select_gameslot(gameslot)
@@ -317,9 +273,7 @@ def select_backup_gameslots(
 
     if start > backup_selection_depth:
         backup_selection_depth = start
-        print(
-            f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}"
-        )
+        print(f"New depth reached: {backup_selection_depth} / {len(matchups_using_backup_slots)}")
 
     if backup_selection_dead_ends >= 10000:
         # It's taking too long. We assume it will not complete in a reasonable time.
@@ -341,65 +295,34 @@ def select_backup_gameslots(
                     for gameslot in matchup.backup_gameslots:
                         if gameslot.selected_matchup is not None:
                             continue
-                        if (
-                            reuse_single_use_location
-                            and gameslot.location.num_games_by_date[gameslot.date] != 1
-                        ):
+                        if reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] != 1:
                             continue
-                        if (
-                            not reuse_single_use_location
-                            and gameslot.location.num_games_by_date[gameslot.date] == 1
-                        ):
+                        if not reuse_single_use_location and gameslot.location.num_games_by_date[gameslot.date] == 1:
                             continue
-                        if (
-                            reuse_multi_use_location
-                            and gameslot.location.num_games_by_date[gameslot.date] <= 1
-                        ):
+                        if reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] <= 1:
                             continue
-                        if (
-                            not reuse_multi_use_location
-                            and gameslot.location.num_games_by_date[gameslot.date] > 1
-                        ):
+                        if not reuse_multi_use_location and gameslot.location.num_games_by_date[gameslot.date] > 1:
                             continue
-                        if (
-                            give_nonpreferred_team_home
-                            and not selection_gives_either_team_home(matchup, gameslot)
-                        ):
+                        if give_nonpreferred_team_home and not selection_gives_either_team_home(matchup, gameslot):
                             continue
-                        if (
-                            not give_nonpreferred_team_home
-                            and selection_gives_either_team_home(matchup, gameslot)
-                        ):
+                        if not give_nonpreferred_team_home and selection_gives_either_team_home(matchup, gameslot):
                             continue
                         if use_weekend and gameslot.date.weekday() not in [4, 5]:
                             continue
                         if not use_weekend and gameslot.date.weekday() in [4, 5]:
                             continue
-                        if (
-                            avoid_consecutive_days
-                            and selection_will_create_consecutive_game_days(
-                                matchup, gameslot
-                            )
+                        if avoid_consecutive_days and selection_will_create_consecutive_game_days(matchup, gameslot):
+                            continue
+                        if not avoid_consecutive_days and not selection_will_create_consecutive_game_days(
+                            matchup, gameslot
                         ):
                             continue
-                        if (
-                            not avoid_consecutive_days
-                            and not selection_will_create_consecutive_game_days(
-                                matchup, gameslot
-                            )
-                        ):
-                            continue
-                        if not all(
-                            w.is_satisfied_by_selection(matchup, gameslot)
-                            for w in window_constraints
-                        ):
+                        if not all(w.is_satisfied_by_selection(matchup, gameslot) for w in window_constraints):
                             continue
 
                         matchup.select_gameslot(gameslot)
 
-                        if select_backup_gameslots(
-                            matchups_using_backup_slots, start + 1, window_constraints
-                        ):
+                        if select_backup_gameslots(matchups_using_backup_slots, start + 1, window_constraints):
                             return True
 
                         matchup.deselect_gameslot()
@@ -412,10 +335,7 @@ def select_backup_gameslots(
 
 
 def selection_gives_either_team_home(matchup: Matchup, gameslot: Gameslot):
-    return (
-        gameslot.location == matchup.team_a.home_location
-        or gameslot.location == matchup.team_b.home_location
-    )
+    return gameslot.location == matchup.team_a.home_location or gameslot.location == matchup.team_b.home_location
 
 
 def selection_will_create_consecutive_game_days(matchup: Matchup, gameslot: Gameslot):
@@ -488,9 +408,7 @@ def assign_preferred_home_teams_to_matchups():
             preassigned_matchups = [m for m in group if m.is_preassigned]
             if first_team.home_location == second_team.home_location:
                 matchups_preassigned_to_home_location = [
-                    m
-                    for m in preassigned_matchups
-                    if m.selected_gameslot.location == first_team.home_location
+                    m for m in preassigned_matchups if m.selected_gameslot.location == first_team.home_location
                 ]
 
                 for i in range(len(matchups_preassigned_to_home_location) // 2):
@@ -504,9 +422,7 @@ def assign_preferred_home_teams_to_matchups():
 
                 if len(matchups_preassigned_to_home_location) % 2 == 1:
                     leftover_matchup = matchups_preassigned_to_home_location[-1]
-                    home_team = get_team_with_lower_preferred_home_ratio(
-                        first_team, second_team
-                    )
+                    home_team = get_team_with_lower_preferred_home_ratio(first_team, second_team)
                     leftover_matchup.select_preferred_home_team(home_team)
                     if home_team == first_team:
                         num_preassigned_home_games_for_first_team += 1
@@ -517,31 +433,23 @@ def assign_preferred_home_teams_to_matchups():
                     if matchup.selected_gameslot.location == first_team.home_location:
                         matchup.select_preferred_home_team(first_team)
                         num_preassigned_home_games_for_first_team += 1
-                    elif (
-                        matchup.selected_gameslot.location == second_team.home_location
-                    ):
+                    elif matchup.selected_gameslot.location == second_team.home_location:
                         matchup.select_preferred_home_team(second_team)
                         num_preassigned_home_games_for_second_team += 1
 
             team_with_fewer_preassigned_home_games = (
                 first_team
-                if num_preassigned_home_games_for_first_team
-                < num_preassigned_home_games_for_second_team
+                if num_preassigned_home_games_for_first_team < num_preassigned_home_games_for_second_team
                 else second_team
             )
             difference_in_preassigned_home = abs(
-                num_preassigned_home_games_for_first_team
-                - num_preassigned_home_games_for_second_team
+                num_preassigned_home_games_for_first_team - num_preassigned_home_games_for_second_team
             )
 
-            remaining_nonpreassigned_matchups = [
-                m for m in group if not m.is_preassigned
-            ]
+            remaining_nonpreassigned_matchups = [m for m in group if not m.is_preassigned]
             while remaining_nonpreassigned_matchups and difference_in_preassigned_home:
                 matchup = remaining_nonpreassigned_matchups.pop()
-                matchup.select_preferred_home_team(
-                    team_with_fewer_preassigned_home_games
-                )
+                matchup.select_preferred_home_team(team_with_fewer_preassigned_home_games)
                 difference_in_preassigned_home -= 1
 
             for _ in range(len(remaining_nonpreassigned_matchups) // 2):
@@ -558,9 +466,7 @@ def assign_preferred_home_teams_to_matchups():
         for group in groups_of_identical_matchups:
             for matchup in group:
                 if not matchup.is_preassigned and matchup.preferred_home_team is None:
-                    home_team = get_team_with_lower_preferred_home_ratio(
-                        matchup.team_a, matchup.team_b
-                    )
+                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
                     matchup.select_preferred_home_team(home_team)
                     break
 
@@ -572,14 +478,10 @@ def assign_preferred_home_teams_to_matchups():
             for matchup in group:
                 if (
                     matchup.is_preassigned
-                    and matchup.selected_gameslot.location
-                    != matchup.team_a.home_location
-                    and matchup.selected_gameslot.location
-                    != matchup.team_b.home_location
+                    and matchup.selected_gameslot.location != matchup.team_a.home_location
+                    and matchup.selected_gameslot.location != matchup.team_b.home_location
                 ):
-                    home_team = get_team_with_lower_preferred_home_ratio(
-                        matchup.team_a, matchup.team_b
-                    )
+                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
                     matchup.select_preferred_home_team(home_team)
 
 
@@ -587,14 +489,12 @@ def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
     team_1_home_ratio = (
         0.5
         if team_1.num_matchups_with_home_preference_chosen == 0
-        else team_1.num_preferred_home_games
-        / float(team_1.num_matchups_with_home_preference_chosen)
+        else team_1.num_preferred_home_games / float(team_1.num_matchups_with_home_preference_chosen)
     )
     team_2_home_ratio = (
         0.5
         if team_2.num_matchups_with_home_preference_chosen == 0
-        else team_2.num_preferred_home_games
-        / float(team_2.num_matchups_with_home_preference_chosen)
+        else team_2.num_preferred_home_games / float(team_2.num_matchups_with_home_preference_chosen)
     )
     if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
         return random.choice([team_1, team_2])
@@ -618,7 +518,7 @@ def ingest_teams_file(
     scarce_location_names: list[str],
 ):
     file_path = f"{directory_path}/teams.csv"
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
             raise Exception("teams.csv must contain at least 1 line (a header)")
@@ -630,9 +530,7 @@ def ingest_teams_file(
             and first_row[1] == "team"
             and first_row[2] == "home location"
         ):
-            raise Exception(
-                "teams.csv should have 3 columns: 'division', 'team', and 'home location'"
-            )
+            raise Exception("teams.csv should have 3 columns: 'division', 'team', and 'home location'")
         for row in lines[1:]:
             division, name, home_location_name = row
             if home_location_name == "NONE":
@@ -641,9 +539,7 @@ def ingest_teams_file(
                 home_location_obj = locations[home_location_name]
             else:
                 home_location_is_scarce = home_location_name in scarce_location_names
-                home_location_obj = Location(
-                    home_location_name, home_location_is_scarce
-                )
+                home_location_obj = Location(home_location_name, home_location_is_scarce)
                 locations[home_location_name] = home_location_obj
 
             teams[(division, name)] = Team(division, name, home_location_obj)
@@ -661,21 +557,16 @@ def ingest_teams_file(
 
 def ingest_matchups_file(directory_path):
     file_path = f"{directory_path}/matchups.csv"
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
             raise Exception("matchups.csv must contain at least 1 line (a header)")
 
         first_row = lines[0]
         if not (
-            len(first_row) == 3
-            and first_row[0] == "division"
-            and first_row[1] == "team a"
-            and first_row[2] == "team b"
+            len(first_row) == 3 and first_row[0] == "division" and first_row[1] == "team a" and first_row[2] == "team b"
         ):
-            raise Exception(
-                "matchups.csv should have 3 columns: 'division', 'team a', and 'team b'"
-            )
+            raise Exception("matchups.csv should have 3 columns: 'division', 'team a', and 'team b'")
         for row in lines[1:]:
             division, team_a_name, team_b_name = row
             team_a = teams[(division, team_a_name)]
@@ -703,21 +594,16 @@ def ingest_matchups_file(directory_path):
 
 def ingest_gameslots_file(directory_path: str, scarce_location_names: list[str]):
     file_path = f"{directory_path}/gameslots.csv"
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
             raise Exception("gameslots.csv must contain at least 1 lines (a header)")
 
         first_row = lines[0]
         if not (
-            len(first_row) == 3
-            and first_row[0] == "date"
-            and first_row[1] == "time"
-            and first_row[2] == "location"
+            len(first_row) == 3 and first_row[0] == "date" and first_row[1] == "time" and first_row[2] == "location"
         ):
-            raise Exception(
-                "gameslots.csv should have 3 columns: 'date', 'time', and 'location'"
-            )
+            raise Exception("gameslots.csv should have 3 columns: 'date', 'time', and 'location'")
         for row in lines[1:]:
             date_string, time_string, location_name = row
 
@@ -731,9 +617,7 @@ def ingest_gameslots_file(directory_path: str, scarce_location_names: list[str])
             datetime_string = date_string + " " + time_string
             datetime_obj = datetime.strptime(datetime_string, "%m/%d/%Y %I:%M%p")
 
-            gameslots.append(
-                Gameslot(datetime_obj.date(), datetime_obj.time(), location_obj)
-            )
+            gameslots.append(Gameslot(datetime_obj.date(), datetime_obj.time(), location_obj))
             location_obj.num_gameslots += 1
 
     print("======================== ingested gameslots: ========================")
@@ -755,7 +639,7 @@ def ingest_gameslots_file(directory_path: str, scarce_location_names: list[str])
 
 def ingest_blackouts_file(directory_path):
     file_path = f"{directory_path}/blackouts.csv"
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
             raise Exception("blackouts.csv must contain at least 1 line (a header)")
@@ -791,11 +675,7 @@ def ingest_blackouts_file(directory_path):
 
             team_name_obj = None if team_name == "ALL" else team_name
 
-            blackouts.append(
-                Blackout(
-                    date_obj, start_time_obj, end_time_obj, division_obj, team_name_obj
-                )
-            )
+            blackouts.append(Blackout(date_obj, start_time_obj, end_time_obj, division_obj, team_name_obj))
 
     print("======================== ingested blackouts: ========================")
     if len(blackouts) <= 20:
@@ -812,12 +692,10 @@ def ingest_blackouts_file(directory_path):
 
 def ingest_preassignments_file(directory_path):
     file_path = f"{directory_path}/preassignments.csv"
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = list(csv.reader(file))
         if len(lines) == 0:
-            raise Exception(
-                "preassignments.csv must contain at least 1 line (a header)"
-            )
+            raise Exception("preassignments.csv must contain at least 1 line (a header)")
 
         first_row = lines[0]
         if not (
@@ -843,9 +721,7 @@ def ingest_preassignments_file(directory_path):
             team_a = teams[(division, team_a_name)]
             team_b = teams[(division, team_b_name)]
 
-            preassignments.append(
-                Preassignment(date_obj, time_obj, location, team_a, team_b)
-            )
+            preassignments.append(Preassignment(date_obj, time_obj, location, team_a, team_b))
 
 
 def write_output_files(output_dir_path: str):
@@ -893,14 +769,8 @@ def print_master_schedule(file=None):
         blackouts_on_day = blackouts_by_day[day]
 
         for i, gameslot in enumerate(gameslots_on_day):
-            blackout_str = (
-                "" if i >= len(blackouts_on_day) else str(blackouts_on_day[i])
-            )
-            matchup_str = (
-                "Open"
-                if gameslot.selected_matchup is None
-                else str(gameslot.selected_matchup)
-            )
+            blackout_str = "" if i >= len(blackouts_on_day) else str(blackouts_on_day[i])
+            matchup_str = "Open" if gameslot.selected_matchup is None else str(gameslot.selected_matchup)
 
             row = [str(gameslot), matchup_str, blackout_str]
 
@@ -930,9 +800,7 @@ def print_pasteable_schedule(file=None):
             else:
                 matchup = gameslot.selected_matchup
                 division = matchup.division
-                division_str = (
-                    "7/8B" if division in ["7/8B South", "7/8B North"] else division
-                )
+                division_str = "7/8B" if division in ["7/8B South", "7/8B North"] else division
                 home_team, away_team = matchup.get_teams_in_home_away_order()
 
                 matchup_str = f"{division_str}\t{home_team.name}\t{away_team.name}"
@@ -1028,9 +896,7 @@ def get_num_consecutive_pairs_to_num_teams():
 
 
 def print_non_preferred_gameslot_metrics(file=None):
-    non_preferred_matchups = list(
-        filter(lambda m: not m.selected_gameslot_is_preferred, matchups)
-    )
+    non_preferred_matchups = list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
     non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.name)
     non_preferred_matchups.sort(key=lambda m: m.preferred_home_team.division)
 
@@ -1091,7 +957,7 @@ def print_block_size_metrics(file=None):
     utils.pretty_print_table(table, file=file)
 
 
-def get_block_sizes_to_counts() -> Dict[int, int]:
+def get_block_sizes_to_counts() -> dict[int, int]:
     block_sizes_to_counts = defaultdict(int)
     for location in locations.values():
         for num_games in location.num_games_by_date.values():
@@ -1190,13 +1056,9 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
 
     with open(seed_file_path, "a") as f:
         num_weekday_games_to_num_teams = get_num_weekday_games_to_num_teams()
-        total_weekday_games = sum(
-            g * t for g, t in num_weekday_games_to_num_teams.items()
-        )
+        total_weekday_games = sum(g * t for g, t in num_weekday_games_to_num_teams.items())
 
-        num_non_preferred_locs = len(
-            list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups))
-        )
+        num_non_preferred_locs = len(list(filter(lambda m: not m.selected_gameslot_is_preferred, matchups)))
         num_games_at_neither_home = 0
         for m in matchups:
             if (

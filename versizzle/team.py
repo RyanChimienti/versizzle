@@ -33,8 +33,7 @@ class Team:
         num_scheduled_home_games = len(
             list(
                 filter(
-                    lambda m: m.selected_gameslot is not None
-                    and m.selected_gameslot.location == self.home_location,
+                    lambda m: m.selected_gameslot is not None and m.selected_gameslot.location == self.home_location,
                     self.matchups,
                 )
             )
@@ -49,8 +48,4 @@ class Team:
         return hash((self.division, self.name))
 
     def __eq__(self, other):
-        return (
-            self.division == other.division
-            and self.name == other.name
-            and self.home_location == other.home_location
-        )
+        return self.division == other.division and self.name == other.name and self.home_location == other.home_location

@@ -1,0 +1,29 @@
+[project]
+name = "versizzle"
+version = "0.1.0"
+description = "A game scheduler for sports leagues"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["more-itertools>=10.1.0", "PyYAML>=6.0.3"]
+
+[dependency-groups]
+dev = ["ruff>=0.16.1"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

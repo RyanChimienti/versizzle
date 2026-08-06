@@ -14,9 +14,7 @@ class WindowConstraint:
     # one of the teams will have too many games in the window. Otherwise returns True.
     def is_satisfied_by_selection(self, matchup: Matchup, gameslot: Gameslot) -> bool:
         if matchup.selected_gameslot is not None:
-            raise Exception(
-                "Cannot test window constraint if matchup is already assigned to a gameslot"
-            )
+            raise Exception("Cannot test window constraint if matchup is already assigned to a gameslot")
 
         candidate_date = gameslot.date
 

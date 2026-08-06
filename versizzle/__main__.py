@@ -4,9 +4,7 @@ from versizzle.window_constraint import WindowConstraint
 
 print(f"Found config: {config}")
 
-window_constraints = [
-    WindowConstraint(w["days"], w["max_games"]) for w in config["window_constraints"]
-]
+window_constraints = [WindowConstraint(w["days"], w["max_games"]) for w in config["window_constraints"]]
 scarce_location_names = config["scarce_locations"]
 input_dir_path = config["input_dir"]
 output_dir_path = config["output_dir"]

@@ -47,23 +47,13 @@ class Preassignment:
                 break
 
         if gameslot_to_use is None:
-            raise Exception(
-                f"Could not find a gameslot to use for preassignment {self}"
-            )
+            raise Exception(f"Could not find a gameslot to use for preassignment {self}")
 
-        if any(
-            b.prohibits_matchup_in_slot(matchup_to_use, gameslot_to_use)
-            for b in blackouts
-        ):
+        if any(b.prohibits_matchup_in_slot(matchup_to_use, gameslot_to_use) for b in blackouts):
             raise Exception(f"Preassignment {self} is prohibited by a blackout")
 
-        if any(
-            not w.is_satisfied_by_selection(matchup_to_use, gameslot_to_use)
-            for w in window_constraints
-        ):
-            raise Exception(
-                f"Preassignment {self} is prohibited by a window constraint"
-            )
+        if any(not w.is_satisfied_by_selection(matchup_to_use, gameslot_to_use) for w in window_constraints):
+            raise Exception(f"Preassignment {self} is prohibited by a window constraint")
 
         matchup_to_use.is_preassigned = True
         matchup_to_use.preferred_gameslots = [gameslot_to_use]
@@ -80,11 +70,7 @@ class Preassignment:
         )
 
     def describes_gameslot(self, gameslot: Gameslot):
-        return (
-            gameslot.date == self.date
-            and gameslot.time == self.time
-            and gameslot.location == self.location
-        )
+        return gameslot.date == self.date and gameslot.time == self.time and gameslot.location == self.location
 
     def __str__(self):
         pretty_date = utils.prettify_date(self.date)

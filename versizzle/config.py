@@ -1,6 +1,6 @@
 import yaml
 
-with open("config.yml", "r") as file:
+with open("config.yml") as file:
     config = yaml.safe_load(file)
 
 if "input_dir" not in config:

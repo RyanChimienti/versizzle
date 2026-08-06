@@ -61,9 +61,7 @@ class PostProcessor:
 
         final_num_isolated = len([m for m in self.matchups if m.is_isolated()])
 
-        print(
-            f"Minimized isolated matchups: {initial_num_isolated} -> {final_num_isolated}"
-        )
+        print(f"Minimized isolated matchups: {initial_num_isolated} -> {final_num_isolated}")
 
     def try_push_matchup(self, matchup: Matchup):
         """
@@ -97,10 +95,7 @@ class PostProcessor:
                 # Our matchup would still be isolated in this slot
                 continue
 
-            if not all(
-                wc.is_satisfied_by_selection(matchup, slot)
-                for wc in self.window_constraints
-            ):
+            if not all(wc.is_satisfied_by_selection(matchup, slot) for wc in self.window_constraints):
                 # Moving the matchup here would cause a window constraint violation
                 continue
 
@@ -136,10 +131,7 @@ class PostProcessor:
             if candidate_matchup.selected_gameslot_is_preferred:
                 candidate_slots = candidate_matchup.preferred_gameslots
             else:
-                candidate_slots = (
-                    candidate_matchup.preferred_gameslots
-                    + candidate_matchup.backup_gameslots
-                )
+                candidate_slots = candidate_matchup.preferred_gameslots + candidate_matchup.backup_gameslots
 
             candidate_slot = first_true(
                 candidate_slots,
@@ -156,8 +148,7 @@ class PostProcessor:
             candidate_matchup.deselect_gameslot()
 
             if not all(
-                wc.is_satisfied_by_selection(candidate_matchup, candidate_slot)
-                for wc in self.window_constraints
+                wc.is_satisfied_by_selection(candidate_matchup, candidate_slot) for wc in self.window_constraints
             ):
                 # Moving the matchup here would cause a window constraint violation
                 candidate_matchup.select_gameslot(original_slot)
@@ -190,17 +181,11 @@ class PostProcessor:
                 failed_blocks.append((date, location))
 
         if failed_blocks:
-            print(
-                "Removing awkward gaps FAILED in some cases! "
-                + "The following blocks require manual adjustment:"
-            )
+            print("Removing awkward gaps FAILED in some cases! " + "The following blocks require manual adjustment:")
             for date, location in failed_blocks:
                 print(f"{utils.prettify_date(date)} at {location}")
         else:
-            print(
-                "Removing awkward gaps was successful in all cases. "
-                + "No manual adjustment required."
-            )
+            print("Removing awkward gaps was successful in all cases. " + "No manual adjustment required.")
 
     # Takes all gameslots for a particular location and day. Attempts to reassign their
     # matchups among the gameslots such that all of the matchups are scheduled
@@ -230,16 +215,11 @@ class PostProcessor:
                 ):
                     for matchup in matchup_permutation:
                         matchup.deselect_gameslot()
-                    for matchup, gameslot in zip(
-                        matchup_permutation, gameslots_in_block[s:]
-                    ):
+                    for matchup, gameslot in zip(matchup_permutation, gameslots_in_block[s:]):
                         matchup.select_gameslot(gameslot)
 
                     if attempt_number > 1:
-                        print(
-                            f"Took {attempt_number} tries to squeeze matchups "
-                            + f"on {pretty_date} at {location}."
-                        )
+                        print(f"Took {attempt_number} tries to squeeze matchups " + f"on {pretty_date} at {location}.")
                     return True
 
                 attempt_number += 1
