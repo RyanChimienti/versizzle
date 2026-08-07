@@ -110,9 +110,6 @@ def ingest_matchups_file(
         matchup = Matchup(team_a, team_b)
         matchups.append(matchup)
 
-        team_a.matchups.append(matchup)
-        team_b.matchups.append(matchup)
-
     result.matchups = matchups
 
     print("======================== ingested matchups: ========================")

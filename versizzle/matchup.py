@@ -13,6 +13,12 @@ class Matchup:
         self.team_a: Team = team_a
         self.team_b: Team = team_b
 
+        team_a.matchups.append(self)
+        team_b.matchups.append(self)
+        if team_a.home_location != team_b.home_location:
+            team_a.num_asymmetric_matchups += 1
+            team_b.num_asymmetric_matchups += 1
+
         self.is_preassigned = False
 
         self.preferred_home_team: Team | None = None
@@ -33,10 +39,10 @@ class Matchup:
 
         if self.team_a.home_location != self.team_b.home_location:
             if team == self.team_a:
-                self.team_a.num_asymmetric_matches_preferring_this_team_as_home += 1
+                self.team_a.num_asymmetric_matchups_preferring_this_team_as_home += 1
             else:
                 assert team == self.team_b
-                self.team_b.num_asymmetric_matches_preferring_this_team_as_home += 1
+                self.team_b.num_asymmetric_matchups_preferring_this_team_as_home += 1
 
             self.team_a.num_asymmetric_matchups_with_home_preference_chosen += 1
             self.team_b.num_asymmetric_matchups_with_home_preference_chosen += 1

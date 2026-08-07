@@ -16,14 +16,17 @@ class Team:
         # All of the matchups (scheduled or not) that include this team
         self.matchups: list[Matchup] = []
 
-        # The number of asymmetric matchups that include this team and have chosen a preferred home location. A matchup
-        # is asymmetric if the teams have different home locations. (In particular, a matchup where both teams lack a
-        # home location is symmetric, and a matchup where only one team has a home location is asymmetric.)
+        # Number of asymmetric matchups that include this team. A matchup is asymmetric if the teams have different home
+        # locations. (In particular, a matchup where both teams lack a home location is symmetric, and a matchup where
+        # only one team has a home location is asymmetric.)
+        self.num_asymmetric_matchups: int = 0
+
+        # The number of asymmetric matchups that include this team and have chosen a preferred home location.
         self.num_asymmetric_matchups_with_home_preference_chosen: int = 0
 
         # The number of asymmetric matchups that include this team and have chosen this team as their preferred home
         # team.
-        self.num_asymmetric_matches_preferring_this_team_as_home: int = 0
+        self.num_asymmetric_matchups_preferring_this_team_as_home: int = 0
 
         # A map from dates to all of the games (AKA *scheduled* matchups) that this team is playing on that date
         self.games_by_date: dict[date, list[Matchup]] = defaultdict(list)
@@ -48,4 +51,4 @@ class Team:
         return hash((self.division, self.name))
 
     def __eq__(self, other):
-        return self.division == other.division and self.name == other.name and self.home_location == other.home_location
+        return self.division == other.division and self.name == other.name

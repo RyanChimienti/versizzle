@@ -59,7 +59,7 @@ def generate_schedule(
     preassignments = ingestion_result.preassignments
 
     do_preassignments(window_constraints)
-    assign_preferred_home_teams_to_matchups()
+    select_preferred_home_teams()
     assign_candidate_gameslots_to_matchups()
 
     success = select_gameslots_for_matchups(window_constraints)
@@ -89,125 +89,202 @@ def do_preassignments(window_constraints: list[WindowConstraint]):
     print()
 
 
-def assign_preferred_home_teams_to_matchups():
-    for d in divisions_to_counts:
-        division_matchups = [m for m in matchups if m.division == d]
+def select_preferred_home_teams():
+    """For each matchup, selects which team is the preferred home team."""
 
-        team_pairs_to_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
-        for m in division_matchups:
-            first_team_name, second_team_name = sorted([m.team_a.name, m.team_b.name])
-            team_pairs_to_matchups[(first_team_name, second_team_name)].append(m)
-
-        groups_of_identical_matchups = team_pairs_to_matchups.values()
-
-        for group in groups_of_identical_matchups:
-            first_team, second_team = group[0].team_a, group[0].team_b
-
-            num_preassigned_home_games_for_first_team = 0
-            num_preassigned_home_games_for_second_team = 0
-
-            # First we process preassigned matchups that have been assigned to either
-            # team's home. If the teams have different home locations this is easy; the
-            # preferred home team is the one whose location was preassigned. If the teams
-            # have the same home location, then we distribute the home games evenly between
-            # them, giving the last game (if there are an odd number) to whichever team
-            # has fewer home games so far.
-            preassigned_matchups = [m for m in group if m.is_preassigned]
-            if first_team.home_location == second_team.home_location:
-                matchups_preassigned_to_home_location = [
-                    m for m in preassigned_matchups if unwrap(m.selected_gameslot).location == first_team.home_location
-                ]
-
-                for i in range(len(matchups_preassigned_to_home_location) // 2):
-                    matchup_1 = matchups_preassigned_to_home_location[i]
-                    matchup_1.select_preferred_home_team(first_team)
-                    num_preassigned_home_games_for_first_team += 1
-
-                    matchup_2 = matchups_preassigned_to_home_location[i + 1]
-                    matchup_2.select_preferred_home_team(second_team)
-                    num_preassigned_home_games_for_second_team += 1
-
-                if len(matchups_preassigned_to_home_location) % 2 == 1:
-                    leftover_matchup = matchups_preassigned_to_home_location[-1]
-                    home_team = get_team_with_lower_preferred_home_ratio(first_team, second_team)
-                    leftover_matchup.select_preferred_home_team(home_team)
-                    if home_team == first_team:
-                        num_preassigned_home_games_for_first_team += 1
-                    else:
-                        num_preassigned_home_games_for_second_team += 1
-            else:
-                for matchup in preassigned_matchups:
-                    assert matchup.selected_gameslot is not None
-                    if matchup.selected_gameslot.location == first_team.home_location:
-                        matchup.select_preferred_home_team(first_team)
-                        num_preassigned_home_games_for_first_team += 1
-                    elif matchup.selected_gameslot.location == second_team.home_location:
-                        matchup.select_preferred_home_team(second_team)
-                        num_preassigned_home_games_for_second_team += 1
-
-            team_with_fewer_preassigned_home_games = (
-                first_team
-                if num_preassigned_home_games_for_first_team < num_preassigned_home_games_for_second_team
-                else second_team
-            )
-            difference_in_preassigned_home = abs(
-                num_preassigned_home_games_for_first_team - num_preassigned_home_games_for_second_team
-            )
-
-            remaining_nonpreassigned_matchups = [m for m in group if not m.is_preassigned]
-            while remaining_nonpreassigned_matchups and difference_in_preassigned_home:
-                matchup = remaining_nonpreassigned_matchups.pop()
-                matchup.select_preferred_home_team(team_with_fewer_preassigned_home_games)
-                difference_in_preassigned_home -= 1
-
-            for _ in range(len(remaining_nonpreassigned_matchups) // 2):
-                matchup_1 = remaining_nonpreassigned_matchups.pop()
-                matchup_1.select_preferred_home_team(first_team)
-
-                matchup_2 = remaining_nonpreassigned_matchups.pop()
-                matchup_2.select_preferred_home_team(second_team)
-
-        # In each matchup group, there may be 1 nonpreassigned matchup that hasn't
-        # received a home team. These matchups are special because, unlike the matchups
-        # processed so far, they have no natural home team. Therefore we can assign them
-        # home teams in whatever way best balances the number of home games for each team.
-        for group in groups_of_identical_matchups:
-            for matchup in group:
-                if not matchup.is_preassigned and matchup.preferred_home_team is None:
-                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
-                    matchup.select_preferred_home_team(home_team)
-                    break
-
-        # Finally, we address the matchups that are preassigned, but to a location that
-        # is neither team's home. We give them preferred home teams so that all matchups
-        # have preferred home teams, but really it's futile because they have already been
-        # preassigned to a different location.
-        for group in groups_of_identical_matchups:
-            for matchup in group:
-                if (
-                    matchup.is_preassigned
-                    and unwrap(matchup.selected_gameslot).location != matchup.team_a.home_location
-                    and unwrap(matchup.selected_gameslot).location != matchup.team_b.home_location
-                ):
-                    home_team = get_team_with_lower_preferred_home_ratio(matchup.team_a, matchup.team_b)
-                    matchup.select_preferred_home_team(home_team)
+    for division in divisions_to_counts:
+        if any(m.is_preassigned for m in matchups if m.division == division):
+            select_preferred_home_teams_in_preassigned_division(division)
+        else:
+            select_preferred_home_teams_in_nonpreassigned_division(division)
 
 
-def get_team_with_lower_preferred_home_ratio(team_1: Team, team_2: Team):
+def select_preferred_home_teams_in_nonpreassigned_division(division: str):
+    """
+    Takes a division with no preassignments. For every matchup in that division, selects which team is the preferred
+    home team. The lack of preassignments allows us to use a more ambitious home selection algorithm. Not only will we
+    strive to give each team at least half their games at home, but we will also strive to give each pair of teams who
+    play each other an even number of home games with one another. (The latter goal is too complicated when
+    preassignments are present in the division.)
+    """
+
+    division_matchups = [m for m in matchups if m.division == division]
+    random.shuffle(division_matchups)  # TODO: Maybe remove all local shuffling and shuffle once right after ingestion
+
+    team_pairs_to_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
+    for m in division_matchups:
+        first_team_name, second_team_name = sorted([m.team_a.name, m.team_b.name])
+        team_pairs_to_matchups[(first_team_name, second_team_name)].append(m)
+
+    groups_of_identical_matchups = team_pairs_to_matchups.values()
+    groups_of_identical_asymmetric_matchups: list[list[Matchup]] = []
+    groups_of_identical_symmetric_matchups: list[list[Matchup]] = []
+    for g in groups_of_identical_matchups:
+        if g[0].team_a.home_location == g[0].team_b.home_location:
+            groups_of_identical_symmetric_matchups.append(g)
+        else:
+            groups_of_identical_asymmetric_matchups.append(g)
+
+    # First distribute groups of identical asymmetric matchups evenly between the two competing teams. Save the last
+    # matchup if there's an odd number; we'll deal with it next...
+
+    for group in groups_of_identical_asymmetric_matchups:
+        team_a, team_b = group[0].team_a, group[0].team_b
+
+        for _ in range(len(group) // 2):
+            group.pop().select_preferred_home_team(team_a)
+            group.pop().select_preferred_home_team(team_b)
+
+    # In each matchup group, there may be one remaining matchup (if it had an odd number originally). These matchups are
+    # special because, unlike the matchups processed so far, they have no natural home team. Therefore we can assign
+    # them home teams in whatever way best balances the number of home games for each team.
+
+    for group in groups_of_identical_asymmetric_matchups:
+        if group:
+            m = group[0]
+
+            home_team = get_team_who_needs_home_in_asymmetric_matchup(m)
+            if home_team is None:
+                home_team = get_team_with_lower_asymmetric_preferred_home_ratio(m.team_a, m.team_b)
+
+            m.select_preferred_home_team(home_team)
+
+    # All that's left to handle are the symmetric matchups. Of course, it doesn't matter which home team we pick for
+    # these from a scheduling standpoint, but it does have a slight aesthetic effect because it determines the order in
+    # which we display the teams. From an aesthetic standpoint, it is nice to balance our symmetric matchups, meaning if
+    # two teams play each other multiple times, we call each team the home team half of the time.
+
+    for group in groups_of_identical_symmetric_matchups:
+        team_a, team_b = group[0].team_a, group[0].team_b
+
+        for _ in range(len(group) // 2):
+            group.pop().select_preferred_home_team(team_a)
+            group.pop().select_preferred_home_team(team_b)
+
+        if group:
+            # If there's an extra matchup, give it to the team with the lower asymmetric home ratio.
+            group[0].select_preferred_home_team(get_team_with_lower_asymmetric_preferred_home_ratio(team_a, team_b))
+
+
+def select_preferred_home_teams_in_preassigned_division(division: str):
+    """
+    Takes a division with at least one preassignment. For every matchup in that division, selects which team is the
+    preferred home team. Preassignments can seriously complicate preferred home selection, so we use a less ambitious
+    algorithm. Namely, we only seek to give each team at least half their games at home, without worrying about how many
+    home games the team has against a specific opponent team.
+    """
+
+    division_matchups = [m for m in matchups if m.division == division]
+    random.shuffle(division_matchups)  # TODO: Maybe remove all local shuffling and shuffle once right after ingestion
+
+    # First, handle preassigned asymmetric matchups. The preferred home team is obvious here: we just use whichever home
+    # location was preassigned.
+
+    for matchup in division_matchups:
+        if not matchup.is_preassigned:
+            continue
+        if matchup.team_a.home_location == matchup.team_b.home_location:
+            continue
+
+        location = unwrap(matchup.selected_gameslot).location
+        if location == matchup.team_a.home_location:
+            home_team = matchup.team_a
+        elif location == matchup.team_b.home_location:
+            home_team = matchup.team_b
+        else:
+            # A preassigned matchup being placed at neither team's home is rare. Rather than carefully considering this
+            # case, We'll let randomness find a good solution over many seeds.
+            home_team = random.choice((matchup.team_a, matchup.team_b))
+
+        matchup.select_preferred_home_team(home_team)
+
+    # Second, handle nonpreassigned asymmetric matchups. This is the interesting case. Our strategy is to take as the
+    # home team whichever team has a lower asymmetric home ratio so far. However, there is a caveat: if either team
+    # needs all its remaining matchups to be home games in order to reach half its asymmetric matchups at home, then
+    # that team is given home no matter what.
+
+    for matchup in division_matchups:
+        if matchup.is_preassigned:
+            continue
+        if matchup.team_a.home_location == matchup.team_b.home_location:
+            continue
+
+        home_team = get_team_who_needs_home_in_asymmetric_matchup(matchup)
+        if home_team is None:
+            home_team = get_team_with_lower_asymmetric_preferred_home_ratio(matchup.team_a, matchup.team_b)
+
+        matchup.select_preferred_home_team(home_team)
+
+    # All that's left to handle are the symmetric matchups (both preassigned and not). Of course, it doesn't matter
+    # which home team we pick for these from a scheduling standpoint, but it does have a slight aesthetic effect because
+    # it determines the order in which we display the teams. From an aesthetic standpoint, it is nice to balance our
+    # symmetric matchups, meaning if two teams play each other multiple times, we call each team the home team half of
+    # the time.
+
+    groups_of_identical_symmetric_matchups: defaultdict[tuple[str, str], list[Matchup]] = defaultdict(list)
+    for matchup in division_matchups:
+        if matchup.team_a.home_location == matchup.team_b.home_location:
+            first_team_name, second_team_name = sorted((matchup.team_a.name, matchup.team_b.name))
+            groups_of_identical_symmetric_matchups[(first_team_name, second_team_name)].append(matchup)
+
+    for group in groups_of_identical_symmetric_matchups.values():
+        team_a, team_b = group[0].team_a, group[0].team_b
+
+        for _ in range(len(group) // 2):
+            group.pop().select_preferred_home_team(team_a)
+            group.pop().select_preferred_home_team(team_b)
+
+        if group:
+            # If there's an extra matchup, give it to the team with the lower asymmetric home ratio.
+            group[0].select_preferred_home_team(get_team_with_lower_asymmetric_preferred_home_ratio(team_a, team_b))
+
+
+def get_team_who_needs_home_in_asymmetric_matchup(matchup: Matchup) -> Team | None:
+    """
+    Takes an asymmetric matchup which has not been assigned a preferred home team. If (exactly) one of the teams in the
+    matchup needs to be given preferred-home games in all of its remaining asymmetric matchups in order to have half of
+    its games at home, returns that team. Otherwise returns None.
+    """
+
+    assert matchup.team_a.home_location != matchup.team_b.home_location
+    assert matchup.preferred_home_team is None
+
+    team_a = matchup.team_a
+    team_b = matchup.team_b
+    team_a_min_asymmetric_home_games_desired = team_a.num_asymmetric_matchups // 2
+    team_b_min_asymmetric_home_games_desired = team_b.num_asymmetric_matchups // 2
+    team_a_max_asymmetric_home_games_achievable = team_a.num_asymmetric_matchups_preferring_this_team_as_home + (
+        team_a.num_asymmetric_matchups - team_a.num_asymmetric_matchups_with_home_preference_chosen
+    )
+    team_b_max_asymmetric_home_games_achievable = team_b.num_asymmetric_matchups_preferring_this_team_as_home + (
+        team_b.num_asymmetric_matchups - team_b.num_asymmetric_matchups_with_home_preference_chosen
+    )
+    team_a_must_be_home = team_a_max_asymmetric_home_games_achievable <= team_a_min_asymmetric_home_games_desired
+    team_b_must_be_home = team_b_max_asymmetric_home_games_achievable <= team_b_min_asymmetric_home_games_desired
+
+    if team_a_must_be_home and not team_b_must_be_home:
+        return team_a
+    if team_b_must_be_home and not team_a_must_be_home:
+        return team_b
+
+    return None
+
+
+def get_team_with_lower_asymmetric_preferred_home_ratio(team_1: Team, team_2: Team):
     team_1_home_ratio = (
         0.5
         if team_1.num_asymmetric_matchups_with_home_preference_chosen == 0
-        else team_1.num_asymmetric_matches_preferring_this_team_as_home
+        else team_1.num_asymmetric_matchups_preferring_this_team_as_home
         / float(team_1.num_asymmetric_matchups_with_home_preference_chosen)
     )
     team_2_home_ratio = (
         0.5
         if team_2.num_asymmetric_matchups_with_home_preference_chosen == 0
-        else team_2.num_asymmetric_matches_preferring_this_team_as_home
+        else team_2.num_asymmetric_matchups_preferring_this_team_as_home
         / float(team_2.num_asymmetric_matchups_with_home_preference_chosen)
     )
     if abs(team_1_home_ratio - team_2_home_ratio) < 0.0001:
-        return random.choice([team_1, team_2])
+        return random.choice((team_1, team_2))
 
     return team_1 if team_1_home_ratio < team_2_home_ratio else team_2
 
@@ -645,7 +722,7 @@ def print_home_preference_metrics(file=None):
     team_metrics = []
     for team in teams.values():
         denominator = team.num_asymmetric_matchups_with_home_preference_chosen
-        numerator = team.num_asymmetric_matches_preferring_this_team_as_home
+        numerator = team.num_asymmetric_matchups_preferring_this_team_as_home
         percentage = numerator / denominator
         team_metrics.append((percentage, str(team), numerator, denominator))
 
