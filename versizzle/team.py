@@ -31,8 +31,11 @@ class Team:
         # A map from dates to all of the games (AKA *scheduled* matchups) that this team is playing on that date
         self.games_by_date: dict[date, list[Matchup]] = defaultdict(list)
 
-    # Returns the ratio of currently scheduled home games to total games in season
     def get_home_percentage(self) -> float:
+        """
+        Returns the ratio of currently scheduled home games to total games in season.
+        """
+
         num_scheduled_home_games = len(
             list(
                 filter(

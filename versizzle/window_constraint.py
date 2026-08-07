@@ -9,10 +9,13 @@ class WindowConstraint:
         self.window_size = window_size
         self.max_games_in_window = max_games_in_window
 
-    # Takes a matchup without a selected gameslot, and a potential gameslot to select.
-    # Returns False if the matchup is prohibited from selecting the gameslot because
-    # one of the teams will have too many games in the window. Otherwise returns True.
     def is_satisfied_by_selection(self, matchup: Matchup, gameslot: Gameslot) -> bool:
+        """
+        Takes a matchup without a selected gameslot, and a potential gameslot to select. Returns `False` if the matchup
+        is prohibited from selecting the gameslot because one of the teams will have too many games in the window.
+        Otherwise returns `True`.
+        """
+
         if matchup.selected_gameslot is not None:
             raise Exception("Cannot test window constraint if matchup is already assigned to a gameslot")
 
