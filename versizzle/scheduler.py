@@ -3,6 +3,7 @@ import random
 from collections import defaultdict
 from collections.abc import Sequence
 from datetime import timedelta
+from heapq import nlargest
 
 from versizzle import ingestion, postprocessor, utils
 from versizzle.blackout import Blackout
@@ -706,6 +707,8 @@ def print_metrics(file=None):
     print(file=file)
     print_non_preferred_gameslot_metrics(file=file)
     print(file=file)
+    print_largest_gap_metrics(file=file)
+    print(file=file)
     print_block_size_metrics(file=file)
     print(file=file)
     print_weekday_metrics(file=file)
@@ -801,7 +804,7 @@ def print_non_preferred_gameslot_metrics(file=None):
 
     print(
         f"{len(non_preferred_matchups)} out of {len(matchups)} matchups received "
-        + "non-preferred locations. Non-preferred assignments (if any) are listed below.",
+        + "non-preferred locations. Non-preferred assignments (if any) are listed below:",
         file=file,
     )
     print(file=file)
@@ -837,6 +840,16 @@ def print_non_preferred_gameslot_metrics(file=None):
         + "(you can find them in the table above).",
         file=file,
     )
+
+
+def print_largest_gap_metrics(file=None):
+    table: list[Sequence[object]] = [
+        ["Team", "Largest gap between games"],
+        ["----", "-------------------------"],
+    ]
+
+    table.extend(get_largest_team_gap_pairs())
+    utils.pretty_print_table(table, file=file)
 
 
 def print_block_size_metrics(file=None):
@@ -904,17 +917,16 @@ def get_num_weekday_games_to_num_teams():
     return num_weekday_games_to_num_teams
 
 
-def get_longest_gap_between_games():
-    longest_gap_in_days = 0
+def get_largest_team_gap_pairs() -> list[tuple[Team, int]]:
+    gaps = []
     for team in teams.values():
-        ordered_matchups = sorted(team.matchups, key=lambda m: unwrap(m.selected_gameslot).date)
-        for i in range(len(ordered_matchups) - 1):
-            first_game_date = unwrap(ordered_matchups[i].selected_gameslot).date
-            second_game_date = unwrap(ordered_matchups[i + 1].selected_gameslot).date
-            gap_in_days = (second_game_date - first_game_date).days
-            longest_gap_in_days = max(gap_in_days, longest_gap_in_days)
+        game_dates = sorted(unwrap(matchup.selected_gameslot).date for matchup in team.matchups)
+        gaps.extend(
+            (team, (second_date - first_date).days)
+            for first_date, second_date in zip(game_dates, game_dates[1:], strict=False)
+        )
 
-    return longest_gap_in_days
+    return nlargest(5, gaps, key=lambda team_gap: team_gap[1])
 
 
 def do_test_run_for_seeds(
@@ -933,7 +945,7 @@ def do_test_run_for_seeds(
         "bad asymmetric home percentages - "
         "smallest block size, num smallest blocks - "
         "most consec pairs, teams with most consec - "
-        "longest gap between games"
+        "longest gaps between games"
     )
     with open(seed_file_path, "w") as f:
         f.write(header + "\n")
@@ -980,12 +992,14 @@ def log_seed_info_from_test_run(output_dir_path: str, random_seed: int):
         largest_consec_pairs_to_num_teams = max(num_consec_pairs_to_num_teams.items())
         most_consec_pairs, teams_with_most_consec = largest_consec_pairs_to_num_teams
 
+        longest_gaps_str = ",".join(str(gap) for _, gap in get_largest_team_gap_pairs())
+
         file_line = (
             f"{random_seed}"
             + f" - {total_weekday_games}"
             + f" - {bad_asymmetric_home_percentages_str}"
             + f" - {smallest_block_size} {num_smallest_blocks}"
             + f" - {most_consec_pairs} {teams_with_most_consec}"
-            + f" - {get_longest_gap_between_games()}"
+            + f" - {longest_gaps_str}"
         )
         f.write(file_line + "\n")
