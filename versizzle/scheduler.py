@@ -415,10 +415,12 @@ def select_preferred_gameslots(window_constraints: list[WindowConstraint]):
         unprocessed_matchups.remove(matchup_to_process)
 
 
-# If the given matchup has at least one preferred gameslot that can be selected,
-# selects the best preferred gameslot. Returns True if a gameslot was selected, False if
-# not.
 def select_preferred_gameslot_for_matchup(matchup: Matchup, window_constraints: list[WindowConstraint]) -> bool:
+    """
+    If the given matchup has at least one preferred gameslot that can be selected, selects the best preferred gameslot.
+    Returns `True` if a gameslot was selected, `False` if not.
+    """
+
     assert matchup.preferred_gameslots is not None
 
     for reuse_location in True, False:
@@ -468,15 +470,16 @@ def get_most_constrained_matchup_in_list(
     return unwrap(most_constrained_matchup)
 
 
-# Returns a score indicating how many preferred gameslots are still available for the given
-# matchup.
-#
-# This score helps us to decide the order in which to process matchups. The idea is that
-# if a matchup has many preferred slots, it's unlikely that an earlier matchup will take
-# all of them. Therefore it's safe to consider it at the end. On the other hand, if a
-# matchup has few preferred slots, then it's in danger of losing its preferred slots, so
-# it should be considered early.
 def get_slot_availability_score(matchup: Matchup, window_constraints: list[WindowConstraint]) -> float:
+    """
+    Returns a score indicating how many preferred gameslots are still available for the given matchup.
+
+    This score helps us to decide the order in which to process matchups. The idea is that if a matchup has many
+    preferred slots, it's unlikely that an earlier matchup will take all of them. Therefore it's safe to consider it at
+    the end. On the other hand, if a matchup has few preferred slots, then it's in danger of losing its preferred slots,
+    so it should be considered early.
+    """
+
     if matchup.selected_gameslot is not None:
         raise Exception(
             "Tried to calculate slot availability score for matchup " + "that has already selected a gameslot."
