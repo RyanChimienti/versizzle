@@ -601,20 +601,8 @@ def write_output_files(output_dir_path: str):
     with open(f"{output_dir_path}/breakout.txt", "w") as f:
         print_breakout_schedule(f)
 
-    metrics_file_path = f"{output_dir_path}/metrics.txt"
-    with open(metrics_file_path, "w"):
-        # Empty the file if it already exists
-        pass
-    with open(metrics_file_path, "a") as f:
-        print_home_preference_metrics(f)
-        print(file=f)
-        print_non_preferred_gameslot_metrics(f)
-        print(file=f)
-        print_block_size_metrics(f)
-        print(file=f)
-        print_weekday_metrics(f)
-        print(file=f)
-        print_consecutive_game_day_metrics(f)
+    with open(f"{output_dir_path}/metrics.txt", "w") as f:
+        print_metrics(f)
 
 
 def print_master_schedule(file=None):
@@ -711,6 +699,18 @@ def print_breakout_schedule(file=None):
         print("-" * len(str(team)), file=file)
         utils.pretty_print_table(table, file=file)
         print(file=file)
+
+
+def print_metrics(file=None):
+    print_home_preference_metrics(file=file)
+    print(file=file)
+    print_non_preferred_gameslot_metrics(file=file)
+    print(file=file)
+    print_block_size_metrics(file=file)
+    print(file=file)
+    print_weekday_metrics(file=file)
+    print(file=file)
+    print_consecutive_game_day_metrics(file=file)
 
 
 def print_home_preference_metrics(file=None):
