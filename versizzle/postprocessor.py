@@ -298,7 +298,7 @@ class PostProcessor:
 
             if reorder_failure_reason:
                 print(
-                    f"Gave up placing younger divisions earlier on {utils.prettify_date(date)} at {location}"
+                    f"Gave up placing younger divisions earlier on {utils.prettify_date(date)} at {location} "
                     f"because {reorder_failure_reason}."
                 )
                 all_blocks_succeeded = False
