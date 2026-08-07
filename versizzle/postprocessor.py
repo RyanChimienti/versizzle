@@ -288,7 +288,9 @@ class PostProcessor:
                     if original_gameslot == target_gameslot:
                         continue
                     else:
-                        reorder_failure_reason = f"matchup {matchup} is preassigned to {original_gameslot}"
+                        reorder_failure_reason = (
+                            f"matchup {matchup} is preassigned to {utils.prettify_time(original_gameslot.time)}"
+                        )
                         break
                 if target_gameslot not in unwrap(matchup.preferred_gameslots) and target_gameslot not in unwrap(
                     matchup.backup_gameslots
