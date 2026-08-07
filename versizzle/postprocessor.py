@@ -33,6 +33,7 @@ class PostProcessor:
         print("Post-processing started.")
         self.minimize_isolated_matchups()
         self.remove_awkward_gaps()
+        self.place_younger_teams_at_start_of_evening_blocks()
         print("Post-processing complete.")
 
     def minimize_isolated_matchups(self):
@@ -245,3 +246,68 @@ class PostProcessor:
 
         print(f"Squeezing matchups FAILED on {pretty_date} at {location}.")
         return False
+
+    def place_younger_teams_at_start_of_evening_blocks(self):
+        if not all(matchup.division.startswith(("5/6", "7/8")) for matchup in self.matchups):
+            print("Placing younger divisions earlier in evenings was skipped: unsupported divisions are present.")
+            return
+
+        gameslots_by_block: dict[tuple[datetime.date, Location], list[Gameslot]] = defaultdict(list)
+        for gameslot in self.gameslots:
+            gameslots_by_block[gameslot.date, gameslot.location].append(gameslot)
+
+        all_blocks_succeeded = True
+
+        for (date, location), gameslots_in_block in gameslots_by_block.items():
+            gameslots_in_block.sort(key=lambda gameslot: gameslot.time)
+            if gameslots_in_block[-1].time < datetime.time(18):
+                # The end of this block is before 6:00PM, so this is not an evening block. There is no need to place
+                # younger teams earlier in a non-evening block.
+                continue
+
+            younger_matchups: list[Matchup] = []
+            older_matchups: list[Matchup] = []
+            for gameslot in gameslots_in_block:
+                matchup = gameslot.selected_matchup
+                if matchup:
+                    (younger_matchups if matchup.division.startswith("5/6") else older_matchups).append(matchup)
+
+            if not younger_matchups:
+                # There are no younger teams in this block, so there is no need to rearrange the block.
+                continue
+
+            ordered_matchups = younger_matchups + older_matchups
+            target_gameslots = gameslots_in_block[: len(ordered_matchups)]
+            original_gameslots = [unwrap(matchup.selected_gameslot) for matchup in ordered_matchups]
+
+            reorder_failure_reason = None
+            for matchup, original_gameslot, target_gameslot in zip(
+                ordered_matchups, original_gameslots, target_gameslots, strict=True
+            ):
+                if matchup.is_preassigned:
+                    if original_gameslot == target_gameslot:
+                        continue
+                    else:
+                        reorder_failure_reason = f"matchup {matchup} is preassigned to {original_gameslot}"
+                        break
+                if target_gameslot not in unwrap(matchup.preferred_gameslots) and target_gameslot not in unwrap(
+                    matchup.backup_gameslots
+                ):
+                    reorder_failure_reason = f"gameslot {target_gameslot} isn't available for matchup {matchup}"
+                    break
+
+            if reorder_failure_reason:
+                print(
+                    f"Gave up placing younger divisions earlier on {utils.prettify_date(date)} at {location}"
+                    f"because {reorder_failure_reason}."
+                )
+                all_blocks_succeeded = False
+                continue
+
+            for matchup in ordered_matchups:
+                matchup.deselect_gameslot()
+            for matchup, target_gameslot in zip(ordered_matchups, target_gameslots, strict=True):
+                matchup.select_gameslot(target_gameslot)
+
+        if all_blocks_succeeded:
+            print("Successfully placed younger divisions earlier in all evening blocks.")
